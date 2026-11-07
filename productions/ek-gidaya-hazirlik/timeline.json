@@ -1,0 +1,73 @@
+{
+  "duration": 43.78,
+  "fps": 30,
+  "width": 1080,
+  "height": 1920,
+  "voice": "tr-TR-AhmetNeural",
+  "scenes": [
+    {
+      "tag": "EK GIDAYA HAZIRLIK",
+      "title": "Ek gıdaya\nhazır mı?",
+      "image": "seated",
+      "speech": "Ek gıdaya hazır mı? Yaklaşık altıncı ayda üç işarete birlikte bakıyoruz.",
+      "start": 0,
+      "end": 6.776958
+    },
+    {
+      "tag": "1 / 3 · BAŞ KONTROLÜ",
+      "title": "Dik oturuş.\nSabit baş.",
+      "image": "seated",
+      "speech": "Bir: Dik otururken başını sabit tutabiliyor mu?",
+      "start": 6.776958,
+      "end": 10.735291
+    },
+    {
+      "tag": "2 / 3 · EL–GÖZ–AĞIZ UYUMU",
+      "title": "Bakıyor. Uzanıyor.\nAğzına götürüyor.",
+      "image": "coordination",
+      "speech": "İki: Gördüğü besine uzanıp ağzına götürebiliyor mu?",
+      "start": 10.735291,
+      "end": 14.742666
+    },
+    {
+      "tag": "3 / 3 · YUTABİLME",
+      "title": "Dışarı itmek\nyerine yutma.",
+      "image": "spoon",
+      "speech": "Üç: Besini diliyle sürekli dışarı itmek yerine yutabiliyor mu?",
+      "start": 14.742666,
+      "end": 19.313708
+    },
+    {
+      "tag": "TEK BAŞINA YETERLİ DEĞİL",
+      "title": "Elini emmesi\nhazır demek değil.",
+      "image": "coordination",
+      "speech": "Sadece elini emmesi ya da gece sık uyanması, hazır olduğu anlamına gelmez.",
+      "start": 19.313708,
+      "end": 25.073541
+    },
+    {
+      "tag": "İLK DENEME",
+      "title": "Sakin bir an.\nKüçük bir tadım.",
+      "image": "spoon",
+      "speech": "İlk denemede sakin bir zaman seçin. Dik otursun, yanında olun. Az miktarla başlayın; ağzını kapatırsa zorlamayın.",
+      "start": 25.073541,
+      "end": 35.698541
+    },
+    {
+      "tag": "BESLENMEYE DEVAM",
+      "title": "Anne sütü veya\nformül mama devam.",
+      "image": "seated",
+      "speech": "Anne sütü ya da formül mama devam.",
+      "start": 35.698541,
+      "end": 38.970583
+    },
+    {
+      "tag": "ÜÇ İŞARETİ BİRLİKTE DÜŞÜNÜN",
+      "title": "Baş. El–göz–ağız.\nYutma.",
+      "image": "seated",
+      "speech": "Bu üç işareti birlikte değerlendirmek için kaydedin.",
+      "start": 38.970583,
+      "end": 43.78
+    }
+  ]
+}
