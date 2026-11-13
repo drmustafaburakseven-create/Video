@@ -1,6 +1,6 @@
 # Günlük hareketli video otomasyonu
 
-Bu akış **fotoğraf slaytı üretmez**. Gemini/Veo API ile sekiz hareketli klip üretir,
+Bu akış **fotoğraf slaytı üretmez**. Gemini Omni API ile sekiz hareketli klip üretir,
 ElevenLabs'taki `Mustafa B. Seven` klon sesiyle birleştirir ve konuşmayla eşleşen
 altyazılar ekler. İsteğe bağlı Claude aşaması sahne hareketlerini geliştirir;
 tıbbi anlatımı değiştirmez. Çıktı 60 saniye, dikey 720×1280 H.264/AAC MP4'tür.
@@ -11,7 +11,7 @@ Depoda **Settings → Secrets and variables → Actions → New repository secre
 
 | Secret | Gerekli mi? | Nereden alınır? |
 |---|---|---|
-| `GEMINI_API_KEY` | Evet | [Google AI Studio](https://aistudio.google.com/api-keys); projede Veo API erişimi ve uygun ücretlendirme gerekir. |
+| `GEMINI_API_KEY` | Evet | [Google AI Studio](https://aistudio.google.com/api-keys); projede video API erişimi ve uygun ücretlendirme gerekir. |
 | `ELEVENLABS_API_KEY` | Evet | ElevenLabs API key; mevcut klon sese TTS erişimi olmalı. Bulut sohbetindeki secret, GitHub'a kendiliğinden taşınmaz. |
 | `ANTHROPIC_API_KEY` | Hayır | [Anthropic Console](https://console.anthropic.com/); yalnız Claude sahne yönetmeni kullanılacaksa. |
 
@@ -30,7 +30,7 @@ değiştirildiğinde eski `prepared_voice` alanını kaldırıp yeni TTS kullan�
 | Variable | Varsayılan | Açıklama |
 |---|---|---|
 | `ELEVENLABS_VOICE_ID` | `allzfJXSadaum3SM2UFr` | Mustafa B. Seven klonu. |
-| `VEO_MODEL` | `veo-3.1-fast-generate-preview` | Projenizin erişebildiği, sekiz saniyelik dikey video üreten Gemini API modeli. |
+| `VEO_MODEL` | `gemini-omni-1.2-flash` | Projenizin erişebildiği, sekiz saniyelik dikey video üreten Gemini API modeli. |
 | `USE_CLAUDE_DIRECTOR` | `false` | `true` ise Claude API anahtarı da gerekir. |
 | `CLAUDE_MODEL` | `claude-sonnet-4-6` | Hesabın erişebildiği Anthropic modeli. |
 
@@ -124,3 +124,12 @@ isteğin tekrar edilmemesi, kalıcı kayıt hatasında isteğin gönderilmemesi,
 tamamlanan kuyruğun ücretlendirilmemesi, hata mesajlarında credential
 sızdırılmaması ve FFmpeg ile hareketli test kaynağından 60 saniyelik gerçek
 kodlama/çözme kontrolü. Test deseni nihai hasta eğitim videosu olarak sunulmaz.
+
+## Kasım 2026 model güncellemesi
+
+Google, Veo 3.1 Preview Gemini API modellerini 22 Ekim 2026 tarihinde kapattı.
+Varsayılan video üretimi artık `gemini-omni-1.2-flash` ile Interactions API
+üzerinden yapılır. API model listesinde bu model doğrulandı. `VEO_MODEL` değişken
+adı geriye uyumluluk için korunur; daha önce eski modelle doldurduysanız
+`gemini-omni-1.2-flash` olarak güncelleyin veya varsayılan için silin.
+Kaynak: https://ai.google.dev/gemini-api/docs/video ve https://ai.google.dev/gemini-api/docs/omni

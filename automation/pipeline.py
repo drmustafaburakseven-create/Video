@@ -13,7 +13,7 @@ from automation.render import render
 from automation.state import GitHubJournal, LocalJournal, PipelineError, paid_once, request, session
 
 ROOT = Path(__file__).resolve().parent
-VEO_MODEL = 'veo-3.1-fast-generate-preview'
+VEO_MODEL = 'gemini-omni-1.2-flash'
 VOICE_ID = 'allzfJXSadaum3SM2UFr'
 
 
@@ -146,6 +146,72 @@ class Veo:
         temporary.replace(path)
 
 
+class Omni:
+    """Current Gemini video API: background interactions with resumable IDs."""
+    base = 'https://generativelanguage.googleapis.com/v1beta'
+
+    def __init__(self, model):
+        self.model = model
+        self.client = session()
+        self.client.headers.update({'x-goog-api-key': os.environ['GEMINI_API_KEY']})
+
+    def submit(self, prompt):
+        result = request(self.client, 'POST', self.base+'/interactions', json={
+            'model': self.model, 'input': prompt, 'background': True, 'store': True,
+            'response_format': {'type': 'video', 'aspect_ratio': '9:16',
+                                'duration': '8s', 'resolution': '720p', 'delivery': 'uri'},
+        }).json()
+        identifier = result.get('id')
+        if not isinstance(identifier, str) or not re.fullmatch(r'[A-Za-z0-9_.-]+', identifier):
+            raise PipelineError('Gemini returned no valid interaction id; automatic retry blocked.')
+        return {'interaction_id': identifier}
+
+    def download(self, receipt, path, timeout=1800):
+        identifier = receipt['interaction_id']
+        if not re.fullmatch(r'[A-Za-z0-9_.-]+', identifier):
+            raise PipelineError('Invalid saved interaction id.')
+        deadline = time.monotonic()+timeout
+        while time.monotonic() < deadline:
+            result = request(self.client, 'GET', self.base+'/interactions/'+identifier).json()
+            status = result.get('status')
+            if status == 'completed':
+                break
+            if status in ['failed', 'cancelled', 'canceled', 'requires_action']:
+                raise PipelineError('Gemini video interaction did not complete; saved request will not be repeated.')
+            time.sleep(15)
+        else:
+            raise PipelineError('Gemini is still generating. Rerun to resume the saved interaction.')
+        videos = [content for step in result.get('steps', []) if step.get('type') == 'model_output'
+                  for content in step.get('content', []) if content.get('type') == 'video']
+        if not videos:
+            raise PipelineError('Gemini returned no video content; no automatic replacement will be charged.')
+        video = videos[0]
+        if video.get('data'):
+            content = base64.b64decode(video['data'], validate=True)
+        else:
+            match = re.search(r'(?:^|/)files/([A-Za-z0-9_-]+)(?:$|[?:])', video.get('uri', ''))
+            if not match:
+                raise PipelineError('Gemini returned an unsupported video URI.')
+            name = 'files/'+match.group(1)
+            while time.monotonic() < deadline:
+                info = request(self.client, 'GET', self.base+'/'+name).json()
+                state = info.get('state')
+                if state == 'ACTIVE':
+                    break
+                if state == 'FAILED':
+                    raise PipelineError('Gemini video file processing failed.')
+                time.sleep(10)
+            else:
+                raise PipelineError('Gemini file is still processing; resume the saved interaction later.')
+            content = request(self.client, 'GET', self.base+'/'+name+':download',
+                              params={'alt': 'media'}).content
+        if len(content) < 1024:
+            raise PipelineError('Gemini returned an empty or invalid video.')
+        temporary = path.with_suffix('.part.mp4')
+        temporary.write_bytes(content)
+        temporary.replace(path)
+
+
 def make_video(plan, name, state, journal, directory, model, voice, director):
     from automation.render import captions, probe
     directory.mkdir(parents=True, exist_ok=True)
@@ -172,7 +238,7 @@ def make_video(plan, name, state, journal, directory, model, voice, director):
     (directory/'plan.json').write_text(json.dumps(plan, ensure_ascii=False, indent=2))
     (directory/'narration.txt').write_text(plan['narration'])
     (directory/'sources.txt').write_text('\n'.join(plan['sources']) + '\n')
-    veo = Veo(model)
+    veo = Omni(model) if model.startswith('gemini-omni-') else Veo(model)
     clips = []
     for i, prompt in enumerate(prompts):
         slot = f'shot-{i+1:02}'

@@ -142,6 +142,35 @@ class PipelineTests(unittest.TestCase):
             self.assertEqual(output.read_bytes(), b'test-video')
         veo.client.models.generate_videos.assert_not_called()
 
+    def test_omni_submission_requests_current_api_and_eight_second_portrait_video(self):
+        with patch.dict(os.environ, {'GEMINI_API_KEY': 'test-only'}), patch('automation.pipeline.request') as req:
+            req.return_value.json.return_value = {'id': 'v1_example', 'status': 'in_progress'}
+            provider = pipeline.Omni(pipeline.VEO_MODEL)
+            receipt = provider.submit('A parent gently mashes soft food.')
+            self.assertEqual(receipt, {'interaction_id': 'v1_example'})
+            payload = req.call_args.kwargs['json']
+            self.assertEqual(payload['response_format']['duration'], '8s')
+            self.assertEqual(payload['response_format']['aspect_ratio'], '9:16')
+            self.assertTrue(payload['background'])
+            self.assertTrue(payload['store'])
+
+    def test_omni_resumes_and_downloads_uri_without_post_or_auth_to_external_host(self):
+        with patch.dict(os.environ, {'GEMINI_API_KEY': 'test-only'}), patch('automation.pipeline.request') as req:
+            completed = Mock()
+            completed.json.return_value = {'status': 'completed', 'steps': [
+                {'type': 'model_output', 'content': [{'type': 'video', 'uri': 'files/generated123'}]}]}
+            active = Mock()
+            active.json.return_value = {'state': 'ACTIVE'}
+            media = Mock(content=b'mp4-test-data'*200)
+            req.side_effect = [completed, active, media]
+            with tempfile.TemporaryDirectory() as directory:
+                output = Path(directory)/'clip.mp4'
+                pipeline.Omni(pipeline.VEO_MODEL).download({'interaction_id': 'v1_existing'}, output)
+                self.assertEqual(output.read_bytes(), media.content)
+            self.assertTrue(all(call.args[1]=='GET' for call in req.call_args_list))
+            self.assertTrue(all(call.args[2].startswith('https://generativelanguage.googleapis.com/')
+                                for call in req.call_args_list))
+
 
 @unittest.skipUnless(shutil.which('ffmpeg') and shutil.which('ffprobe'), 'FFmpeg required')
 class NativeRenderTests(unittest.TestCase):
