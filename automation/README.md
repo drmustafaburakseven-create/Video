@@ -32,6 +32,12 @@ Anahtarları kod, issue, çalışma günlüğü veya sohbet içine yapıştırma
 seçilebilir; bu seçenek hiçbir sağlayıcı kredisi harcamaz.
 Gerçek üretim için `validate_only` kapalı çalıştırın.
 
+Git üzerinden açıkça üretim başlatmak için `render-video-` ile başlayan benzersiz
+bir etiket gönderilebilir. Bu da aynı kuyruk ve tekrar ücretlendirme korumasını
+kullanır; sıradan kod push'ları ücretli üretim başlatmaz. Son çalışmanın anahtar
+içermeyen durum özeti `video-automation-state` dalındaki
+`.video-state/latest-run.json` dosyasına da yazılır.
+
 ## Her gün 09.00 Türkiye saati
 
 `daily-video.yml` içindeki `0 6 * * *`, Türkiye saatiyle 09.00'dır.

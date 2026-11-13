@@ -1,6 +1,9 @@
 name: Daily motion video
 
 on:
+  push:
+    # An explicit release-style trigger for starting a requested render via Git.
+    tags: ['render-video-*']
   schedule:
     # Turkey remains UTC+3: 06:00 UTC = 09:00 Europe/Istanbul.
     - cron: '0 6 * * *'
@@ -75,6 +78,8 @@ jobs:
           retention-days: 30
       - name: Write run summary
         if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python - <<'PY'
           import json, os
@@ -87,4 +92,19 @@ jobs:
               f.write('```json\n' + json.dumps(result, ensure_ascii=False, indent=2) + '\n```\n\n')
               f.write('MP4 ve altyazılar bu çalıştırmanın **Artifacts** bölümündedir.\n')
               f.write('Kurulum ve kurtarma: `automation/README.md`.\n')
+          # A small, credential-free receipt makes the job status available with
+          # the same Git repository access used to submit the render request.
+          from automation.state import GitHubJournal
+          try:
+              journal = GitHubJournal(os.environ['GITHUB_REPOSITORY'],
+                                      os.environ['GITHUB_TOKEN'], os.environ['GITHUB_SHA'])
+              journal.load('latest-run')
+              journal.save('latest-run', {
+                  'run_id': os.environ['GITHUB_RUN_ID'],
+                  'run_attempt': os.environ['GITHUB_RUN_ATTEMPT'],
+                  'commit': os.environ['GITHUB_SHA'],
+                  'result': result,
+              })
+          except Exception as exc:
+              print('Run receipt could not be saved (' + type(exc).__name__ + ').')
           PY
