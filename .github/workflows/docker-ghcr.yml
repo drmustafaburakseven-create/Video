@@ -8,8 +8,12 @@ on:
       - "v*"
     paths-ignore:
       - "README*.md"
+      - ".gitignore"
       - "docs/**"
       - ".github/workflows/docker-ghcr.yml"
+      - "automation/**"
+      - ".github/workflows/daily-video.yml"
+      - ".github/workflows/video-automation-checks.yml"
   workflow_dispatch:
 
 permissions:
