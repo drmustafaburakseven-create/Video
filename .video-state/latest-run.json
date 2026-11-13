@@ -1,1 +1,1 @@
-{"run_id": "43410680568", "run_attempt": "1", "commit": "bc002dafa335d13526be13bb2785ef8f70621df0", "result": {"status": "blocked", "message": "Operation failed (ClientError); journal preserved. HTTP 404. Provider status: NOT_FOUND."}}
+{"run_id": "43444327300", "run_attempt": "1", "commit": "5047104c93c60187f853300bbee7af559194706c", "result": {"status": "blocked", "message": "Gemini video interaction did not complete; saved request will not be repeated."}}
