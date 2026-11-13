@@ -96,6 +96,18 @@ class PipelineTests(unittest.TestCase):
                 generate.assert_not_called()
             self.assertEqual(json.loads((Path(directory)/'status.json').read_text())['status'], 'queue_empty')
 
+    def test_prepared_voice_reuses_existing_clone_without_elevenlabs_key(self):
+        result = pipeline.prepared_voice(self.plan, pipeline.VOICE_ID)
+        self.assertTrue(result['audio_base64'])
+        with patch.dict(os.environ, {'GEMINI_API_KEY': 'example'}, clear=True):
+            self.assertEqual(pipeline.required_keys(False, prepared=True), [])
+
+    def test_prepared_voice_rejects_changed_narration_or_voice(self):
+        with self.assertRaises(PipelineError):
+            pipeline.prepared_voice({**self.plan, 'narration': self.plan['narration']+' Test.'}, pipeline.VOICE_ID)
+        with self.assertRaises(PipelineError):
+            pipeline.prepared_voice(self.plan, 'different-voice')
+
     def test_sdk_exception_message_is_never_logged(self):
         with tempfile.TemporaryDirectory() as directory:
             out = io.StringIO()

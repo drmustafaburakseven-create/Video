@@ -19,6 +19,12 @@ Depoda **Settings → Secrets and variables → Actions → New repository secre
 iki aşamalı doğrulama kodu veya tarayıcı girişini otomasyona kaydetmeyin.
 Anahtarları kod, issue, çalışma günlüğü veya sohbet içine yapıştırmayın.
 
+İlk ek gıda planı, kullanıcının daha önce ElevenLabs ile üretilmiş klon sesini
+`automation/assets/ek-gida/` içinden kullanır. Bu plan için ElevenLabs anahtarı
+gerekmez ve ses yeniden ücretlendirilmez. Ses kimliği, metin ve dosya özetleri
+eşleşmelidir. Yeni anlatımlar için `ELEVENLABS_API_KEY` gereklidir; metin
+değiştirildiğinde eski `prepared_voice` alanını kaldırıp yeni TTS kullanın.
+
 İsteğe bağlı **Variables**:
 
 | Variable | Varsayılan | Açıklama |

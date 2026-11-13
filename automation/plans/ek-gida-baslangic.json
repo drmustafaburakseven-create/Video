@@ -35,5 +35,13 @@
     {
       "prompt": "Portrait 9:16 photorealistic documentary video in a warm cream and navy home kitchen. Fictional people, never presented as real patients. The mother is a woman with dark brown hair in a beige cotton shirt; infant scenes show a six-month-old baby with fine brown hair and a sage bib, securely harnessed and upright in a wooden high chair with adult supervision. A warm photorealistic continuous eight-second portrait shot of a mother and infant. The mother rests the spoon on the tray and smiles calmly toward the baby. Baby naturally blinks, makes a small hand movement and returns the mother's gaze. Keep baby safely upright in the harnessed high chair, no feeding action. Real gentle facial and hand movement, stable anatomy, warm daylight, no dramatic camera motion, no text, no dialogue, no still-photo animation."
     }
-  ]
+  ],
+  "prepared_voice": {
+    "audio": "assets/ek-gida/voice.mp3",
+    "alignment": "assets/ek-gida/alignment.json",
+    "voice_id": "allzfJXSadaum3SM2UFr",
+    "text_sha256": "9d64f4d0e8ca011157a96a21f6914b090440ca9d6bea230ac6981f81e817f7db",
+    "audio_sha256": "a9d0a7d5df8b20842d17e84cd16bede7f4cca36c0d387ca18a1fc357a697481c",
+    "alignment_sha256": "139142757dc6133982deb6538c1d1b91b5686f608b78b01d00a27a5839f5e5be"
+  }
 }

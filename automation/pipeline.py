@@ -41,11 +41,32 @@ def job_name(plan, model, voice, director):
     return plan['id'] + '-' + hashlib.sha256(data.encode()).hexdigest()[:16]
 
 
-def required_keys(director):
-    keys = ['GEMINI_API_KEY', 'ELEVENLABS_API_KEY']
+def required_keys(director, prepared=False):
+    keys = ['GEMINI_API_KEY']
+    if not prepared:
+        keys.append('ELEVENLABS_API_KEY')
     if director:
         keys.append('ANTHROPIC_API_KEY')
     return [key for key in keys if not os.environ.get(key, '').strip()]
+
+
+def prepared_voice(plan, voice):
+    prepared = plan.get('prepared_voice')
+    if not prepared:
+        return None
+    if (prepared.get('voice_id') != voice or prepared.get('text_sha256') !=
+            hashlib.sha256(plan['narration'].encode()).hexdigest()):
+        raise PipelineError('Prepared voice does not match the selected voice or narration.')
+    paths = {}
+    for kind in ['audio', 'alignment']:
+        path = (ROOT / prepared[kind]).resolve()
+        if not path.is_relative_to((ROOT/'assets').resolve()):
+            raise PipelineError('Prepared voice must be inside automation/assets.')
+        if hashlib.sha256(path.read_bytes()).hexdigest() != prepared[kind+'_sha256']:
+            raise PipelineError('Prepared voice integrity check failed.')
+        paths[kind] = path
+    return {'audio_base64': base64.b64encode(paths['audio'].read_bytes()).decode(),
+            'alignment': json.loads(paths['alignment'].read_text())}
 
 
 def direct_shots(plan):
@@ -132,7 +153,9 @@ def make_video(plan, name, state, journal, directory, model, voice, director):
         prompts = paid_once(journal, name, state, 'director', lambda: direct_shots(plan))
     else:
         prompts = [shot['prompt'] for shot in plan['shots']]
-    result = paid_once(journal, name, state, 'voice', lambda: synthesize(plan['narration'], voice))
+    prepared = prepared_voice(plan, voice)
+    result = paid_once(journal, name, state, 'voice',
+                       lambda: prepared or synthesize(plan['narration'], voice))
     try:
         content = base64.b64decode(result['audio_base64'], validate=True)
     except (KeyError, ValueError, TypeError):
@@ -202,7 +225,8 @@ def main(argv=None):
             state = journal.load(name)
             if state.get('complete'):
                 continue
-            missing = required_keys(director)
+            prepared = prepared_voice(plan, voice)
+            missing = required_keys(director, prepared is not None)
             if missing:
                 raise PipelineError('Missing GitHub Actions secrets: ' + ', '.join(missing))
             if not all(shutil.which(cmd) for cmd in ['ffmpeg', 'ffprobe']):
@@ -218,6 +242,18 @@ def main(argv=None):
     except Exception as exc:
         # SDK exception strings may contain credentials, signed URLs or request bodies.
         message = str(exc) if isinstance(exc, PipelineError) else f'Operation failed ({type(exc).__name__}); journal preserved.'
+        if not isinstance(exc, PipelineError):
+            code = getattr(exc, 'code', None)
+            status = getattr(exc, 'status', None)
+            if isinstance(code, int) and 100 <= code <= 599:
+                message += f' HTTP {code}.'
+            if isinstance(status, str) and re.fullmatch(r'[A-Z_]{1,50}', status):
+                message += f' Provider status: {status}.'
+            provider_message = str(getattr(exc, 'message', '')).lower()
+            if 'billing' in provider_message or 'paid tier' in provider_message:
+                message += ' Provider requires an eligible paid API project.'
+            if 'api key not valid' in provider_message:
+                message += ' Provider rejected the API key.'
         (args.output/'status.json').write_text(json.dumps({'status': 'blocked', 'message': message}))
         print(message)
         return 2
