@@ -177,7 +177,12 @@ class Omni:
             if status == 'completed':
                 break
             if status in ['failed', 'cancelled', 'canceled', 'requires_action']:
-                raise PipelineError('Gemini video interaction did not complete; saved request will not be repeated.')
+                codes = [e.get('code') for e in result.get('errors', []) if isinstance(e, dict)]
+                codes = [c for c in codes if isinstance(c, str) and re.fullmatch(r'[A-Z_]{1,50}', c)]
+                detail = ' Provider codes: '+', '.join(codes)+'.' if codes else ''
+                if 'RESOURCE_EXHAUSTED' in codes:
+                    detail += ' Check Gemini API project quota, capacity and billing; no automatic paid retry.'
+                raise PipelineError('Gemini video interaction did not complete; saved request will not be repeated.'+detail)
             time.sleep(15)
         else:
             raise PipelineError('Gemini is still generating. Rerun to resume the saved interaction.')

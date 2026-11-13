@@ -171,6 +171,17 @@ class PipelineTests(unittest.TestCase):
             self.assertTrue(all(call.args[2].startswith('https://generativelanguage.googleapis.com/')
                                 for call in req.call_args_list))
 
+    def test_omni_reports_quota_code_without_remote_error_text_or_resubmitting(self):
+        with patch.dict(os.environ, {'GEMINI_API_KEY': 'test-only'}), patch('automation.pipeline.request') as req:
+            req.return_value.json.return_value = {'status': 'failed', 'errors': [
+                {'code': 'RESOURCE_EXHAUSTED', 'message': 'remote-private-example'}]}
+            with tempfile.TemporaryDirectory() as directory:
+                with self.assertRaisesRegex(PipelineError, 'RESOURCE_EXHAUSTED') as caught:
+                    pipeline.Omni(pipeline.VEO_MODEL).download({'interaction_id': 'v1_failed'}, Path(directory)/'clip.mp4')
+            self.assertNotIn('remote-private-example', str(caught.exception))
+            req.assert_called_once()
+            self.assertEqual(req.call_args.args[1], 'GET')
+
 
 @unittest.skipUnless(shutil.which('ffmpeg') and shutil.which('ffprobe'), 'FFmpeg required')
 class NativeRenderTests(unittest.TestCase):
