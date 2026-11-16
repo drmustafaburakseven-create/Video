@@ -1,0 +1,128 @@
+{
+  "id": "ekgida-hazirlik-motion-preview",
+  "title": "Ek gıdaya hazırlık — hareketli stok önizlemesi",
+  "format": "hybrid-v1",
+  "enabled": false,
+  "duration_seconds": 60,
+  "narration": "Bebeğinizin ek gıdaya hazır olduğunu nasıl anlarsınız? Genellikle altıncı ay civarında, yaşıyla birlikte gelişim belirtilerine bakarız. Başını ve boynunu dengede tutabilmesi, destekle ya da kendi başına dik oturabilmesi gerekir. Yiyecek sunduğunuzda ağzını açması, besini diliyle dışarı itmek yerine yutabilmesi de önemli işaretlerdir. Yalnızca sizin yemeğinize uzanması, başlamak için yeterli değildir. Dört aydan önce ek gıdaya başlanması önerilmez. Hazır olduğunda yumuşak, ezilmiş kıvamlarla başlayın; becerileri geliştikçe dokuyu değiştirin. Yemek sırasında dik otursun ve yanında bir yetişkin bulunsun. Sert parçalar ve bütün kuruyemişler uygun değildir. Emin değilseniz çocuk doktorunuzla birlikte değerlendirin. İlk öğünden önce bu listeyi kaydedin.",
+  "sources": [
+    "https://www.cdc.gov/infant-toddler-nutrition/foods-and-drinks/when-what-and-how-to-introduce-solid-foods.html",
+    "https://www.cdc.gov/infant-toddler-nutrition/foods-and-drinks/choking-hazards.html"
+  ],
+  "shots": [
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508621",
+      "duration": 4,
+      "source_start": 0,
+      "transition": "cut"
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508627",
+      "duration": 4,
+      "source_start": 0,
+      "transition": "cut"
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-5894796",
+      "duration": 4,
+      "source_start": 0,
+      "transition": "cut"
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508626",
+      "duration": 4,
+      "source_start": 0,
+      "transition": "cut"
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508621",
+      "duration": 4,
+      "source_start": 4,
+      "transition": "fade"
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508627",
+      "duration": 4,
+      "source_start": 4,
+      "transition": "cut"
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-5894796",
+      "duration": 4,
+      "source_start": 4,
+      "transition": "cut"
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508626",
+      "duration": 4,
+      "source_start": 4,
+      "transition": "cut"
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508621",
+      "duration": 4,
+      "source_start": 8,
+      "transition": "fade"
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508627",
+      "duration": 4,
+      "source_start": 8,
+      "transition": "cut"
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-5894796",
+      "duration": 4,
+      "source_start": 8,
+      "transition": "cut"
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508626",
+      "duration": 4,
+      "source_start": 8,
+      "transition": "cut"
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508621",
+      "duration": 4,
+      "source_start": 12,
+      "transition": "fade"
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508627",
+      "duration": 4,
+      "source_start": 12,
+      "transition": "cut"
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508626",
+      "duration": 4,
+      "source_start": 12,
+      "transition": "cut"
+    }
+  ],
+  "production_note": "Kendi ElevenLabs sesi ve lisanslı hareketli stok çekimler. Kullanıcının fotoğrafı ve avatar erişimi eksik olduğu için bu önizlemede konuşan avatar bulunmaz.",
+  "prepared_voice": {
+    "voice_id": "allzfJXSadaum3SM2UFr",
+    "text_sha256": "f760017a8764b044a4ec1c5c1d730496182c1ce215b489689a85b28c56320dca",
+    "audio": "assets/narration-577ed2ab33c47f2d8968ad61/voice.mp3",
+    "alignment": "assets/narration-577ed2ab33c47f2d8968ad61/alignment.json",
+    "audio_sha256": "c1ef872115e612070a0c372749c1d2e02022755faafe2d7da96b2371d4d707b9",
+    "alignment_sha256": "252cb4f8009070b20fb471ec60ccb9e8a1b25f2a10ad46504e8b7010ecd7ab52"
+  }
+}

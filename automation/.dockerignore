@@ -1,0 +1,13 @@
+.env
+**/.env
+private/
+media/library/
+media/.catalog.lock
+assets/.voice.lock
+drafts/studio-*.json
+__pycache__/
+**/__pycache__/
+*.pyc
+.venv/
+video-output/
+*.log

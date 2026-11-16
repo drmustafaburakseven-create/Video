@@ -3,6 +3,9 @@ import base64
 import json
 import os
 import re
+import fcntl
+from contextlib import contextmanager
+import tempfile
 from pathlib import Path
 
 import requests
@@ -40,9 +43,22 @@ class LocalJournal:
 
     def save(self, name, data):
         path = self.root / (name + '.json')
-        temporary = path.with_suffix('.tmp')
-        temporary.write_text(json.dumps(data, ensure_ascii=False, indent=2))
-        temporary.replace(path)
+        with tempfile.NamedTemporaryFile(mode='w', dir=self.root, suffix='.tmp', delete=False) as stream:
+            temporary = Path(stream.name)
+            json.dump(data, stream, ensure_ascii=False, indent=2)
+        try:
+            temporary.replace(path)
+        finally:
+            temporary.unlink(missing_ok=True)
+
+    @contextmanager
+    def operation_lock(self, name):
+        with (self.root/(name+'.lock')).open('a') as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(lock, fcntl.LOCK_UN)
 
 
 class GitHubJournal:
@@ -102,6 +118,15 @@ class GitHubJournal:
 
 def paid_once(journal, name, state, slot, submit):
     """Commit intent before submitting; preserve successful response before proceeding."""
+    if isinstance(journal, LocalJournal):
+        with journal.operation_lock(name):
+            # A second local process may have loaded its stale state before the lock.
+            state.update(journal.load(name))
+            return _paid_once(journal, name, state, slot, submit)
+    return _paid_once(journal, name, state, slot, submit)
+
+
+def _paid_once(journal, name, state, slot, submit):
     if slot in state:
         value = state[slot]
         if value.get('status') != 'received':

@@ -1,0 +1,27 @@
+# Portable alternative for an always-on host. Creating this file does not deploy it.
+services:
+  daily-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mbs-daily-video:local
+    restart: unless-stopped
+    init: true
+    user: "${VIDEO_UID:-1000}:${VIDEO_GID:-1000}"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      TZ: Europe/Istanbul
+      VIDEO_OUTPUT_ROOT: /data
+      AVATAR_PORTRAIT_PATH: /private/portrait.jpg
+    volumes:
+      - ../video-output:/data
+      - ./media:/app/automation/media
+      - ./drafts:/app/automation/drafts
+      - ./private:/private:ro
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    stop_grace_period: 30s

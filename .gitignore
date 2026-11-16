@@ -52,3 +52,6 @@ htmlcov/
 /automation/media/.catalog.lock
 /automation/assets/.voice.lock
 /.venv-video/
+/automation/drafts/studio-*.json
+/automation/private/
+/automation/media/library/pexels-*.mp4

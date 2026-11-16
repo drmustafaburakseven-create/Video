@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       plan:
-        description: 'Optional ready plan filename; blank uses the queue. Prepare accepts draft names too.'
+        description: 'Optional ready plan filename; blank prepares five topics and one daily video. Prepare accepts drafts.'
         required: false
         type: string
       validate_only:
@@ -21,6 +21,15 @@ on:
         description: 'Export narration and avatar audio slices only (requires plan filename; may use TTS credits)'
         type: boolean
         default: false
+      editorial_only:
+        description: 'Five topic suggestions and one script only; no TTS or video (leave plan blank)'
+        type: boolean
+        default: false
+      avatar_provider:
+        description: 'Explicit avatar provider; no automatic fallback'
+        type: choice
+        options: [fal, elevenlabs]
+        default: fal
 
 permissions:
   contents: write # Persist paid-operation receipts on video-automation-state, never on main.
@@ -47,12 +56,49 @@ jobs:
           python -m pip install -r automation/requirements.txt
       - name: Validate plans
         run: python -m automation.pipeline --validate
+      - name: Restore licensed stock footage
+        if: ${{ !inputs.validate_only && !inputs.prepare_only && !inputs.editorial_only }}
+        run: python -m automation.restore_media
+      - name: Load private avatar portrait
+        if: ${{ !inputs.validate_only && !inputs.plan && !inputs.prepare_only && !inputs.editorial_only }}
+        env:
+          AVATAR_PORTRAIT_BASE64: ${{ secrets.AVATAR_PORTRAIT_BASE64 }}
+        run: |
+          python - <<'PY'
+          import base64, binascii, os
+          from pathlib import Path
+          from automation.produce import _portrait
+          from automation.state import PipelineError
+          value = os.environ.get('AVATAR_PORTRAIT_BASE64', '')
+          if not value:
+              print('No portrait configured; studio will report needs_inputs without TTS/video calls.')
+              raise SystemExit(0)
+          # GitHub secrets have a 48 KiB encoded-value limit (~36 KiB image).
+          # Larger originals belong on the private persistent worker filesystem.
+          if len(value.encode('utf-8')) > 48 * 1024:
+              print('Portrait secret exceeds 48 KiB; use a compact JPEG or the private persistent worker.')
+              raise SystemExit(2)
+          destination = Path(os.environ['RUNNER_TEMP']) / 'private-avatar-portrait'
+          try:
+              content = base64.b64decode(value.replace('\n', '').replace('\r', ''), validate=True)
+              descriptor = os.open(destination, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+              with os.fdopen(descriptor, 'wb') as handle:
+                  handle.write(content)
+              _portrait(destination)
+          except (binascii.Error, ValueError, OSError, PipelineError):
+              destination.unlink(missing_ok=True)
+              print('AVATAR_PORTRAIT_BASE64 must contain one valid PNG/JPEG portrait; its value was not logged.')
+              raise SystemExit(2)
+          with open(os.environ['GITHUB_ENV'], 'a') as handle:
+              handle.write('AVATAR_PORTRAIT_PATH=' + str(destination) + '\n')
+          PY
       - name: Generate the next motion video
         if: ${{ !inputs.validate_only }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FAL_KEY: ${{ secrets.FAL_KEY }}
           ELEVENLABS_VOICE_ID: ${{ vars.ELEVENLABS_VOICE_ID }}
           VEO_MODEL: ${{ vars.VEO_MODEL }}
           CLAUDE_MODEL: ${{ vars.CLAUDE_MODEL }}
@@ -60,11 +106,24 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           INPUT_PLAN: ${{ inputs.plan }}
           PREPARE_ONLY: ${{ inputs.prepare_only }}
+          EDITORIAL_ONLY: ${{ inputs.editorial_only }}
+          AVATAR_PROVIDER: ${{ inputs.avatar_provider || 'fal' }}
+          EDITORIAL_PROVIDER: ${{ vars.EDITORIAL_PROVIDER || 'gemini' }}
         run: |
-          args=()
-          if [ -n "$INPUT_PLAN" ]; then args+=(--plan "$INPUT_PLAN"); fi
-          if [ "$PREPARE_ONLY" = "true" ]; then args+=(--prepare); fi
-          python -m automation.pipeline "${args[@]}"
+          if [ -n "$INPUT_PLAN" ] || [ "$PREPARE_ONLY" = "true" ]; then
+            args=()
+            if [ -n "$INPUT_PLAN" ]; then args+=(--plan "$INPUT_PLAN"); fi
+            if [ "$PREPARE_ONLY" = "true" ]; then args+=(--prepare); fi
+            python -m automation.pipeline "${args[@]}"
+          else
+            case "$EDITORIAL_PROVIDER" in
+              gemini|claude) ;;
+              *) echo 'Hosted workflow supports EDITORIAL_PROVIDER=gemini or claude. Claude Code subscription login requires a configured persistent worker.'; exit 2 ;;
+            esac
+            args=(--avatar-provider "$AVATAR_PROVIDER" --provider "$EDITORIAL_PROVIDER")
+            if [ "$EDITORIAL_ONLY" = "true" ]; then args+=(--editorial-only); fi
+            python -m automation.studio "${args[@]}"
+          fi
       - name: Upload video and recovery assets
         if: always()
         uses: actions/upload-artifact@v4
@@ -72,6 +131,12 @@ jobs:
           name: motion-video-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             video-output/status.json
+            video-output/production-status.json
+            video-output/studio/*/status.json
+            video-output/studio/*/daily.json
+            video-output/studio/*/daily.md
+            video-output/studio/*/*.editorial.json
+            video-output/studio/*/compiled-plan.json
             video-output/*/video.mp4
             video-output/*/shot-*.mp4
             video-output/*/generated-*.mp4
@@ -87,6 +152,7 @@ jobs:
             video-output/*/validation.json
             video-output/*/budget.json
             video-output/*/delivery.json
+            video-output/*/production.json
           if-no-files-found: ignore
           retention-days: 30
       - name: Write run summary
@@ -103,7 +169,8 @@ jobs:
               f.write('## Günlük hareketli video\n\n')
               f.write('Saat: 09.00 Türkiye (06.00 UTC).\n\n')
               f.write('```json\n' + json.dumps(result, ensure_ascii=False, indent=2) + '\n```\n\n')
-              f.write('MP4 ve altyazılar bu çalıştırmanın **Artifacts** bölümündedir.\n')
+              f.write('Başarılı üretimde MP4 ve altyazılar **Artifacts** bölümündedir. `needs_inputs` ise eksik portre/ara çekimleri tamamlayın.\n')
+              f.write('Plan boşken: beş konu önerisi, bir seçilmiş senaryo ve girdiler hazırsa bir 60 saniyelik video. Otomatik yayın yapılmaz.\n')
               f.write('Kurulum ve kurtarma: `automation/README.md`.\n')
           # A small, credential-free receipt makes the job status available with
           # the same Git repository access used to submit the render request.

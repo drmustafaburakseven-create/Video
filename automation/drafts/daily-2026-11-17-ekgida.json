@@ -1,0 +1,115 @@
+{
+  "format": "hybrid-v1",
+  "id": "2026-11-17-ek-gida-hazirlik",
+  "title": "Bebeğim ek gıdaya hazır mı?",
+  "topic_id": "ek-gida-hazirlik",
+  "date": "2026-11-17",
+  "enabled": false,
+  "duration_seconds": 60,
+  "narration": "Bebeğinizin ek gıdaya hazır olduğunu nasıl anlarsınız? Genellikle altıncı ay civarında, yaşıyla birlikte gelişim belirtilerine bakarız. Başını ve boynunu dengede tutabilmesi, destekle ya da kendi başına dik oturabilmesi gerekir. Yiyecek sunduğunuzda ağzını açması, besini diliyle dışarı itmek yerine yutabilmesi de önemli işaretlerdir. Yalnızca sizin yemeğinize uzanması, başlamak için yeterli değildir. Dört aydan önce ek gıdaya başlanması önerilmez. Hazır olduğunda yumuşak, ezilmiş kıvamlarla başlayın; becerileri geliştikçe dokuyu değiştirin. Yemek sırasında dik otursun ve yanında bir yetişkin bulunsun. Sert parçalar ve bütün kuruyemişler uygun değildir. Emin değilseniz çocuk doktorunuzla birlikte değerlendirin. İlk öğünden önce bu listeyi kaydedin.",
+  "sources": [
+    "https://www.cdc.gov/infant-toddler-nutrition/foods-and-drinks/when-what-and-how-to-introduce-solid-foods.html",
+    "https://www.cdc.gov/infant-toddler-nutrition/foods-and-drinks/choking-hazards.html"
+  ],
+  "shots": [
+    {
+      "kind": "avatar",
+      "asset_id": "avatar-35427892c783923a0f92-01",
+      "duration": 4,
+      "source_start": 0
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-5894796",
+      "duration": 4,
+      "source_start": 0
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508621",
+      "duration": 4,
+      "source_start": 0
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508621",
+      "duration": 4,
+      "source_start": 4
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508621",
+      "duration": 4,
+      "source_start": 8
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508626",
+      "duration": 4,
+      "source_start": 8
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508627",
+      "duration": 4,
+      "source_start": 8
+    },
+    {
+      "kind": "avatar",
+      "asset_id": "avatar-35427892c783923a0f92-08",
+      "duration": 4,
+      "source_start": 0
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508621",
+      "duration": 4,
+      "source_start": 12
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-5894796",
+      "duration": 4,
+      "source_start": 4
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-5894796",
+      "duration": 4,
+      "source_start": 8
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508626",
+      "duration": 4,
+      "source_start": 0
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508627",
+      "duration": 4,
+      "source_start": 0
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508627",
+      "duration": 4,
+      "source_start": 4
+    },
+    {
+      "kind": "stock",
+      "asset_id": "pexels-7508626",
+      "duration": 4,
+      "source_start": 4
+    }
+  ],
+  "production_note": "Kaynaklara göre düzeltilmiş metin ve ölçülmüş özgün ses hazır. Hareketli stok görüntüler mevcut. Kullanıcının portresi ve avatar hizmeti erişimi gerekiyor; yayın öncesi hekim ve görsel incelemesi yapılmalı.",
+  "prepared_voice": {
+    "voice_id": "allzfJXSadaum3SM2UFr",
+    "text_sha256": "f760017a8764b044a4ec1c5c1d730496182c1ce215b489689a85b28c56320dca",
+    "audio": "assets/narration-577ed2ab33c47f2d8968ad61/voice.mp3",
+    "alignment": "assets/narration-577ed2ab33c47f2d8968ad61/alignment.json",
+    "audio_sha256": "c1ef872115e612070a0c372749c1d2e02022755faafe2d7da96b2371d4d707b9",
+    "alignment_sha256": "252cb4f8009070b20fb471ec60ccb9e8a1b25f2a10ad46504e8b7010ecd7ab52"
+  }
+}

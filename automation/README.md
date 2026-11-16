@@ -1,19 +1,31 @@
 # Günlük hareketli video otomasyonu
 
-Yeni **karma akış**, 60 saniyeyi kısa hareketli çekimlerle oluşturur: başlangıç
-hedefi **44 sn stok + 8 sn Gemini görüntüsü + 8 sn konuşan avatar**. ElevenLabs
-klon sesi, altyazı ve kurgu tek bir 720×1280 MP4 dosyasında birleşir. Aynı dosya
-YouTube Shorts ve Instagram Reels için kullanılır.
+Varsayılan **studio akışı**, her gün beş kaynaklı konu önerisi ve bir seçilmiş
+senaryo hazırlar; uygun girdiler varsa sizin ElevenLabs klon sesinizle bir
+60 saniyelik dikey video üretir. Görüntü hedefi **52 sn uygun stok/önceden üretilmiş
+ara çekim + 8 sn konuşan avatar**; yeterli kaynak yoksa **44 sn stok + 8 sn yeni
+Gemini görüntüsü + 8 sn avatar** kullanılabilir. Aynı MP4, Reels ve Shorts için uygundur.
 
+- **[Türkçe kullanım planı, güncel durum ve yaklaşık maliyet](DAILY_REELS_PLAN.md)**
 - **[Gemini’ye verilecek prompt](GEMINI_PROMPT.md)**
+- **[GitHub dışında sürekli çalışan sunucu kurulumu](WORKER.md)**
 - **[Medya ekleme, avatar ve günlük üretim rehberi](HYBRID_GUIDE.md)**
 
-İlk örnek `automation/drafts/ek-gida-hybrid.json` içindedir. Katalog şu anda
-boştur; gerçek stok ve kullanıcı fotoğrafıyla hazırlanmış avatar klipleri
-beklenmektedir. Hazır olmayan taslak günlük kuyruğa girmez. Önceki sekiz yeni
-AI klipli örnek devre dışıdır (`enabled: false`). Avatar üreticisi bağlantısı
-henüz kurulmamıştır; `--prepare` aynı sesin tam parçalarını dış hizmete teslim
-etmek için çıkarır. Instagram Edits zorunlu değildir.
+**16 Kasım 2026 durumu:** kendi klon sesiniz, gerçek hareketli stok görüntüler ve
+altyazılarla 60 saniyelik örnek üretildi; **bu örnek avatar içermiyor**. Yerel dosya
+`video-output/ekgida-hazirlik-motion-preview-9745f40a25499fb9/video.mp4`; GitHub'da
+yayınlanmış bir indirme bağlantısı değildir. Taslağı
+`automation/drafts/ekgida-hazirlik-motion-preview.json` içinde ve günlük üretim
+için devre dışıdır. Ek gıdaya hazırlık için dört Pexels klibi (toplam 73,14 sn)
+kaynak/lisans kaydıyla edinildi ve örnek kareleri incelendi. Ham stok dosyaları
+GitHub'a yeniden dağıtılmak üzere eklenmez; runner'da gerektiğinde geri yüklenir.
+
+Fal Aurora ve ElevenLabs Aurora avatar adaptörleri uygulandı ve sahte yanıtlarla
+test edildi. **Fotoğrafınız ve `FAL_KEY` eksik; canlı avatar üretimi yapılmadı.**
+Mevcut ElevenLabs Creator hesabı video API'sinde Pro gerektiren 402 yanıtı veriyor.
+Bir paket yükseltmesi veya kredi satın alımı yapılmadı. GitHub iş akışı kodu
+bulunsa da depoda Actions kapalı olduğu için günlük otomasyon henüz canlı değil.
+Bu bulut bilgisayarın sürekli açık kalacağı varsayılmamalıdır.
 
 ## İlk kurulum — şifre gerekmez
 
@@ -21,13 +33,22 @@ Depoda **Settings → Secrets and variables → Actions → New repository secre
 
 | Secret | Gerekli mi? | Nereden alınır? |
 |---|---|---|
-| `GEMINI_API_KEY` | Yalnız yeni Gemini klibi üretilecekse | [Google AI Studio](https://aistudio.google.com/api-keys); projede video API erişimi ve uygun ücretlendirme gerekir. |
+| `GEMINI_API_KEY` | Varsayılan günlük senaryo için; ayrıca yeni Gemini klibi gerekiyorsa | [Google AI Studio](https://aistudio.google.com/api-keys); video için uygun API erişimi/ücretlendirme gerekir. |
 | `ELEVENLABS_API_KEY` | Evet | ElevenLabs API key; mevcut klon sese TTS erişimi olmalı. Bulut sohbetindeki secret, GitHub'a kendiliğinden taşınmaz. |
-| `ANTHROPIC_API_KEY` | Hayır | [Anthropic Console](https://console.anthropic.com/); yalnız Claude sahne yönetmeni kullanılacaksa. |
+| `FAL_KEY` | Fal ile yeni avatar için | [fal.ai](https://fal.ai/); görüntü ve mevcut sesle Aurora üretimi, kullanım başına ücretli. |
+| `AVATAR_PORTRAIT_BASE64` | GitHub runner'da avatar için | Kompakt JPG/PNG fotoğrafının base64 biçimi; kodlanmış metin en fazla 48 KiB, özgün dosya en fazla 36 KiB, her kenar en az 256 piksel. Fotoğraf geldikten sonra uygun kopya hazırlanır. |
+| `ANTHROPIC_API_KEY` | Hayır | [Anthropic Console](https://console.anthropic.com/); editoryal sağlayıcı Claude seçilirse gerekir. |
+| `PEXELS_API_KEY` | Hayır | [Pexels API](https://www.pexels.com/api/); sonraki stok aramaları için. İlk örneğin kamuya açık klipleri anahtarsız edinildi. |
 
 **Gemini ve Claude web abonelikleri API bakiyesi değildir.** Şifre, oturum çerezi,
 iki aşamalı doğrulama kodu veya tarayıcı girişini otomasyona kaydetmeyin.
 Anahtarları kod, issue, çalışma günlüğü veya sohbet içine yapıştırmayın.
+
+GitHub secret boyut sınırı yalnız bu aktarım yöntemine aittir. Kalıcı özel
+çalıştırıcıda portre dosyası en fazla 25 MB olabilir; yüksek kaliteli özgün
+fotoğraf için bu yol tercih edilebilir. Portreyi public Git deposuna veya
+indirme artifact'lerine eklemeyin. GitHub yöntemi fotoğrafı runner'ın geçici,
+özel dizinine açar.
 
 İlk ek gıda planı, kullanıcının daha önce ElevenLabs ile üretilmiş klon sesini
 `automation/assets/ek-gida/` içinden kullanır. Bu plan için ElevenLabs anahtarı
@@ -40,13 +61,17 @@ değiştirildiğinde eski `prepared_voice` alanını kaldırıp yeni TTS kullan�
 | Variable | Varsayılan | Açıklama |
 |---|---|---|
 | `ELEVENLABS_VOICE_ID` | `allzfJXSadaum3SM2UFr` | Mustafa B. Seven klonu. |
+| `EDITORIAL_PROVIDER` | `gemini` | Günlük senaryo için `gemini` veya `claude`. Yerel Claude Code oturumu GitHub runner'a taşınmaz. |
 | `VEO_MODEL` | `gemini-omni-1.2-flash` | Projenizin erişebildiği, sekiz saniyelik dikey video üreten Gemini API modeli. |
 | `USE_CLAUDE_DIRECTOR` | `false` | Yalnız eski sekiz klipli akışta geçerlidir; karma akış ek Claude çağrısı yapmaz. |
 | `CLAUDE_MODEL` | `claude-sonnet-4-6` | Hesabın erişebildiği Anthropic modeli. |
 
-İlk kontrol için **Actions → Daily motion video → Run workflow → validate_only**
+Actions etkinleştirildikten sonra ilk kontrol için **Actions → Daily motion video → Run workflow → validate_only**
 seçilebilir; bu seçenek hiçbir sağlayıcı kredisi harcamaz.
-Gerçek üretim için `validate_only` kapalı çalıştırın.
+Varsayılan studio için `plan` boş, `validate_only` kapalı ve `avatar_provider: fal`
+olmalı. `editorial_only` yalnız öneri/senaryo üretir; bu, tıbbi onay veya bitmiş
+video değildir. Fotoğraf ve uygun stok eksikse studio `needs_inputs` durumuyla
+durur; yeni ses/avatar/video satın almaz. Editoryal taslak bir kez üretilip saklanabilir.
 Yalnız avatar hazırlığı için `plan: ek-gida-hybrid.json` ve `prepare_only: true`
 seçin. Eşleşen ses kaydı olmayan yeni metinlerde bu işlem TTS kredisi kullanır.
 
@@ -65,15 +90,19 @@ Fork depolarında Actions/scheduled workflows kapalıysa Actions sekmesinden
 etkinleştirin. GitHub'ın uzun süre etkinlik görmeyen public depolar için
 uyguladığı zamanlama kısıtları da geçerlidir.
 
-Her gün `automation/plans/*.json` dosyalarından alfabetik sırayla **etkin ve ilk
-tamamlanmamış içerik** seçilir. Bir çalıştırmada en fazla bir içerik işlenir.
-`enabled: false` olanlar atlanır. Medyası tamamlanan yeni planlar eklenmelidir;
-Gemini web sohbeti kendiliğinden konu dosyası yüklemez. Hazır kuyruk boşsa işlem
-ücretli çağrı yapmadan `queue_empty` ile biter; aynı video her gün tekrar üretilmez.
+Plan belirtilmeyen günlük çalışma **studio** yolunu kullanır: 12 başlıklı,
+resmî kaynaklarla desteklenmiş havuzdan beş öneri, bir seçilmiş senaryo ve
+girdiler tamamlanmışsa bir video. Bu sınırsız yeni gündem keşfi değildir.
+Yeni günlerde ilgili konunun yeterli, uygun stok görüntüsü yoksa üretim durur;
+medya kataloğunun o konu için tamamlanması gerekir. Gemini 3.5 Flash-Lite ile
+canlı metin üretimi doğrulandı. Claude Code bu bulut ortamında kurulu ancak
+oturumu açık değil; Claude API anahtarı da mevcut yerel ortamda yok.
 
 Bir planı elle seçmek için Run workflow içindeki `plan` alanına dosya adını
-yazın. Karma şema ve hazırlık sırası [HYBRID_GUIDE.md](HYBRID_GUIDE.md) içindedir.
-`--prepare` taslakları okuyabilir; normal günlük üretim yalnız `plans/` okur.
+yazın; bu **eski pipeline** yoludur. Eski pipeline plans kuyruğunda alfabetik
+sırayla etkin ve ilk tamamlanmamış içeriği işler; boşsa `queue_empty` döner,
+`enabled: false` olanları atlar. `--prepare` taslakları okuyabilir.
+Karma şema ve hazırlık sırası [HYBRID_GUIDE.md](HYBRID_GUIDE.md) içindedir.
 
 ## Sonucu indirme
 
@@ -89,9 +118,15 @@ arşiv için indirin. Sosyal medyada otomatik yayın yapılmaz.
   en fazla 12 saniyedir. Varsayılan tek 8 saniyelik yeni kliptir. Stok/önceden
   üretilmiş medya yeniden kullanılabilir. Bu **para limiti değil, süre limitidir**;
   sağlayıcıların güncel ücretleri geçerlidir.
-- Karma akışta tüm stok ve avatar dosyaları ücretli istekten önce kontrol edilir.
+- Studio/produce akışında fotoğraf ve gerekli stok dosyaları, yeni ses/avatar/video
+  isteklerinden önce kontrol edilir. Eski pipeline hazır avatar dosyası bekler;
+  `produce` desteklenen sağlayıcıyla avatar oluşturabilir.
   Aynı metin + ses kimliği aynı ses kaydını; aynı model + prompt + kaynak süresi
   aynı Gemini işlem kimliğini kullanır. Görsel plan değişince ses yeniden alınmaz.
+- Avatar isteği fotoğraf özeti, tam ses dilimi özeti ve sağlayıcı/model bilgisiyle
+  kaydedilir. Kabul edilmiş iş zaman aşımında yeniden satın alınmaz; aynı iş
+  sorgulanır. Belirsiz gönderim otomatik tekrarlanmaz. İki ayrı yerel süreç de
+  dosya kilidi ve güncel kayıt okumasıyla aynı ücretli işlemi çoğaltamaz.
 - Eski, devre dışı sekiz klipli biçim etkinleştirilirse 8 × 8 saniye üretim
   ve isteğe bağlı Claude çağrısı yapabilir; ekonomik karma şemayı kullanın.
 - `video-automation-state` dalı, her ücretli işlemden **önce** niyeti, kabulden
@@ -127,8 +162,21 @@ python -m venv .venv-video
 Güvenli ortam değişkenleri tanımlandıktan sonra:
 
 ```bash
+# Günlük öneriler ve tek senaryo; henüz video oluşturmaz.
+.venv-video/bin/python -m automation.studio --editorial-only
+# Fotoğraf ve konuya uygun stoklar tamamlanmışsa tam üretim.
+.venv-video/bin/python -m automation.studio --portrait /guvenli/dizin/fotograf.jpg --avatar-provider fal
+# Önceden hazırlanmış bir plan için avatar dahil üretim.
+.venv-video/bin/python -m automation.produce --plan ek-gida-hybrid.json --portrait /guvenli/dizin/fotograf.jpg --avatar-provider fal
+# Eski akış: yalnız mevcut planın ses/avatar hazırlık dosyalarını çıkarır.
 .venv-video/bin/python -m automation.pipeline --plan ek-gida-hybrid.json --prepare
 ```
+
+Yerelde `AVATAR_PORTRAIT_PATH` verilmişse studio için `--portrait` gerekli değildir.
+`automation.daily` yalnız editoryal üretim, `automation.studio` günlük orkestrasyon,
+`automation.produce` ise planın gerçek medya üretimi ve birleştirilmesi içindir.
+`--provider claude-cli` yalnız kimliği doğrulanmış yerel Claude Code kurulumu ile
+kullanılabilir; web aboneliği veya kurulu CLI tek başına açık oturum demek değildir.
 
 Yerel modda `video-output/journal/` aynı tekrar-ücretlendirme korumasını sağlar.
 Bu klasörü ve dönen API işlem kimliklerini koruyun. Anahtar değerleri komut
