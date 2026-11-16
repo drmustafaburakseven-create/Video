@@ -1,0 +1,107 @@
+{
+  "title": "Ek gıdaya güvenli başlangıç",
+  "duration_seconds": 60,
+  "narration": "Ek gıdaya ne zaman başlamalı?\nGenellikle altıncı ay civarında. Bebeğiniz başını dik tutabiliyor, destekle oturabiliyor ve yiyeceği yutabiliyorsa hazır olabilir.\nAnne sütü veya formül mama devam eder; ek gıda bunları tamamlar.\nBaşlangıçta birkaç küçük kaşık yeterli. İyi pişmiş et ve mercimek gibi demir içeren besinlere yer verin; sebze ve yoğurtla çeşitlendirin.\nYumuşak, ezilmiş kıvamla başlayın; becerisi geliştikçe dokuyu artırın. Aylarca yalnızca pürüzsüz püre vermeyin.\nİyi pişmiş yumurta gibi alerjenleri gereksiz yere geciktirmeyin. Ağır egzama veya bilinen alerjide önce hekiminizle planlayın.\nTuz ve şeker eklemeyin; bir yaşından önce bal vermeyin. Bütün kuruyemiş, bütün üzüm ve sert çiğ parçalar boğulma riski taşır.\nBebeğiniz dik otursun ve yemek boyunca yanında olun. Başını çeviriyor veya ağzını kapatıyorsa zorlamayın.\nAmaç tabağı bitirmek değil, güvenle öğrenmek. İlk öğünden önce bu listeyi kaydedin.",
+  "sources": [
+    "https://www.cdc.gov/infant-toddler-nutrition/foods-and-drinks/when-what-and-how-to-introduce-solid-foods.html",
+    "https://www.cdc.gov/infant-toddler-nutrition/vitamins-minerals/iron.html",
+    "https://www.cdc.gov/infant-toddler-nutrition/foods-and-drinks/choking-hazards.html",
+    "https://www.cdc.gov/infant-toddler-nutrition/foods-and-drinks/foods-and-drinks-to-avoid-or-limit.html",
+    "https://www.cdc.gov/infant-toddler-nutrition/mealtime/signs-your-child-is-hungry-or-full.html"
+  ],
+  "prepared_voice": {
+    "audio": "assets/ek-gida/voice.mp3",
+    "alignment": "assets/ek-gida/alignment.json",
+    "voice_id": "allzfJXSadaum3SM2UFr",
+    "text_sha256": "9d64f4d0e8ca011157a96a21f6914b090440ca9d6bea230ac6981f81e817f7db",
+    "audio_sha256": "a9d0a7d5df8b20842d17e84cd16bede7f4cca36c0d387ca18a1fc357a697481c",
+    "alignment_sha256": "139142757dc6133982deb6538c1d1b91b5686f608b78b01d00a27a5839f5e5be"
+  },
+  "id": "ek-gida-hybrid",
+  "format": "hybrid-v1",
+  "enabled": false,
+  "shots": [
+    {
+      "kind": "avatar",
+      "asset_id": "ek-gida-avatar-01",
+      "duration": 4
+    },
+    {
+      "kind": "stock",
+      "asset_id": "infant-upright",
+      "duration": 4
+    },
+    {
+      "kind": "stock",
+      "asset_id": "parent-spoon",
+      "duration": 4
+    },
+    {
+      "kind": "stock",
+      "asset_id": "milk-and-meal",
+      "duration": 4
+    },
+    {
+      "kind": "stock",
+      "asset_id": "lentil-preparation",
+      "duration": 4
+    },
+    {
+      "kind": "generated",
+      "generation_id": "soft-mash",
+      "generation_seconds": 8,
+      "source_start": 0,
+      "duration": 4,
+      "prompt": "Photorealistic continuous eight-second portrait 9:16 video: a clean adult hand gently presses a fork twice through thoroughly cooked soft orange vegetable in a cream bowl, then lifts a little mash and lowers it. Visible real food deformation and coherent hand movement. Warm daylight, stationary camera, no child in frame, no text, no speech, no camera-only animation."
+    },
+    {
+      "kind": "generated",
+      "generation_id": "soft-mash",
+      "generation_seconds": 8,
+      "source_start": 4,
+      "duration": 4,
+      "prompt": "Photorealistic continuous eight-second portrait 9:16 video: a clean adult hand gently presses a fork twice through thoroughly cooked soft orange vegetable in a cream bowl, then lifts a little mash and lowers it. Visible real food deformation and coherent hand movement. Warm daylight, stationary camera, no child in frame, no text, no speech, no camera-only animation."
+    },
+    {
+      "kind": "stock",
+      "asset_id": "soft-textures",
+      "duration": 4
+    },
+    {
+      "kind": "stock",
+      "asset_id": "cooked-egg",
+      "duration": 4
+    },
+    {
+      "kind": "stock",
+      "asset_id": "plain-yogurt",
+      "duration": 4
+    },
+    {
+      "kind": "stock",
+      "asset_id": "food-safety",
+      "duration": 4
+    },
+    {
+      "kind": "stock",
+      "asset_id": "parent-supervision",
+      "duration": 4
+    },
+    {
+      "kind": "stock",
+      "asset_id": "baby-full-cues",
+      "duration": 4
+    },
+    {
+      "kind": "stock",
+      "asset_id": "family-meal",
+      "duration": 4
+    },
+    {
+      "kind": "avatar",
+      "asset_id": "ek-gida-avatar-15",
+      "duration": 4
+    }
+  ],
+  "production_note": "Taslak: stok ve avatar kimlikleri henüz katalogda yoktur. Medya eklenmeden etkinleştirmeyin; bu plan aktif kuyruğa dahil değildir."
+}

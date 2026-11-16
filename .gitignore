@@ -49,4 +49,6 @@ htmlcov/
 
 # Generated automation outputs and local request journals (never credentials).
 /video-output/
+/automation/media/.catalog.lock
+/automation/assets/.voice.lock
 /.venv-video/

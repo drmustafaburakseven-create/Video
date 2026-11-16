@@ -43,5 +43,6 @@
     "text_sha256": "9d64f4d0e8ca011157a96a21f6914b090440ca9d6bea230ac6981f81e817f7db",
     "audio_sha256": "a9d0a7d5df8b20842d17e84cd16bede7f4cca36c0d387ca18a1fc357a697481c",
     "alignment_sha256": "139142757dc6133982deb6538c1d1b91b5686f608b78b01d00a27a5839f5e5be"
-  }
+  },
+  "enabled": false
 }

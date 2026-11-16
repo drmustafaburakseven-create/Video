@@ -1,9 +1,19 @@
 # Günlük hareketli video otomasyonu
 
-Bu akış **fotoğraf slaytı üretmez**. Gemini Omni API ile sekiz hareketli klip üretir,
-ElevenLabs'taki `Mustafa B. Seven` klon sesiyle birleştirir ve konuşmayla eşleşen
-altyazılar ekler. İsteğe bağlı Claude aşaması sahne hareketlerini geliştirir;
-tıbbi anlatımı değiştirmez. Çıktı 60 saniye, dikey 720×1280 H.264/AAC MP4'tür.
+Yeni **karma akış**, 60 saniyeyi kısa hareketli çekimlerle oluşturur: başlangıç
+hedefi **44 sn stok + 8 sn Gemini görüntüsü + 8 sn konuşan avatar**. ElevenLabs
+klon sesi, altyazı ve kurgu tek bir 720×1280 MP4 dosyasında birleşir. Aynı dosya
+YouTube Shorts ve Instagram Reels için kullanılır.
+
+- **[Gemini’ye verilecek prompt](GEMINI_PROMPT.md)**
+- **[Medya ekleme, avatar ve günlük üretim rehberi](HYBRID_GUIDE.md)**
+
+İlk örnek `automation/drafts/ek-gida-hybrid.json` içindedir. Katalog şu anda
+boştur; gerçek stok ve kullanıcı fotoğrafıyla hazırlanmış avatar klipleri
+beklenmektedir. Hazır olmayan taslak günlük kuyruğa girmez. Önceki sekiz yeni
+AI klipli örnek devre dışıdır (`enabled: false`). Avatar üreticisi bağlantısı
+henüz kurulmamıştır; `--prepare` aynı sesin tam parçalarını dış hizmete teslim
+etmek için çıkarır. Instagram Edits zorunlu değildir.
 
 ## İlk kurulum — şifre gerekmez
 
@@ -11,7 +21,7 @@ Depoda **Settings → Secrets and variables → Actions → New repository secre
 
 | Secret | Gerekli mi? | Nereden alınır? |
 |---|---|---|
-| `GEMINI_API_KEY` | Evet | [Google AI Studio](https://aistudio.google.com/api-keys); projede video API erişimi ve uygun ücretlendirme gerekir. |
+| `GEMINI_API_KEY` | Yalnız yeni Gemini klibi üretilecekse | [Google AI Studio](https://aistudio.google.com/api-keys); projede video API erişimi ve uygun ücretlendirme gerekir. |
 | `ELEVENLABS_API_KEY` | Evet | ElevenLabs API key; mevcut klon sese TTS erişimi olmalı. Bulut sohbetindeki secret, GitHub'a kendiliğinden taşınmaz. |
 | `ANTHROPIC_API_KEY` | Hayır | [Anthropic Console](https://console.anthropic.com/); yalnız Claude sahne yönetmeni kullanılacaksa. |
 
@@ -31,12 +41,14 @@ değiştirildiğinde eski `prepared_voice` alanını kaldırıp yeni TTS kullan�
 |---|---|---|
 | `ELEVENLABS_VOICE_ID` | `allzfJXSadaum3SM2UFr` | Mustafa B. Seven klonu. |
 | `VEO_MODEL` | `gemini-omni-1.2-flash` | Projenizin erişebildiği, sekiz saniyelik dikey video üreten Gemini API modeli. |
-| `USE_CLAUDE_DIRECTOR` | `false` | `true` ise Claude API anahtarı da gerekir. |
+| `USE_CLAUDE_DIRECTOR` | `false` | Yalnız eski sekiz klipli akışta geçerlidir; karma akış ek Claude çağrısı yapmaz. |
 | `CLAUDE_MODEL` | `claude-sonnet-4-6` | Hesabın erişebildiği Anthropic modeli. |
 
 İlk kontrol için **Actions → Daily motion video → Run workflow → validate_only**
 seçilebilir; bu seçenek hiçbir sağlayıcı kredisi harcamaz.
 Gerçek üretim için `validate_only` kapalı çalıştırın.
+Yalnız avatar hazırlığı için `plan: ek-gida-hybrid.json` ve `prepare_only: true`
+seçin. Eşleşen ses kaydı olmayan yeni metinlerde bu işlem TTS kredisi kullanır.
 
 Git üzerinden açıkça üretim başlatmak için `render-video-` ile başlayan benzersiz
 bir etiket gönderilebilir. Bu da aynı kuyruk ve tekrar ücretlendirme korumasını
@@ -53,16 +65,15 @@ Fork depolarında Actions/scheduled workflows kapalıysa Actions sekmesinden
 etkinleştirin. GitHub'ın uzun süre etkinlik görmeyen public depolar için
 uyguladığı zamanlama kısıtları da geçerlidir.
 
-Her gün `automation/plans/*.json` dosyalarından alfabetik sırayla **ilk
+Her gün `automation/plans/*.json` dosyalarından alfabetik sırayla **etkin ve ilk
 tamamlanmamış içerik** seçilir. Bir çalıştırmada en fazla bir içerik işlenir.
-Başlangıç kuyruğunda kaynakları belirtilmiş `ek-gida-baslangic.json` vardır.
-Her gün farklı içerik için aynı şemayla yeni plan dosyaları ekleyin. Kuyruk
-tükenince işlem ücretli çağrı yapmadan `queue_empty` ile biter; aynı video
-her gün yeniden üretilmez. Claude kendiliğinden yeni tıbbi anlatım yazmaz.
+`enabled: false` olanlar atlanır. Medyası tamamlanan yeni planlar eklenmelidir;
+Gemini web sohbeti kendiliğinden konu dosyası yüklemez. Hazır kuyruk boşsa işlem
+ücretli çağrı yapmadan `queue_empty` ile biter; aynı video her gün tekrar üretilmez.
 
-Bir planı elle seçmek için Run workflow içindeki `plan` alanına örneğin
-`ek-gida-baslangic.json` yazın. Şema: `id`, `title`, `duration_seconds: 60`,
-`narration`, `sources` ve sekiz adet `shots[].prompt`.
+Bir planı elle seçmek için Run workflow içindeki `plan` alanına dosya adını
+yazın. Karma şema ve hazırlık sırası [HYBRID_GUIDE.md](HYBRID_GUIDE.md) içindedir.
+`--prepare` taslakları okuyabilir; normal günlük üretim yalnız `plans/` okur.
 
 ## Sonucu indirme
 
@@ -74,9 +85,15 @@ arşiv için indirin. Sosyal medyada otomatik yayın yapılmaz.
 
 ## Maliyet ve yarıda kalma davranışı
 
-- Her plan en fazla 8 × 8 saniyelik video üretimi, bir TTS isteği ve etkinse
-  bir Claude isteği içerir. Bu **para limiti değil, istek/süre limitidir**;
-  sağlayıcıların güncel ücretleri geçerlidir. Son videoda 60 saniye kullanılır.
+- Karma planda yeni Gemini kaynakları en fazla 16 saniye, avatar gösterimi
+  en fazla 12 saniyedir. Varsayılan tek 8 saniyelik yeni kliptir. Stok/önceden
+  üretilmiş medya yeniden kullanılabilir. Bu **para limiti değil, süre limitidir**;
+  sağlayıcıların güncel ücretleri geçerlidir.
+- Karma akışta tüm stok ve avatar dosyaları ücretli istekten önce kontrol edilir.
+  Aynı metin + ses kimliği aynı ses kaydını; aynı model + prompt + kaynak süresi
+  aynı Gemini işlem kimliğini kullanır. Görsel plan değişince ses yeniden alınmaz.
+- Eski, devre dışı sekiz klipli biçim etkinleştirilirse 8 × 8 saniye üretim
+  ve isteğe bağlı Claude çağrısı yapabilir; ekonomik karma şemayı kullanın.
 - `video-automation-state` dalı, her ücretli işlemden **önce** niyeti, kabulden
   sonra işlem kimliğini kaydeder. Bitmiş içerik tekrar ücretlendirilmez.
 - Ses yanıtı ve hizalaması bu dalda tutulur; sonraki GitHub runner aynı sesi
@@ -87,8 +104,8 @@ arşiv için indirin. Sosyal medyada otomatik yayın yapılmaz.
   kliplerle yerel kurtarma yapın. Kayıtları silerek körlemesine yeniden üretim
   yaptırmayın. Model reddi veya moderasyon sonucunda başka modelle sessiz
   deneme yapılmaz.
-- Plan, ses kimliği, Veo modeli veya Claude yönetmen ayarı değişirse yeni
-  içerik kimliği oluşur ve yeni üretim ücretli olabilir.
+- Metin, ses kimliği veya üretim promptu/modeli değişirse yeni üretim ücretli olabilir.
+  Hazırlanmış avatar yeni ses/metinle otomatik eşleşmiş sayılmaz.
 - Bu state dalını silmek, tamamlanmış içerik hafızasını kaybettirir. Dalı
   koruyun. Workflow'a bu dala yazma yetkisi engellenirse ücretli çağrıdan önce
   durur. Workflow concurrency, aynı anda iki üretim yapılmasını önler.
@@ -110,7 +127,7 @@ python -m venv .venv-video
 Güvenli ortam değişkenleri tanımlandıktan sonra:
 
 ```bash
-.venv-video/bin/python -m automation.pipeline --plan ek-gida-baslangic.json
+.venv-video/bin/python -m automation.pipeline --plan ek-gida-hybrid.json --prepare
 ```
 
 Yerel modda `video-output/journal/` aynı tekrar-ücretlendirme korumasını sağlar.

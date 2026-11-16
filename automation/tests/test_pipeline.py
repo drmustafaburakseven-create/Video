@@ -78,7 +78,7 @@ class PipelineTests(unittest.TestCase):
 
     def test_missing_credentials_are_reported_without_network(self):
         with patch.dict(os.environ, {}, clear=True), tempfile.TemporaryDirectory() as directory:
-            with patch('automation.pipeline.make_video') as generate:
+            with patch('automation.pipeline.make_video') as generate, patch('automation.pipeline.load_plan', return_value={**self.plan, 'enabled': True}):
                 with contextlib.redirect_stdout(io.StringIO()):
                     code = pipeline.main(['--output', directory])
                 self.assertEqual(code, 2)
@@ -90,7 +90,7 @@ class PipelineTests(unittest.TestCase):
         with patch.dict(os.environ, {}, clear=True), tempfile.TemporaryDirectory() as directory:
             name = pipeline.job_name(self.plan, pipeline.VEO_MODEL, pipeline.VOICE_ID, False)
             LocalJournal(Path(directory)/'journal').save(name, {'complete': True})
-            with patch('automation.pipeline.make_video') as generate:
+            with patch('automation.pipeline.make_video') as generate, patch('automation.pipeline.load_plan', return_value={**self.plan, 'enabled': True}):
                 with contextlib.redirect_stdout(io.StringIO()):
                     self.assertEqual(pipeline.main(['--output', directory]), 0)
                 generate.assert_not_called()

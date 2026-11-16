@@ -10,11 +10,15 @@ on:
   workflow_dispatch:
     inputs:
       plan:
-        description: 'Optional plan filename, e.g. ek-gida-baslangic.json; blank uses the queue'
+        description: 'Optional ready plan filename; blank uses the queue. Prepare accepts draft names too.'
         required: false
         type: string
       validate_only:
         description: 'Check the plans without spending provider credits'
+        type: boolean
+        default: false
+      prepare_only:
+        description: 'Export narration and avatar audio slices only (requires plan filename; may use TTS credits)'
         type: boolean
         default: false
 
@@ -55,9 +59,11 @@ jobs:
           USE_CLAUDE_DIRECTOR: ${{ vars.USE_CLAUDE_DIRECTOR }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           INPUT_PLAN: ${{ inputs.plan }}
+          PREPARE_ONLY: ${{ inputs.prepare_only }}
         run: |
           args=()
           if [ -n "$INPUT_PLAN" ]; then args+=(--plan "$INPUT_PLAN"); fi
+          if [ "$PREPARE_ONLY" = "true" ]; then args+=(--prepare); fi
           python -m automation.pipeline "${args[@]}"
       - name: Upload video and recovery assets
         if: always()
@@ -68,12 +74,19 @@ jobs:
             video-output/status.json
             video-output/*/video.mp4
             video-output/*/shot-*.mp4
+            video-output/*/generated-*.mp4
+            video-output/*/avatar-*-speech.wav
+            video-output/*/avatar-requests.json
             video-output/*/voice.mp3
+            video-output/*/alignment.json
+            video-output/*/voice-manifest.json
             video-output/*/captions.*
             video-output/*/narration.txt
             video-output/*/sources.txt
             video-output/*/plan.json
             video-output/*/validation.json
+            video-output/*/budget.json
+            video-output/*/delivery.json
           if-no-files-found: ignore
           retention-days: 30
       - name: Write run summary

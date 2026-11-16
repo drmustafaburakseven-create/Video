@@ -1,0 +1,26 @@
+[
+  {
+    "asset_id": "ek-gida-avatar-01",
+    "timeline_start": 0,
+    "duration": 4,
+    "audio_file": "avatar-01-speech.wav",
+    "slice_sha256": "eda431468a2ae19e67dcaf8217f29afa5f2f9368af7a61bd7b72fea4213b7f2b",
+    "audio_sha256": "a9d0a7d5df8b20842d17e84cd16bede7f4cca36c0d387ca18a1fc357a697481c",
+    "voice_id": "allzfJXSadaum3SM2UFr",
+    "narration_sha256": "9d64f4d0e8ca011157a96a21f6914b090440ca9d6bea230ac6981f81e817f7db",
+    "portrait_required": true,
+    "instruction": "Use the supplied audio verbatim with the user-provided portrait; do not generate another voice."
+  },
+  {
+    "asset_id": "ek-gida-avatar-15",
+    "timeline_start": 56,
+    "duration": 4,
+    "audio_file": "avatar-15-speech.wav",
+    "slice_sha256": "a84ff3ca3619819747cf28243721bd0e5738250c9a399387579ba6e88cd5c004",
+    "audio_sha256": "a9d0a7d5df8b20842d17e84cd16bede7f4cca36c0d387ca18a1fc357a697481c",
+    "voice_id": "allzfJXSadaum3SM2UFr",
+    "narration_sha256": "9d64f4d0e8ca011157a96a21f6914b090440ca9d6bea230ac6981f81e817f7db",
+    "portrait_required": true,
+    "instruction": "Use the supplied audio verbatim with the user-provided portrait; do not generate another voice."
+  }
+]

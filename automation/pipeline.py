@@ -24,11 +24,17 @@ def load_plan(path):
     narration = plan.get('narration', '')
     if not isinstance(narration, str) or not 400 <= len(narration) <= 1400:
         raise PipelineError('A 60-second Turkish narration must contain 400–1400 characters.')
-    if plan.get('duration_seconds') != 60 or len(plan.get('shots', [])) != 8:
-        raise PipelineError('Plan must specify 60 seconds and exactly eight shots.')
+    if plan.get('duration_seconds') != 60 or type(plan.get('enabled', True)) is not bool:
+        raise PipelineError('Plan must specify 60 seconds and a boolean enabled flag.')
     if not plan.get('sources') or not all(isinstance(s, str) and s.startswith('https://')
                                         for s in plan['sources']):
         raise PipelineError('Plan must include medical source links outside the narration.')
+    if plan.get('format') == 'hybrid-v1':
+        from automation.hybrid import validate
+        validate(plan)
+        return plan
+    if plan.get('format') not in [None, 'full-ai-v1'] or len(plan.get('shots', [])) != 8:
+        raise PipelineError('Legacy plans need exactly eight shots; hybrid plans use format hybrid-v1.')
     for shot in plan['shots']:
         if not isinstance(shot.get('prompt'), str) or not 40 <= len(shot['prompt']) <= 2500:
             raise PipelineError('Each shot needs a descriptive motion prompt.')
@@ -36,8 +42,13 @@ def load_plan(path):
 
 
 def job_name(plan, model, voice, director):
-    data = json.dumps({'plan': plan, 'model': model, 'voice': voice, 'director': director},
-                      sort_keys=True, ensure_ascii=False)
+    # Queue toggles must not cause a previously paid video to be generated again.
+    identity = {'plan': {k:v for k,v in plan.items() if k != 'enabled'},
+                'model': model, 'voice': voice, 'director': director}
+    if plan.get('format') == 'hybrid-v1':
+        from automation.hybrid import fingerprint
+        identity['assets'] = fingerprint(plan)
+    data = json.dumps(identity, sort_keys=True, ensure_ascii=False)
     return plan['id'] + '-' + hashlib.sha256(data.encode()).hexdigest()[:16]
 
 
@@ -155,11 +166,11 @@ class Omni:
         self.client = session()
         self.client.headers.update({'x-goog-api-key': os.environ['GEMINI_API_KEY']})
 
-    def submit(self, prompt):
+    def submit(self, prompt, duration=8):
         result = request(self.client, 'POST', self.base+'/interactions', json={
             'model': self.model, 'input': prompt, 'background': True, 'store': True,
             'response_format': {'type': 'video', 'aspect_ratio': '9:16',
-                                'duration': '8s', 'resolution': '720p', 'delivery': 'uri'},
+                                'duration': f'{duration}s', 'resolution': '720p', 'delivery': 'uri'},
         }).json()
         identifier = result.get('id')
         if not isinstance(identifier, str) or not re.fullmatch(r'[A-Za-z0-9_.-]+', identifier):
@@ -267,18 +278,31 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--plan', help='Optional filename from automation/plans; otherwise use the queue.')
     parser.add_argument('--validate', action='store_true', help='Validate plans without network or credentials.')
+    parser.add_argument('--prepare', action='store_true', help='With --plan: prepare narration and avatar speech slices; drafts allowed.')
+    parser.add_argument('--check-media', action='store_true', help='Check reusable footage without generation or credentials.')
     parser.add_argument('--output', type=Path, default=Path('video-output'))
     args = parser.parse_args(argv)
     args.output.mkdir(parents=True, exist_ok=True)
     try:
         if args.plan and not re.fullmatch(r'[a-z0-9-]+\.json', args.plan):
             raise PipelineError('Plan must be a filename from automation/plans.')
+        if args.prepare and (not args.plan or args.check_media):
+            raise PipelineError('--prepare requires --plan and cannot be combined with --check-media.')
         paths = [ROOT/'plans'/args.plan] if args.plan else sorted((ROOT/'plans').glob('*.json'))
+        if args.prepare and not paths[0].exists():
+            paths = [ROOT/'drafts'/args.plan]
         plans = [load_plan(path) for path in paths]
         if not plans:
             raise PipelineError('No video plans found.')
         if args.validate:
             print(json.dumps({'valid_plans': [p['id'] for p in plans]}))
+            return 0
+        if args.check_media:
+            from automation.hybrid import resolve
+            for plan in plans:
+                if plan.get('format') == 'hybrid-v1':
+                    resolve(plan)
+            print(json.dumps({'media_checked': [p['id'] for p in plans]}))
             return 0
         model = os.environ.get('VEO_MODEL') or VEO_MODEL
         voice = os.environ.get('ELEVENLABS_VOICE_ID') or VOICE_ID
@@ -292,21 +316,36 @@ def main(argv=None):
         else:
             journal = LocalJournal(args.output/'journal')
         for plan in plans:
-            name = job_name(plan, model, voice, director_key)
+            if not args.prepare and not plan.get('enabled', True):
+                continue
+            hybrid = plan.get('format') == 'hybrid-v1'
+            name = job_name(plan, model, voice, False if hybrid else director_key)
+            if args.prepare:
+                if not hybrid:
+                    raise PipelineError('--prepare requires a hybrid-v1 plan.')
+                from automation.hybrid import prepare
+                prepare(plan, voice, journal, args.output/name)
+                summary = {'status': 'prepared', 'plan': plan['id'], 'directory': name,
+                           'message': 'Narration and exact avatar speech slices exported; no video generation.'}
+                break
             state = journal.load(name)
             if state.get('complete'):
                 continue
-            prepared = prepared_voice(plan, voice)
-            missing = required_keys(director, prepared is not None)
-            if missing:
-                raise PipelineError('Missing GitHub Actions secrets: ' + ', '.join(missing))
             if not all(shutil.which(cmd) for cmd in ['ffmpeg', 'ffprobe']):
                 raise PipelineError('Install ffmpeg and ffprobe before generation.')
-            make_video(plan, name, state, journal, args.output/name, model, voice, director)
+            if hybrid:
+                from automation.hybrid import make
+                make(plan, name, state, journal, args.output/name, model, voice)
+            else:
+                prepared = prepared_voice(plan, voice)
+                missing = required_keys(director, prepared is not None)
+                if missing:
+                    raise PipelineError('Missing GitHub Actions secrets: ' + ', '.join(missing))
+                make_video(plan, name, state, journal, args.output/name, model, voice, director)
             summary = {'status': 'completed', 'plan': plan['id'], 'directory': name}
-            break  # At most one plan / eight video submissions in a scheduled run.
+            break  # At most one ready plan per scheduled run.
         else:
-            summary = {'status': 'queue_empty', 'message': 'All plans already completed; no paid requests.'}
+            summary = {'status': 'queue_empty', 'message': 'No enabled unfinished plans; no paid requests.'}
         (args.output/'status.json').write_text(json.dumps(summary, ensure_ascii=False, indent=2))
         print(json.dumps(summary, ensure_ascii=False))
         return 0

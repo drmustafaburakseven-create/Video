@@ -20,10 +20,12 @@
 
 ## Günlük Türkçe hareketli video
 
-Gemini Omni ile hareketli sahneler, mevcut ElevenLabs klon sesi, eşzamanlı
-altyazılar ve kısa geçişlerle 60 saniyelik video üretimi: **[Kurulum ve kullanım](automation/README.md)**.
+Hareketli stok, kısa Gemini sahneleri, kendi fotoğrafınızdan hazırlanmış avatar
+ve ElevenLabs klon sesini 60 saniyede birleştiren ekonomik kurgu: **[Kurulum ve kullanım](automation/README.md)**.
 GitHub Actions her gün Türkiye saatiyle 09.00'da içerik kuyruğunu işler.
 API anahtarları GitHub Secrets'ta tutulur; web hesabı şifresi kullanılmaz.
+**[Gemini için günlük içerik promptu](automation/GEMINI_PROMPT.md)** ·
+**[Karma video rehberi](automation/HYBRID_GUIDE.md)**
 
 ## 界面预览 🖥️
 
