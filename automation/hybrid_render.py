@@ -87,13 +87,23 @@ def source_labels(ass_path, segments):
     path.write_text('\n'.join(lines)+'\n')
 
 
-def render_hybrid(segments, audio, alignment, output, *, narration_delay=0.25, caption_writer=None, overlays=True):
+def render_hybrid(segments, audio, alignment, output, *, narration_delay=0.25, caption_writer=None, overlays=True,
+                  ending_hold=0, ending_fade=0):
     """Render 60 seconds; use narration_delay=0 for speech already synced to a face."""
     if type(overlays) is not bool:
         raise PipelineError('Overlay preference must be a boolean.')
     narration_delay = _number(narration_delay, 'Narration delay')
     if not 0 <= narration_delay <= 1:
         raise PipelineError('Narration delay must be between zero and one second.')
+    ending_hold = _number(ending_hold, 'Ending hold')
+    ending_fade = _number(ending_fade, 'Ending fade')
+    if not 0 <= ending_hold <= 5 or not 0 <= ending_fade <= 3:
+        raise PipelineError('Ending hold must be 0–5 seconds and fade 0–3 seconds.')
+    fade_frames = round(ending_fade*FPS)
+    if ending_fade and fade_frames < 2:
+        raise PipelineError('Ending fade must span at least two frames.')
+    ending_fade = fade_frames/FPS
+    fade_start = TOTAL_SECONDS-ending_fade
     # FFmpeg's delay is specified in whole milliseconds. Use the same effective
     # offset for subtitles and the validation report, including an explicit zero.
     delay_ms = round(narration_delay*1000)
@@ -112,6 +122,8 @@ def render_hybrid(segments, audio, alignment, output, *, narration_delay=0.25, c
     if (not 45 <= duration <= max_audio or last_word > max_speech_end
             or last_word > duration+narration_delay+0.001):
         raise PipelineError('Narration and its last word must fit the video without stretching or truncation.')
+    if (ending_hold or ending_fade) and last_word > fade_start-ending_hold:
+        raise PipelineError('Final speech overlaps the reserved natural hold or fade; shorten the closing take, not its words.')
     if overlays:
         source_labels(output/'captions.ass', segments)
     args = ['ffmpeg', '-v', 'error', '-nostdin', '-y']
@@ -130,9 +142,12 @@ def render_hybrid(segments, audio, alignment, output, *, narration_delay=0.25, c
         filters.append(vf+f'[v{i}]')
     joined = ''.join(f'[v{i}]' for i in range(len(segments)))
     overlay_filter = ',ass=captions.ass' if overlays else ''
-    filters.append(joined+f'concat=n={len(segments)}:v=1:a=0'+overlay_filter+'[v]')
+    ending_video = (f',fade=t=out:start_frame={TOTAL_SECONDS*FPS-fade_frames}:nb_frames={fade_frames-1}'
+                    if fade_frames else '')
+    filters.append(joined+f'concat=n={len(segments)}:v=1:a=0'+overlay_filter+ending_video+'[v]')
+    ending_audio = f',afade=t=out:st={fade_start:g}:d={ending_fade:g}' if fade_frames else ''
     filters.append(f'[{len(segments)}:a]adelay={delay_ms}:all=1,apad,atrim=duration=60,'
-                   'loudnorm=I=-16:TP=-1.5:LRA=9[a]')
+                   'loudnorm=I=-16:TP=-1.5:LRA=9'+ending_audio+'[a]')
     args += ['-i', str(audio), '-filter_complex_threads', '1', '-filter_complex', ';'.join(filters),
              '-map', '[v]', '-map', '[a]', '-t', '60', '-c:v', 'libx264', '-preset', 'fast',
              '-crf', '19', '-threads', '2', '-pix_fmt', 'yuv420p', '-c:a', 'aac',
@@ -162,6 +177,9 @@ def render_hybrid(segments, audio, alignment, output, *, narration_delay=0.25, c
               'transitions': 'clean cuts by default; optional four-frame B-roll fades; hard cuts at avatar boundaries',
               'voice_speed_changed': False, 'narration_delay_seconds': narration_delay,
               'text_overlays': overlays,
+              'ending': {'minimum_quiet_hold_seconds': ending_hold, 'fade_seconds': ending_fade,
+                         'fade_start_seconds': fade_start if fade_frames else None,
+                         'last_word_end_seconds': last_word, 'source_motion_retained': True},
               'synthetic_labels': 'generated/avatar intervals only' if overlays else 'not burned in; provenance retained separately',
               'avatar_lip_sync': 'source footage required; no face animation or lip-sync fabricated by compositor'}
     (output/'validation.json').write_text(json.dumps(report, ensure_ascii=False, indent=2))

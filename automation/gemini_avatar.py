@@ -31,7 +31,7 @@ def _write(path, value):
     Path(path).write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n')
 
 
-def speaking_prompt(speech, duration, performance="calm"):
+def speaking_prompt(speech, duration, performance="calm", tail_seconds=0):
     if performance not in {"calm", "energetic", "conversational"}:
         raise PipelineError("Unsupported speaking performance.")
     if (not isinstance(speech, str) or not 3 <= len(speech.strip()) <= 300
@@ -39,6 +39,9 @@ def speaking_prompt(speech, duration, performance="calm"):
         raise PipelineError('Use a short plain Turkish sentence without links or instructions.')
     if type(duration) is not int or not 3 <= duration <= 10:
         raise PipelineError('A speaking-photo proof must be 3–10 whole seconds.')
+    if (type(tail_seconds) not in (int, float) or not math.isfinite(tail_seconds)
+            or not 0 <= tail_seconds <= duration-1):
+        raise PipelineError('The natural closing tail must leave at least one second for speech.')
     # Keep this prompt/identity compatible with the first recorded four-second
     # proof. Its failed receipt must not become an accidental new purchase.
     prompt = (f'Create a photorealistic {duration}-second portrait 9:16 video of the same adult man in the supplied photograph. '
@@ -69,6 +72,17 @@ def speaking_prompt(speech, duration, performance="calm"):
                    'presenter voice, dramatic acting, beauty filter or face smoothing. '
                    'Do not add filler words, laughter or any words absent from the supplied speech. '
                    'Keep the supplied face and natural skin texture consistent throughout the single continuous shot.')
+    if tail_seconds:
+        deadline = duration-tail_seconds
+        prompt = prompt.replace('finish all words before the final half-second.',
+                                f'finish all words by {deadline:g} seconds.')
+        prompt = prompt.replace('Finish all words before the final half-second.',
+                                f'Finish all words by {deadline:g} seconds.')
+        prompt += (f' Finish the complete final word by {deadline:g} seconds. For the remaining '
+                   f'{tail_seconds:g} seconds keep the mouth quietly closed, with natural breathing, '
+                   'a relaxed friendly expression and occasional blinking. No additional words, humming, '
+                   'filler sounds or restart of speech. Keep filming live natural movement to the end; '
+                   'do not freeze, loop, fade or cut the shot. This breathing room will be used for a soft ending.')
     return prompt
 
 
@@ -188,10 +202,10 @@ def remux(native, converted, output, *, max_drift=0.15):
     return output
 
 
-def create(portrait, speech, voice, journal, output, *, duration=4, model=VEO_MODEL, timeout=1800, attempt=None, performance="calm"):
+def create(portrait, speech, voice, journal, output, *, duration=4, model=VEO_MODEL, timeout=1800, attempt=None, performance="calm", tail_seconds=0):
     """Create one inspectable proof; no claim of verified words or perfect lip sync."""
     from automation.voice_changer import convert, extract_audio
-    prompt = speaking_prompt(speech, duration, performance)
+    prompt = speaking_prompt(speech, duration, performance, tail_seconds)
     if not isinstance(voice, str) or not re.fullmatch(r'[A-Za-z0-9_-]+', voice):
         raise PipelineError('Invalid ElevenLabs voice identifier.')
     if (isinstance(timeout, bool) or not isinstance(timeout, (int, float))
@@ -240,6 +254,7 @@ def create(portrait, speech, voice, journal, output, *, duration=4, model=VEO_MO
                                                   'portrait_sha256': picture_hash, 'requested_speech': speech,
                                                   'duration_seconds': duration, 'attempt': attempt,
                                                   'performance': performance,
+                                                  'requested_tail_seconds': tail_seconds,
                                                   'original_tts_used': False})
                 _operation(generator, receipt, journal, name, state, directory)
                 try:
@@ -277,6 +292,7 @@ def create(portrait, speech, voice, journal, output, *, duration=4, model=VEO_MO
                     'portrait_sha256': picture_hash, 'requested_speech': speech,
                     'duration_seconds': actual_duration, 'native_audio_rms_dbfs': level,
                     'performance': performance,
+                    'requested_tail_seconds': tail_seconds,
                     'native_video_sha256': _sha(native), 'converted_audio_sha256': _sha(converted),
                     'output_sha256': _sha(final), 'original_tts_used': False,
                     'generated_speech_text_verified': False, 'face_identity_review': 'required',
@@ -296,6 +312,8 @@ def main(argv=None):
     parser.add_argument('--voice', default=VOICE_ID)
     parser.add_argument('--duration', type=int, default=4)
     parser.add_argument('--performance', choices=['calm', 'energetic', 'conversational'], default='calm')
+    parser.add_argument('--tail-seconds', type=float, default=0,
+                        help='Request live quiet time after the final word; verify the generated timing.')
     parser.add_argument('--model', default=VEO_MODEL)
     parser.add_argument('--output', type=Path, default=Path('video-output/gemini-avatar'))
     parser.add_argument('--journal', type=Path, default=Path('video-output/journal'))
@@ -304,7 +322,8 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         final = create(args.portrait, args.speech, args.voice, LocalJournal(args.journal), args.output,
-                       duration=args.duration, model=args.model, timeout=args.timeout, attempt=args.attempt, performance=args.performance)
+                       duration=args.duration, model=args.model, timeout=args.timeout, attempt=args.attempt,
+                       performance=args.performance, tail_seconds=args.tail_seconds)
         print(json.dumps({'status': 'proof_ready', 'file': str(final), 'full_reels_created': False,
                           'lip_sync_review': 'required', 'speech_text_review': 'required'}, ensure_ascii=False))
         return 0

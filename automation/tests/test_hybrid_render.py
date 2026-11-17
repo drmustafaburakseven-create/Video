@@ -68,6 +68,26 @@ class HybridLabelsTests(unittest.TestCase):
 
 
 class HybridNarrationDelayTests(unittest.TestCase):
+    def test_invalid_ending_is_rejected_before_media_or_encoding(self):
+        for options in [{'ending_hold': True}, {'ending_hold': -1}, {'ending_hold': 6},
+                        {'ending_fade': float('nan')}, {'ending_fade': 4}, {'ending_fade': .01}]:
+            with self.subTest(options=options), patch('automation.hybrid_render.probe') as inspect:
+                with self.assertRaises(PipelineError):
+                    render_hybrid([], 'voice.wav', alignment(), 'unused', **options)
+                inspect.assert_not_called()
+
+    def test_speech_inside_reserved_hold_or_fade_is_blocked(self):
+        for last_word in [58.3, 59.4]:
+            with self.subTest(last_word=last_word), tempfile.TemporaryDirectory() as directory, \
+                    patch('automation.hybrid_render.validate_segments', return_value=[]), \
+                    patch('automation.hybrid_render.probe', return_value={'format': {'duration': 60}}), \
+                    patch('automation.hybrid_render.captions', return_value=last_word), \
+                    patch('automation.hybrid_render.subprocess.run') as encode:
+                with self.assertRaisesRegex(PipelineError, 'reserved natural hold or fade'):
+                    render_hybrid([], 'voice.wav', alignment(), directory,
+                                  narration_delay=0, ending_hold=1, ending_fade=.75)
+                encode.assert_not_called()
+
     def test_invalid_delay_is_rejected_before_media_or_encoding(self):
         for delay in [True, False, float('nan'), float('inf'), -0.01, 1.001, '0']:
             with self.subTest(delay=delay), patch('automation.hybrid_render.probe') as inspect, \
@@ -131,6 +151,41 @@ class HybridNarrationDelayTests(unittest.TestCase):
 
 @unittest.skipUnless(shutil.which('ffmpeg') and shutil.which('ffprobe'), 'FFmpeg required')
 class HybridNativeRenderTests(unittest.TestCase):
+    def test_soft_ending_preserves_duration_reaches_black_and_fades_audio(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            clip, audio = root/'moving.mp4', root/'tone.wav'
+            subprocess.run(['ffmpeg', '-v', 'error', '-f', 'lavfi', '-i',
+                            'testsrc2=size=90x160:rate=24:duration=10', '-c:v', 'libx264',
+                            '-preset', 'ultrafast', '-threads', '1', str(clip)], check=True)
+            subprocess.run(['ffmpeg', '-v', 'error', '-f', 'lavfi', '-i',
+                            'sine=frequency=230:sample_rate=24000:duration=60', str(audio)], check=True)
+            segments = [{'path': clip, 'kind': 'avatar', 'start': i*10,
+                         'duration': 10, 'source_start': 0} for i in range(6)]
+            # Fixture tone is continuous to make the post-speech audio fade measurable.
+            timed = alignment()
+            timed['character_end_times_seconds'][-1] = 58
+            output = render_hybrid(segments, audio, timed, root/'output', narration_delay=0,
+                                   overlays=False, ending_hold=1, ending_fade=.75)
+            video = next(s for s in probe(output)['streams'] if s['codec_type'] == 'video')
+            self.assertEqual(int(video['nb_frames']), 1440)
+            frame = subprocess.check_output(['ffmpeg', '-v', 'error', '-i', str(output),
+                                             '-vf', 'select=eq(n\\,1439),scale=90:160,format=gray',
+                                             '-frames:v', '1', '-f', 'rawvideo', '-'])
+            self.assertEqual(len(frame), 90*160)
+            # Lossy H.264 and limited-range conversion can leave a few levels
+            # above zero even when the final pre-encode frame is black.
+            self.assertLess(sum(frame)/len(frame), 3)
+            raw = subprocess.check_output(['ffmpeg', '-v', 'error', '-i', str(output), '-ss', '59',
+                                           '-t', '1', '-vn', '-ar', '24000', '-ac', '1', '-f', 's16le', '-'])
+            samples = array('h', raw)
+            before, after = samples[:4800], samples[21600:24000]
+            self.assertLess(sum(abs(x) for x in after)/len(after),
+                            sum(abs(x) for x in before)/len(before)*.15)
+            report = json.loads((root/'output/validation.json').read_text())
+            self.assertEqual(report['ending']['fade_start_seconds'], 59.25)
+            self.assertFalse(report['voice_speed_changed'])
+
     def test_mixed_timeline_preserves_sixty_seconds_and_narration(self):
         # A moving test pattern stands in for licensed/provided footage; it is not
         # a generated avatar or a user-facing completed educational video.

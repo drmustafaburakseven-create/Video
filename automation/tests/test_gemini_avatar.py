@@ -103,6 +103,26 @@ class SpeakingProofTests(unittest.TestCase):
             self.assertNotIn('test-google-key', path.read_text())
             self.assertNotIn('test-eleven-key', path.read_text())
 
+    def test_natural_tail_has_separate_receipt_and_resumes_without_repurchase(self):
+        original = self.create()
+        self.assertEqual(self.create(tail_seconds=0), original)
+        self.api.request.side_effect = [response({'id': 'quiet-tail'}), response({'status': 'completed'})]
+        closing = self.create(tail_seconds=1)
+        self.assertNotEqual(original, closing)
+        self.assertEqual(self.create(tail_seconds=1), closing)
+        self.assertEqual(self.generator.download.call_count, 2)
+        sent = self.api.request.call_args_list[-2].kwargs['json']['input'][1]['text']
+        self.assertIn('complete final word by 3 seconds', sent)
+        self.assertIn('do not freeze, loop, fade or cut', sent)
+        manifest = json.loads(closing.with_name('proof-manifest.json').read_text())
+        self.assertEqual(manifest['requested_tail_seconds'], 1)
+
+    def test_invalid_quiet_tail_is_rejected_before_purchase(self):
+        for tail in [True, -1, 4, float('nan'), float('inf'), '1']:
+            with self.subTest(tail=tail), self.assertRaises(PipelineError):
+                self.create(tail_seconds=tail)
+        self.api.request.assert_not_called()
+
     def test_conversational_take_preserves_separate_cached_performances(self):
         calm = self.create()
         self.api.request.side_effect = [response({'id': 'conversation-id'}), response({'status': 'completed'})]
