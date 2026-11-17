@@ -5,12 +5,17 @@ Bu kurallar konuya özgü değildir. Son kullanıcı tercihi önce gelir. Günce
 ## Anlatıcı ve amaç
 Çocuk doktoru ve ebeveynlere pratik bilgi veren bir içerik üreticisi gibi konuş: sıcak, canlı, doğrudan, öğretici. Eğlenceyi doğal ses performansına, mimiklere ve kurguya taşı; çocukların korkusu, kanaması veya hastalığıyla şaka yapma. Korkutarak izletme, suçlama, kesin sonuç veya viral olma garantisi verme. İzleyicinin başka bir ebeveyne gönderebileceği tek uygulanabilir mesaj üret.
 
+## Editör planı önce gelir
+Ses satın almadan veya görüntü üretmeden önce her cümle için gösterilecek eylemi yaz: kim, nerede, ne yapıyor, neyi anlamayı sağlıyor? Yalnızca “çocuk”, “doktor”, “telefon” anahtar kelimeleri eşleştiği için stok seçme. Mutfakta zamanlayıcı veya ilgisiz muayene gibi bağlam dışı çekimler kullanılmaz.
+
+Uygulama anlatımında aynı kişi/ortam/giysi ve işlemin devamlılığı korunur. Her görüntünün anlatılan cümleyle ilişkisi açık olmalıdır. Doğru uygulama gösterimi, süre tutma ve yardım isteme ayrı sahneler olarak planlanır. Yeni ses ölçüldükten sonra kesmeler gerçek kelime zamanlarına göre ayarlanır. Uygun stok yoksa bunu açık belirt ve eksik eylemi gerçekçi canlandırmayla tamamla; yapay çekimi gerçek stok diye tanıtma.
+
 ## Metin ve seslendirme sırası
 1. Kullanıcı konuyu verir. Önce 60 saniyelik bütün metni sosyal medya metin yazarı gibi kurgula: doğrudan açılış, ilk açıklamada cevap, uygulanabilir adımlar, kısa kapanış.
 2. Mustafa’nın Yazı Tarzı becerisini uygula: samimi, kısa, doğal, sahiplenen konuşma; “Önce…”, “Şimdi…”, “Püf noktası şu…” gibi gündelik bağlantılar. Kurumsal broşür dili veya monoton ders anlatımı kullanma. Klinik doğruluk önceliklidir.
-3. Metnin duygu planını ayrıca hazırla: sıcak güven verme, merak, önemli noktada belirgin vurgu ve acil uyarıda ciddi/net ton. Kanama gibi konularda kahkaha, alay veya neşeli acil uyarı yok.
-4. Ara görüntülerin anlatımını mevcut kullanıcı klonuyla ElevenLabs `eleven_v4` üzerinden üret. Model erişimini doğrula; v4 kullanmadıysan kullanmış gibi raporlama. Desteklenen köşeli parantez içi ses yönlendirmeleri ayrı üretim metnindedir; temiz konuşma metnine dahil edilmez. SSML break veya desteklenmeyen style/speaker_boost parametreleri gönderme.
-5. Seslendirme çıktıktan sonra metni ve gerçek süreyi kontrol et, görüntü kesmelerini bu sesin anlamına uydur. Fazla uzun sesi hızlandırma veya sözcük kesme; metni uygun uzunlukta yeniden yaz. Canlı akışı gereksiz sessizlikle bölme.
+3. Ara anlatımın tonu karşındaki aileye konuşan doğal bir çocuk doktoru gibi tutarlı olmalı: sıcak, güven veren, ölçülü. Cümle başına farklı duygu rolü, spiker tonu, büyük harfli sert vurgu, aşırı coşku veya robotik okuma kullanma. Az ve genel ses yönlendirmesi tercih et. Kritik bilgiyi anlaşılır söyle; acil uyarıyı teatralleştirme. Kullanıcının beğendiği metni yalnızca ton için yeniden yazma.
+4. Ses üretmeden mevcut kullanıcı klonunun erişilebilir olduğunu doğrula. Eski kimlik bulunamıyorsa hesabın kendi klonlarını listele; aynı isim ve sahipliği doğrulanan güncel kaydı kullan, belirsizlikte rastgele ses seçme. Ara görüntülerin anlatımını mevcut kullanıcı klonuyla ElevenLabs `eleven_v4` üzerinden üret. Model erişimini doğrula; v4 kullanmadıysan kullanmış gibi raporlama. Desteklenen köşeli parantez içi ses yönlendirmeleri ayrı üretim metnindedir; temiz konuşma metnine dahil edilmez. SSML break veya desteklenmeyen style/speaker_boost parametreleri gönderme.
+5. Seslendirme çıktıktan sonra metni ve gerçek süreyi kontrol et, görüntü kesmelerini bu sesin anlamına uydur. Fazla uzun sesi hızlandırma veya sözcük kesme; metni uygun uzunlukta yeniden yaz. Canlı akışı gereksiz sessizlikle bölme; yapay duraklar ekleyerek performansı parça parça birleştirme. Öncelik tek, doğal akan ses kaydıdır.
 6. Kullanıcının beğendiği mevcut avatar performansı yeniden kullanılabilir; dudak uyumunu bozmamak için bu görüntünün mevcut sesini koru. Orta bölümün yeni v4 sesi, onaylanmış avatar sesini değiştirmek zorunda değildir.
 
 ## Süre ve sahneler
