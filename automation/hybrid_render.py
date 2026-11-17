@@ -85,8 +85,10 @@ def source_labels(ass_path, segments):
     path.write_text('\n'.join(lines)+'\n')
 
 
-def render_hybrid(segments, audio, alignment, output, *, narration_delay=0.25, caption_writer=None):
+def render_hybrid(segments, audio, alignment, output, *, narration_delay=0.25, caption_writer=None, overlays=True):
     """Render 60 seconds; use narration_delay=0 for speech already synced to a face."""
+    if type(overlays) is not bool:
+        raise PipelineError('Overlay preference must be a boolean.')
     narration_delay = _number(narration_delay, 'Narration delay')
     if not 0 <= narration_delay <= 1:
         raise PipelineError('Narration delay must be between zero and one second.')
@@ -99,10 +101,11 @@ def render_hybrid(segments, audio, alignment, output, *, narration_delay=0.25, c
     output.mkdir(parents=True, exist_ok=True)
     audio = Path(audio).resolve()
     duration = float(probe(audio)['format']['duration'])
-    last_word = (caption_writer or captions)(alignment, output, delay=narration_delay)
+    last_word = ((caption_writer or captions) if overlays else captions)(alignment, output, delay=narration_delay)
     if not 45 <= duration <= 59.5 or last_word > 59.75:
         raise PipelineError('Narration must fit 45–59.5 seconds; the voice will not be stretched or truncated.')
-    source_labels(output/'captions.ass', segments)
+    if overlays:
+        source_labels(output/'captions.ass', segments)
     args = ['ffmpeg', '-v', 'error', '-nostdin', '-y']
     filters = []
     for i, segment in enumerate(segments):
@@ -118,7 +121,8 @@ def render_hybrid(segments, audio, alignment, output, *, narration_delay=0.25, c
                 vf += f',fade=t=out:start_frame={segment["frames"]-4}:nb_frames=4'
         filters.append(vf+f'[v{i}]')
     joined = ''.join(f'[v{i}]' for i in range(len(segments)))
-    filters.append(joined+f'concat=n={len(segments)}:v=1:a=0,ass=captions.ass[v]')
+    overlay_filter = ',ass=captions.ass' if overlays else ''
+    filters.append(joined+f'concat=n={len(segments)}:v=1:a=0'+overlay_filter+'[v]')
     filters.append(f'[{len(segments)}:a]adelay={delay_ms}:all=1,apad,atrim=duration=60,'
                    'loudnorm=I=-16:TP=-1.5:LRA=9[a]')
     args += ['-i', str(audio), '-filter_complex_threads', '1', '-filter_complex', ';'.join(filters),
@@ -149,7 +153,8 @@ def render_hybrid(segments, audio, alignment, output, *, narration_delay=0.25, c
                                 for kind in sorted(KINDS)},
               'transitions': 'clean cuts by default; optional four-frame B-roll fades; hard cuts at avatar boundaries',
               'voice_speed_changed': False, 'narration_delay_seconds': narration_delay,
-              'synthetic_labels': 'generated/avatar intervals only',
+              'text_overlays': overlays,
+              'synthetic_labels': 'generated/avatar intervals only' if overlays else 'not burned in; provenance retained separately',
               'avatar_lip_sync': 'source footage required; no face animation or lip-sync fabricated by compositor'}
     (output/'validation.json').write_text(json.dumps(report, ensure_ascii=False, indent=2))
     return final

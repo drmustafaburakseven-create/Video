@@ -1,4 +1,4 @@
-> Yeni video üretimleri için konu bağımsız [Reels stil kuralları](REELS_STYLE.md): enerjik anlatım, 10–40–10 kurgu ve hareketli kısa yazılar. Eski günlük studio zamanlaması ayrı entegrasyon gerektirir.
+> Yeni video üretimleri için konu bağımsız [Reels stil kuralları](REELS_STYLE.md): önce konuşma metni, Mustafa’nın üslubu, duygulu ElevenLabs v4 anlatımı, 10–40–10 kurgu ve yazısız video. Eski günlük studio zamanlaması ayrı entegrasyon gerektirir.
 
 # Günlük hareketli video otomasyonu
 
