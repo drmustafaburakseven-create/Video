@@ -213,3 +213,18 @@ Varsayılan video üretimi artık `gemini-omni-1.2-flash` ile Interactions API
 adı geriye uyumluluk için korunur; daha önce eski modelle doldurduysanız
 `gemini-omni-1.2-flash` olarak güncelleyin veya varsayılan için silin.
 Kaynak: https://ai.google.dev/gemini-api/docs/video ve https://ai.google.dev/gemini-api/docs/omni
+
+## İsteğe bağlı sıcak ofis / 1080p üretimi
+
+Son kullanıcı tercihleri `profiles/warm-office-60.json` ve `REELS_STYLE.md` içinde
+kayıtlıdır: 15 saniye açılış, 30 saniye hareketli ara bölüm, 15 saniye kapanış;
+1080×1920/30 fps, kelime altyazısı, `@Drmustafaburakseven` ve yumuşak final kartı.
+`automation.reel_1080.render` incelenmiş kaynak listesi, tam 60 saniyelik PCM
+karışım, `last_spoken_word` ve isteğe bağlı ASS/font klasörü alır. Eksik görüntüyü
+dondurarak doldurmaz; konuşmanın 58,5 saniyeden sonra devam etmesini reddeder.
+Süre/çakışma, canlı kaynak uzunluğu ve klinik ret denetimleri kodlamadan önce
+çalışır. Son MP4 ayrıca çözümlenmeli ve ses seviyesi ölçülmelidir.
+
+Bu ayrı bir üretim yoludur; mevcut `studio` ve günlük GitHub zamanlayıcısı bu
+profile otomatik geçirilmez. API üretimi, gerçek konuşma/görüntü incelemesi,
+ses karışımı ve ASS oluşturma çağıran üretim planının sorumluluğundadır.

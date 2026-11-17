@@ -2,6 +2,19 @@
 
 Bu kurallar konuya özgü değildir. Son kullanıcı tercihi önce gelir. Güncelleme: 17 Kasım 2026.
 
+## Son onaylanan üretim profili: sıcak ofis, 1080p / 30
+
+Kullanıcının son ayrıntılı prodüksiyon talimatı, aşağıdaki eski 720p/24, yazısız ve 10–40–10 varsayılanlarını bu yeni üretim biçiminde değiştirir. Yapılandırma: `profiles/warm-office-60.json`. Bu, eski günlük iş akışının kendiliğinden yeni profile geçtiği anlamına gelmez; gerçek kullanılan renderer belirtilir.
+
+- Tam 60 saniye, 1080×1920, 30 fps, H.264 High 4.1 / avc1 / yuv420p / BT.709, yaklaşık 14 Mbps, AAC-LC 48 kHz stereo 320 kbps, fast-start. Toplam −14 LUFS, en yüksek −1 dBTP. Fiziksel iPhone denemesi yapılmadıysa yalnız biçim doğrulaması raporlanır.
+- 0–15 saniye aynı sıcak ofiste kesintisiz kullanıcı avatarı; ilk 4,5 saniye kamera arkasından kadın sorusunu sessiz dinler, 4,5–6 saniye doğal kısa tepki verir, 6–15 saniye cevaplar. 15–45 saniye üç anlamlı bölümde en az dört farklı gerçek hareketli kaynak. 45–60 saniye aynı ofiste kapanış.
+- Kadın sesi: tasarlanmış ayrı yapay ses, Eleven v3, üç kısa seçenek; doktorun klonu kadına uygulanmaz. Kullanıcının gerçek klonu ara anlatımda v4, ekrandaki konuşmada Gemini doğal performans → ElevenLabs Voice Changer. Gemini video API harici ses girişini desteklemediği için fotoğraf + ElevenLabs sesinin doğrudan kullanıldığı iddia edilmez. Modelin desteklemediği style/speaker boost parametreleri TTS'ye gönderilmez.
+- Kullanıcının yeni isteğiyle altyazı ve grafikler açık: 1–3 sözcük, beyaz Inter, altın vurgulu italik Playfair; sözcüklerin gerçek zamanlarıyla eşleştir. Üst 220, alt 380, sağ 140, sol 60 piksel güvenli alan; altyazı merkezi y=1260. Kaynak videolarda modelin ürettiği yazı bulunmamalı; bütün yazılar kontrollü kurgu katmanından gelir.
+- Köşe ve final kullanıcı adı `@Drmustafaburakseven`. İlk soru başlığı, kısa cevap rozeti, kanıta uygun bilgi kartı; istatistik veya kesin sonuç uyduran bar grafikleri yok. Tıbbi içerik konuya özel doğrulanır.
+- Aynı özgün yüz, saç, ten ve giysi; krem/bej modern ofis, yumuşak nötr yüz ışığı, sıcak hasır abajur, lacivert fincan. Kusursuz benzerlik iddiası yerine gerçek çıktı incelenir. Çocuk davranışları ve küçük uygulamalar da yaşa uygunluk açısından kontrol edilir.
+- Son söz 58,5 saniyeden önce tamamlanır. Son 1,5 saniyede canlı görüntü %70 kararır, Instagram final kartı görünür ve müzik yumuşakça söner. Donmuş kuyruk, hece kesme veya hızlandırma yapılmaz. Müzik özgün/lisansı uygun, konuşmanın altında; geçiş ve efektler ölçülü.
+- `automation.reel_1080.render` incelenmiş sahneleri ve aynı zaman çizelgesinde hazırlanmış sesi işler; eksik kaynak süresini dondurarak uzatmayı, boşluk/çakışma ve klinik olarak reddedilmiş görüntüleri engeller. Ücretli kaynaklar ayrı, yeniden kullanılabilir işlem kayıtlarıyla saklanır.
+
 ## Anlatıcı ve amaç
 Çocuk doktoru ve ebeveynlere pratik bilgi veren bir içerik üreticisi gibi konuş: sıcak, canlı, doğrudan, öğretici. Eğlenceyi doğal ses performansına, mimiklere ve kurguya taşı; çocukların korkusu, kanaması veya hastalığıyla şaka yapma. Korkutarak izletme, suçlama, kesin sonuç veya viral olma garantisi verme. İzleyicinin başka bir ebeveyne gönderebileceği tek uygulanabilir mesaj üret.
 
