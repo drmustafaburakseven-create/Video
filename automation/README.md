@@ -21,7 +21,9 @@ kaynak/lisans kaydıyla edinildi ve örnek kareleri incelendi. Ham stok dosyalar
 GitHub'a yeniden dağıtılmak üzere eklenmez; runner'da gerektiğinde geri yüklenir.
 
 Fal Aurora ve ElevenLabs Aurora avatar adaptörleri uygulandı ve sahte yanıtlarla
-test edildi. **Fotoğrafınız ve `FAL_KEY` eksik; canlı avatar üretimi yapılmadı.**
+test edildi. **Fotoğrafınız özel klasörde hazır; canlı avatar üretimi henüz yapılmadı.**
+Fal dışında [Gemini + ElevenLabs ve doğrudan Seedance 2.5](DIRECT_API_OPTIONS.md)
+yolları da incelendi. `FAL_KEY` yalnız Fal yolu tercih edilirse gerekir.
 Mevcut ElevenLabs Creator hesabı video API'sinde Pro gerektiren 402 yanıtı veriyor.
 Bir paket yükseltmesi veya kredi satın alımı yapılmadı. GitHub iş akışı kodu
 bulunsa da depoda Actions kapalı olduğu için günlük otomasyon henüz canlı değil.

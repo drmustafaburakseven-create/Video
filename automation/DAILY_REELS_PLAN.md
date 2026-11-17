@@ -1,13 +1,14 @@
 # Günlük Reels ve Shorts planı
 
+**17 Kasım güncellemesi:** Portre fotoğrafı alındı ve özel klasörde hazır. Fal zorunlu değildir; [Gemini + ElevenLabs ve doğrudan Seedance 2.5 seçenekleri](DIRECT_API_OPTIONS.md) ayrıca incelendi. Aşağıdaki Fal kurulumu alternatif yollardan biridir.
+
 Hedef: her gün Türkiye saatiyle **09.00'da beş konu önerisi hazırlamak**, bunlardan
 birini seçip **sizin sesinizle, kısa konuşan avatar bölümleriyle ve hareketli ara
 görüntülerle yaklaşık 60 saniyelik bir video** üretmek. Aynı dikey video Instagram
 Reels ve YouTube Shorts için kullanılacak. Ek bütçe hedefi ayda **4.000 TL**.
 
 **Üretim kodu hazırlandı; sistem henüz baştan sona çalışan, her gün kendiliğinden
-video teslim eden bir hizmet değil.** Fotoğraf, avatar hizmeti bağlantısı ve
-sürekli çalışacak ortam tamamlanmalı.
+video teslim eden bir hizmet değil.** Avatar hizmeti bağlantısı ve sürekli çalışacak ortam tamamlanmalı.
 
 **İlk gerçek örnek tamamlandı:** sizin klon sesiniz, hareketli stok çekimleri ve
 altyazılarla **60 saniyelik, 720×1280 MP4** oluşturuldu; dosyanın baştan sona
@@ -15,21 +16,19 @@ altyazılarla **60 saniyelik, 720×1280 MP4** oluşturuldu; dosyanın baştan so
 bilgisayarda [video.mp4](../video-output/ekgida-hazirlik-motion-preview-9745f40a25499fb9/video.mp4)
 konumunda; bu göreli bağlantı GitHub'da bir video yayını veya indirme servisi değildir.
 
-## Şimdi sizden gereken iki şey
+## Fal yolu tercih edilirse kalan adım
 
-1. **Kendi fotoğrafınızı yeniden yükleyin.** Önceden gönderdiğiniz portreniz şu an
-   erişilebilen dosyalarda bulunamadı. Yüzünüzün net göründüğü, önden çekilmiş,
-   iyi ışıklı, tek kişilik bir JPG veya PNG yeterli. Poster veya ekran görüntüsü
-   yerine fotoğrafın kendisini gönderin. GitHub'ın gizli bilgi boyut sınırına
-   uygun küçük kopyayı teknik olarak hazırlayabiliriz; bunu sizin yapmanız gerekmez.
-2. **[fal.ai](https://fal.ai/) hesabında API anahtarı ve kullanım kredisi hazırlayın.**
+Portre fotoğrafınız hazır; yeniden yüklemeniz gerekmiyor.
+
+**[fal.ai](https://fal.ai/) hesabında API anahtarı ve kullanım kredisi gerekir.**
    Anahtarı sohbet mesajına yapıştırmayın; çalıştırılacak ortamın gizli bilgiler
    bölümüne **`FAL_KEY`** adıyla kaydedin. GitHub'da çalıştırılacaksa aynı adla
    [deponun Actions secrets bölümüne](https://github.com/drmustafaburakseven-create/Video/settings/secrets/actions)
    eklenmeli. Bulut ortamının gizli bilgileri ve GitHub secrets ayrı yerlerdir;
    birine kaydetmek diğerini otomatik doldurmaz.
 
-Fal hesabı açılmadı, kredi satın alınmadı ve avatar üretimi için ücretli istek
+Fal hesabını açtınız; son paylaştığınız ekranda bakiye sıfır görünüyordu.
+Çalışma ortamına Fal anahtarı bağlanmadı ve avatar üretimi için ücretli istek
 gönderilmedi. Mevcut ElevenLabs üyeliğiniz seslendirme için kullanılacak; yalnızca
 avatar API'si uğruna ElevenLabs paket yükseltmesi yapılmadı.
 
