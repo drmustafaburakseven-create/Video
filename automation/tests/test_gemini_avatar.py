@@ -103,6 +103,20 @@ class SpeakingProofTests(unittest.TestCase):
             self.assertNotIn('test-google-key', path.read_text())
             self.assertNotIn('test-eleven-key', path.read_text())
 
+    def test_conversational_take_preserves_separate_cached_performances(self):
+        calm = self.create()
+        self.api.request.side_effect = [response({'id': 'conversation-id'}), response({'status': 'completed'})]
+        natural = self.create(performance='conversational')
+        self.assertNotEqual(calm, natural)
+        self.assertEqual(self.create(performance='conversational'), natural)
+        self.assertEqual(self.generator.download.call_count, 2)
+        self.assertEqual(self.converter.call_count, 2)
+        manifest = json.loads(natural.with_name('proof-manifest.json').read_text())
+        self.assertEqual(manifest['performance'], 'conversational')
+        sent = self.api.request.call_args_list[-2].kwargs['json']
+        self.assertEqual(sent['response_format']['duration'], '4s')
+        self.assertIn('Ek gıdaya hazır mı?', sent['input'][1]['text'])
+
     def test_failed_resource_exhausted_receipt_never_buys_replacement(self):
         failure = {'status': 'failed', 'errors': [{'code': 'RESOURCE_EXHAUSTED',
                                                  'message': 'private provider response'}]}

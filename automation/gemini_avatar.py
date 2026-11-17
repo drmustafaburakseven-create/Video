@@ -32,7 +32,7 @@ def _write(path, value):
 
 
 def speaking_prompt(speech, duration, performance="calm"):
-    if performance not in {"calm", "energetic"}:
+    if performance not in {"calm", "energetic", "conversational"}:
         raise PipelineError("Unsupported speaking performance.")
     if (not isinstance(speech, str) or not 3 <= len(speech.strip()) <= 300
             or re.search(r'[\x00-\x1f<>]|https?://', speech)):
@@ -56,6 +56,19 @@ def speaking_prompt(speech, duration, performance="calm"):
                    'subtle eyebrow expression and one restrained hand gesture. No shouting, theatrical acting, '
                    'fearmongering or robotic cadence. Finish all words before the final half-second. '
                    'Keep the head and face stable enough for natural lip synchronization.')
+    elif performance == "conversational":
+        prompt = prompt.replace('He calmly speaks one short Turkish sentence',
+                                'He answers a parent in a candid, relaxed consultation, saying these Turkish words')
+        prompt += (' Start speaking within the first half-second, finish all words before the final half-second. '
+                   'A real pediatrician talking to one family, with warm matter-of-fact Turkish delivery and '
+                   'unforced connected phrases. Let meaning create small irregular pauses and gentle emphasis. '
+                   'Relaxed forehead and cheeks, mostly neutral mouth between phrases, a small fleeting smile only '
+                   'when it arises naturally. Mostly direct eye contact with one brief natural glance, subtle breathing '
+                   'and nonperiodic blinking. Keep hands resting; no rehearsed gestures or pointing. '
+                   'No repeated eyebrow raises, rhythmic head nods, exaggerated mouth shapes, fixed grin, '
+                   'presenter voice, dramatic acting, beauty filter or face smoothing. '
+                   'Do not add filler words, laughter or any words absent from the supplied speech. '
+                   'Keep the supplied face and natural skin texture consistent throughout the single continuous shot.')
     return prompt
 
 
@@ -226,6 +239,7 @@ def create(portrait, speech, voice, journal, output, *, duration=4, model=VEO_MO
                 _write(directory/'request.json', {'journal': name, 'receipt': receipt, 'model': model,
                                                   'portrait_sha256': picture_hash, 'requested_speech': speech,
                                                   'duration_seconds': duration, 'attempt': attempt,
+                                                  'performance': performance,
                                                   'original_tts_used': False})
                 _operation(generator, receipt, journal, name, state, directory)
                 try:
@@ -262,6 +276,7 @@ def create(portrait, speech, voice, journal, output, *, duration=4, model=VEO_MO
         manifest = {'schema': 'gemini-speaking-proof-v1', 'model': model, 'voice_id': voice,
                     'portrait_sha256': picture_hash, 'requested_speech': speech,
                     'duration_seconds': actual_duration, 'native_audio_rms_dbfs': level,
+                    'performance': performance,
                     'native_video_sha256': _sha(native), 'converted_audio_sha256': _sha(converted),
                     'output_sha256': _sha(final), 'original_tts_used': False,
                     'generated_speech_text_verified': False, 'face_identity_review': 'required',
@@ -280,7 +295,7 @@ def main(argv=None):
     parser.add_argument('--speech', required=True, help='One short Turkish sentence to be generated, then reviewed.')
     parser.add_argument('--voice', default=VOICE_ID)
     parser.add_argument('--duration', type=int, default=4)
-    parser.add_argument('--performance', choices=['calm', 'energetic'], default='calm')
+    parser.add_argument('--performance', choices=['calm', 'energetic', 'conversational'], default='calm')
     parser.add_argument('--model', default=VEO_MODEL)
     parser.add_argument('--output', type=Path, default=Path('video-output/gemini-avatar'))
     parser.add_argument('--journal', type=Path, default=Path('video-output/journal'))

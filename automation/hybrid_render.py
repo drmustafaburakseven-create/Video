@@ -104,8 +104,14 @@ def render_hybrid(segments, audio, alignment, output, *, narration_delay=0.25, c
     audio = Path(audio).resolve()
     duration = float(probe(audio)['format']['duration'])
     last_word = ((caption_writer or captions) if overlays else captions)(alignment, output, delay=narration_delay)
-    if not 45 <= duration <= 59.5 or last_word > 59.75:
-        raise PipelineError('Narration must fit 45–59.5 seconds; the voice will not be stretched or truncated.')
+    # A source-synced closing line may legitimately finish during the last
+    # half-second. Permit the full master only with zero added delay; retain
+    # the existing headroom for older delayed-narration callers.
+    max_audio = TOTAL_SECONDS if delay_ms == 0 else 59.5
+    max_speech_end = TOTAL_SECONDS-1/FPS if delay_ms == 0 else 59.75
+    if (not 45 <= duration <= max_audio or last_word > max_speech_end
+            or last_word > duration+narration_delay+0.001):
+        raise PipelineError('Narration and its last word must fit the video without stretching or truncation.')
     if overlays:
         source_labels(output/'captions.ass', segments)
     args = ['ffmpeg', '-v', 'error', '-nostdin', '-y']

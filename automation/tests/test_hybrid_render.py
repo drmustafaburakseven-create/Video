@@ -83,7 +83,23 @@ class HybridNarrationDelayTests(unittest.TestCase):
     def test_existing_callers_keep_the_quarter_second_delay(self):
         self._check_delay(None, '00:00:00,250', 250)
 
-    def _check_delay(self, delay, expected_caption_start, delay_ms):
+    def test_complete_last_word_is_kept_in_zero_delay_sixty_second_master(self):
+        self._check_delay(0, '00:00:00,000', 0, audio_duration=60, last_word=59.78)
+
+    def test_overrun_or_alignment_past_audio_is_blocked_before_encoding(self):
+        for duration, last_word, delay in [(60.1, 59.78, 0), (60, 60, 0),
+                                          (59, 59.78, 0), (60, 59.78, 0.25)]:
+            with self.subTest(duration=duration, last_word=last_word, delay=delay), \
+                    tempfile.TemporaryDirectory() as directory, \
+                    patch('automation.hybrid_render.validate_segments', return_value=[]), \
+                    patch('automation.hybrid_render.probe', return_value={'format': {'duration': duration}}), \
+                    patch('automation.hybrid_render.captions', return_value=last_word), \
+                    patch('automation.hybrid_render.subprocess.run') as encode:
+                with self.assertRaisesRegex(PipelineError, 'without stretching or truncation'):
+                    render_hybrid([], 'voice.wav', alignment(), directory, narration_delay=delay)
+                encode.assert_not_called()
+
+    def _check_delay(self, delay, expected_caption_start, delay_ms, audio_duration=58, last_word=None):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             segments = [{'path': root/'clip.mp4', 'kind': 'avatar', 'start': 0,
@@ -94,12 +110,15 @@ class HybridNarrationDelayTests(unittest.TestCase):
                 {'codec_type': 'audio', 'duration': '60'},
             ]}
             kwargs = {} if delay is None else {'narration_delay': delay}
+            timed_text = alignment()
+            if last_word is not None:
+                timed_text['character_end_times_seconds'][-1] = last_word
             with patch('automation.hybrid_render.validate_segments', return_value=segments), \
                     patch('automation.hybrid_render.probe', side_effect=[
-                        {'format': {'duration': '58'}}, final_probe]), \
+                        {'format': {'duration': str(audio_duration)}}, final_probe]), \
                     patch('automation.hybrid_render.subprocess.run', return_value=Mock(returncode=0)) as encode, \
                     patch('automation.hybrid_render.command'):
-                render_hybrid(segments, root/'voice.wav', alignment(), root/'output', **kwargs)
+                render_hybrid(segments, root/'voice.wav', timed_text, root/'output', **kwargs)
             # Captions are written by the actual alignment implementation.
             first_timing = (root/'output/captions.srt').read_text().splitlines()[1]
             self.assertTrue(first_timing.startswith(expected_caption_start+' --> '))
