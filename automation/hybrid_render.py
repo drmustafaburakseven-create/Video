@@ -85,7 +85,7 @@ def source_labels(ass_path, segments):
     path.write_text('\n'.join(lines)+'\n')
 
 
-def render_hybrid(segments, audio, alignment, output, *, narration_delay=0.25):
+def render_hybrid(segments, audio, alignment, output, *, narration_delay=0.25, caption_writer=None):
     """Render 60 seconds; use narration_delay=0 for speech already synced to a face."""
     narration_delay = _number(narration_delay, 'Narration delay')
     if not 0 <= narration_delay <= 1:
@@ -99,7 +99,7 @@ def render_hybrid(segments, audio, alignment, output, *, narration_delay=0.25):
     output.mkdir(parents=True, exist_ok=True)
     audio = Path(audio).resolve()
     duration = float(probe(audio)['format']['duration'])
-    last_word = captions(alignment, output, delay=narration_delay)
+    last_word = (caption_writer or captions)(alignment, output, delay=narration_delay)
     if not 45 <= duration <= 59.5 or last_word > 59.75:
         raise PipelineError('Narration must fit 45–59.5 seconds; the voice will not be stretched or truncated.')
     source_labels(output/'captions.ass', segments)

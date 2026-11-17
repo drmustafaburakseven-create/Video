@@ -1,3 +1,5 @@
+> Yeni video üretimleri için konu bağımsız [Reels stil kuralları](REELS_STYLE.md): enerjik anlatım, 10–40–10 kurgu ve hareketli kısa yazılar. Eski günlük studio zamanlaması ayrı entegrasyon gerektirir.
+
 # Günlük hareketli video otomasyonu
 
 Varsayılan **studio akışı**, her gün beş kaynaklı konu önerisi ve bir seçilmiş

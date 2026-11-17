@@ -31,7 +31,9 @@ def _write(path, value):
     Path(path).write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n')
 
 
-def speaking_prompt(speech, duration):
+def speaking_prompt(speech, duration, performance="calm"):
+    if performance not in {"calm", "energetic"}:
+        raise PipelineError("Unsupported speaking performance.")
     if (not isinstance(speech, str) or not 3 <= len(speech.strip()) <= 300
             or re.search(r'[\x00-\x1f<>]|https?://', speech)):
         raise PipelineError('Use a short plain Turkish sentence without links or instructions.')
@@ -39,7 +41,7 @@ def speaking_prompt(speech, duration):
         raise PipelineError('A speaking-photo proof must be 3–10 whole seconds.')
     # Keep this prompt/identity compatible with the first recorded four-second
     # proof. Its failed receipt must not become an accidental new purchase.
-    return (f'Create a photorealistic {duration}-second portrait 9:16 video of the same adult man in the supplied photograph. '
+    prompt = (f'Create a photorealistic {duration}-second portrait 9:16 video of the same adult man in the supplied photograph. '
             'Preserve his facial identity, age, hairstyle and white medical coat. '
             'Head and shoulders, fixed camera, subtle natural blinking. '
             f'He calmly speaks one short Turkish sentence, exactly: {json.dumps(speech.strip(), ensure_ascii=False)} '
@@ -47,6 +49,14 @@ def speaking_prompt(speech, duration):
             'no subtitles, no new people. Finish the sentence within the four-second shot. '
             'This adult supplied his own image for this educational video.').replace(
                 'within the four-second shot.', f'within the {"four" if duration == 4 else duration}-second shot.')
+    if performance == "energetic":
+        prompt = prompt.replace('He calmly speaks', 'He speaks with warm, confident, lively pediatric educator energy')
+        prompt += (' Begin speaking within the first half-second. Conversational Turkish, varied intonation, '
+                   'clear key-word emphasis and natural short pauses. Friendly direct eye contact, '
+                   'subtle eyebrow expression and one restrained hand gesture. No shouting, theatrical acting, '
+                   'fearmongering or robotic cadence. Finish all words before the final half-second. '
+                   'Keep the head and face stable enough for natural lip synchronization.')
+    return prompt
 
 
 def identity(portrait_bytes, prompt, model, duration, attempt=None):
@@ -165,10 +175,10 @@ def remux(native, converted, output, *, max_drift=0.15):
     return output
 
 
-def create(portrait, speech, voice, journal, output, *, duration=4, model=VEO_MODEL, timeout=1800, attempt=None):
+def create(portrait, speech, voice, journal, output, *, duration=4, model=VEO_MODEL, timeout=1800, attempt=None, performance="calm"):
     """Create one inspectable proof; no claim of verified words or perfect lip sync."""
     from automation.voice_changer import convert, extract_audio
-    prompt = speaking_prompt(speech, duration)
+    prompt = speaking_prompt(speech, duration, performance)
     if not isinstance(voice, str) or not re.fullmatch(r'[A-Za-z0-9_-]+', voice):
         raise PipelineError('Invalid ElevenLabs voice identifier.')
     if (isinstance(timeout, bool) or not isinstance(timeout, (int, float))
@@ -270,6 +280,7 @@ def main(argv=None):
     parser.add_argument('--speech', required=True, help='One short Turkish sentence to be generated, then reviewed.')
     parser.add_argument('--voice', default=VOICE_ID)
     parser.add_argument('--duration', type=int, default=4)
+    parser.add_argument('--performance', choices=['calm', 'energetic'], default='calm')
     parser.add_argument('--model', default=VEO_MODEL)
     parser.add_argument('--output', type=Path, default=Path('video-output/gemini-avatar'))
     parser.add_argument('--journal', type=Path, default=Path('video-output/journal'))
@@ -278,7 +289,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         final = create(args.portrait, args.speech, args.voice, LocalJournal(args.journal), args.output,
-                       duration=args.duration, model=args.model, timeout=args.timeout, attempt=args.attempt)
+                       duration=args.duration, model=args.model, timeout=args.timeout, attempt=args.attempt, performance=args.performance)
         print(json.dumps({'status': 'proof_ready', 'file': str(final), 'full_reels_created': False,
                           'lip_sync_review': 'required', 'speech_text_review': 'required'}, ensure_ascii=False))
         return 0

@@ -68,6 +68,19 @@ class SpeakingProofTests(unittest.TestCase):
         return ga.create(self.portrait, 'Ek gıdaya hazır mı?', kwargs.pop('voice', 'own-clone'),
                          self.journal, self.output, **kwargs)
 
+    def test_energetic_performance_uses_distinct_paid_identity(self):
+        calm = ga.speaking_prompt('Merhaba dünya.', 10)
+        energetic = ga.speaking_prompt('Merhaba dünya.', 10, 'energetic')
+        self.assertIn('calmly', calm)
+        self.assertNotIn('calmly', energetic)
+        self.assertIn('first half-second', energetic)
+        self.assertIn('Merhaba dünya.', energetic)
+        args = (b'portrait', 'test-model', 10)
+        self.assertNotEqual(ga.identity(args[0], calm, args[1], args[2]),
+                            ga.identity(args[0], energetic, args[1], args[2]))
+        with self.assertRaises(PipelineError):
+            ga.speaking_prompt('Merhaba dünya.', 10, 'unrecognized')
+
     def test_one_paid_generation_and_conversion_then_cached_proof(self):
         self.api.request.side_effect = [response({'id': 'saved-id'}), response({'status': 'in_progress'})]
         final = self.create()
