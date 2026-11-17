@@ -7,6 +7,7 @@ ara çekim + 8 sn konuşan avatar**; yeterli kaynak yoksa **44 sn stok + 8 sn ye
 Gemini görüntüsü + 8 sn avatar** kullanılabilir. Aynı MP4, Reels ve Shorts için uygundur.
 
 - **[Türkçe kullanım planı, güncel durum ve yaklaşık maliyet](DAILY_REELS_PLAN.md)**
+- **[Seçilen Gemini + ElevenLabs Voice Changer yolu ve mevcut erişim engeli](GEMINI_VOICE_GUIDE.md)**
 - **[Gemini’ye verilecek prompt](GEMINI_PROMPT.md)**
 - **[GitHub dışında sürekli çalışan sunucu kurulumu](WORKER.md)**
 - **[Medya ekleme, avatar ve günlük üretim rehberi](HYBRID_GUIDE.md)**

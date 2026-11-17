@@ -5,6 +5,10 @@ günlük bir video; ek bütçe en fazla 4.000 TL/ay. Fal zorunlu değildir.
 Kullanıcının seçilen ikinci fotoğrafı özel klasörde hazırdır; yeniden yüklenmesi
 gerekmez. Fotoğraf Git deposunda paylaşılmaz.
 
+**Seçilen yol:** Gemini + ElevenLabs Voice Changer. Bağlantı kodu ve ses
+dönüştürmenin canlı testi tamamlandı; Google video erişimi hâlâ engelli.
+[Güncel teşhis ve çalıştırma rehberi](GEMINI_VOICE_GUIDE.md).
+
 ## Mevcut hesaplarla Gemini + ElevenLabs
 
 Alternatif sıra şöyledir:
@@ -23,7 +27,8 @@ korumayı hedefliyor. Birebir aynı süre, ses benzerliği ve dudak uyumu ancak
 
 Türkçe destekleyen ElevenLabs modeli `eleven_multilingual_sts_v2`, adresi
 `POST /v1/speech-to-speech/{voice_id}`. Standart MP3 çıktı için Pro paket
-gerekliliği belgelenmiyor; bu hesabın canlı Voice Changer yetkisi henüz denenmedi.
+gerekliliği belgelenmiyor. Bu hesaptaki dört saniyelik canlı dönüşüm denemesi
+başarılı; süre 4,075102 saniye ölçüldü. Bu test henüz bir Gemini videosuna ait değil.
 
 **Canlı deneme:** Gemini `gemini-omni-1.2-flash` ile kendi portresi ve kısa
 Türkçe cümlesi kullanılan tek bir dört saniyelik istek yapıldı. İşlem
