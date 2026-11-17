@@ -1,4 +1,16 @@
-> Yeni video üretimleri için konu bağımsız [Reels stil kuralları](REELS_STYLE.md): önce konuşma metni, Mustafa’nın üslubu, duygulu ElevenLabs v4 anlatımı, 10–40–10 kurgu ve yazısız video. Eski günlük studio zamanlaması ayrı entegrasyon gerektirir.
+> Yeni video üretimleri için konu bağımsız [Reels stil kuralları](REELS_STYLE.md): önce konuşma metni, Mustafa’nın üslubu, doğal ElevenLabs v4 anlatımı, 10–40–10 kurgu, en az dört farklı ara sahne ve yazısız video. Avatarın ses/görüntü zamanlaması korunur; öğretici hareketler görsel olarak incelenir. Eski günlük studio zamanlaması ayrı entegrasyon gerektirir.
+
+Yeni kurgunun iPhone / Reels / Shorts teslim kopyası:
+
+```bash
+python -m automation.iphone_export video-output/yeni-kurgu/video.mp4 video-output/yeni-iphone.mp4
+```
+
+Komut özgün videoyu korur; H.264 Main 3.1, 720×1280, sabit 24 kare/sn,
+AAC-LC stereo ve fast-start çıktısını tam çözümleyerek doğrular. Yanındaki
+`.validation.json` teknik kontrolleri kaydeder; fiziksel iPhone testi veya
+sosyal paylaşım yapıldığını iddia etmez. Reddedilmiş/bekleyen klinik inceleme
+kaydı olan medya, karma kurgu ve bu dışa aktarma yolunda engellenir.
 
 # Günlük hareketli video otomasyonu
 

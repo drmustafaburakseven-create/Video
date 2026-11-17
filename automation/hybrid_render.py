@@ -11,6 +11,7 @@ import subprocess
 
 from automation.render import captions, command, probe, timestamp
 from automation.state import PipelineError
+from automation.clinical_review import check as check_clinical_review
 
 FPS = 24
 TOTAL_SECONDS = 60
@@ -49,6 +50,7 @@ def validate_segments(segments):
             raise PipelineError(f'Segment {index+1} video file is missing.') from None
         if path.suffix.lower() in {'.png', '.jpg', '.jpeg', '.webp', '.gif', '.bmp', '.tiff'}:
             raise PipelineError('Hybrid rendering requires moving video, not still images.')
+        check_clinical_review(path)
         media = probe(path)
         video = next((s for s in media.get('streams', []) if s.get('codec_type') == 'video'), None)
         if not video:
