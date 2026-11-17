@@ -229,7 +229,11 @@ def create(portrait, speech, voice, journal, output, *, duration=4, model=VEO_MO
                         pass
                     raise
                 state['native_sha256'] = _sha(native)
+                # Omni.download returns only after the saved operation completes.
+                # Do not leave the earlier polling snapshot marked in progress.
+                state['operation_status'] = {'status': 'completed', 'provider_codes': []}
                 journal.save(name, state)
+                _write(directory/'provider-status.json', state['operation_status'])
             finally:
                 generator.client.close()
         actual_duration = _native_media(native, duration)

@@ -5,8 +5,8 @@ günlük bir video; ek bütçe en fazla 4.000 TL/ay. Fal zorunlu değildir.
 Kullanıcının seçilen ikinci fotoğrafı özel klasörde hazırdır; yeniden yüklenmesi
 gerekmez. Fotoğraf Git deposunda paylaşılmaz.
 
-**Seçilen yol:** Gemini + ElevenLabs Voice Changer. Bağlantı kodu ve ses
-dönüştürmenin canlı testi tamamlandı; Google video erişimi hâlâ engelli.
+**Seçilen yol:** Gemini + ElevenLabs Voice Changer. Kullanıcının hesap yüklemesinden sonra Gemini video üretimi ve ses
+dönüştürme başarılı oldu; dört saniyelik avatar 60 saniyelik örneğe eklendi.
 [Güncel teşhis ve çalıştırma rehberi](GEMINI_VOICE_GUIDE.md).
 
 ## Mevcut hesaplarla Gemini + ElevenLabs
@@ -36,7 +36,7 @@ Türkçe cümlesi kullanılan tek bir dört saniyelik istek yapıldı. İşlem
 sağlayıcı kapasitesini birbirinden ayırmıyor. API anahtarıyla model listesinin
 okunabilmesi, video üretim kotasını doğrulamaz. İşlem kimliği yerel journal'da
 saklandı; otomatik tekrar yapılmadı. Video çıkmadığı için ses dönüştürme aşaması
-başlatılmadı. Bu yol henüz çalışan uçtan uca avatar akışı değildir.
+başlatılmadı. Bu ilk deneme sonradan hesap yüklemesi ardından yeni, adlandırılmış bir istekle başarıya ulaştı; güncel sonuç yukarıdaki rehberdedir.
 
 Kaynaklar:
 

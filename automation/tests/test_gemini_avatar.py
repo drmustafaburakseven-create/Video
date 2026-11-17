@@ -69,6 +69,7 @@ class SpeakingProofTests(unittest.TestCase):
                          self.journal, self.output, **kwargs)
 
     def test_one_paid_generation_and_conversion_then_cached_proof(self):
+        self.api.request.side_effect = [response({'id': 'saved-id'}), response({'status': 'in_progress'})]
         final = self.create()
         self.assertEqual(self.create(), final)
         self.assertEqual(self.api.request.call_count, 2)
@@ -82,7 +83,10 @@ class SpeakingProofTests(unittest.TestCase):
         self.assertFalse(manifest['generated_speech_text_verified'])
         self.assertFalse(manifest['full_reels_created'])
         self.assertEqual(manifest['lip_sync_review'], 'required')
+        provider_status = json.loads((final.parent.parent/'provider-status.json').read_text())
+        self.assertEqual(provider_status, {'status': 'completed', 'provider_codes': []})
         for path in self.journal.root.glob('*.json'):
+            self.assertEqual(json.loads(path.read_text())['operation_status'], provider_status)
             self.assertNotIn('test-google-key', path.read_text())
             self.assertNotIn('test-eleven-key', path.read_text())
 

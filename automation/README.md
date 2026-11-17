@@ -7,28 +7,26 @@ ara çekim + 8 sn konuşan avatar**; yeterli kaynak yoksa **44 sn stok + 8 sn ye
 Gemini görüntüsü + 8 sn avatar** kullanılabilir. Aynı MP4, Reels ve Shorts için uygundur.
 
 - **[Türkçe kullanım planı, güncel durum ve yaklaşık maliyet](DAILY_REELS_PLAN.md)**
-- **[Seçilen Gemini + ElevenLabs Voice Changer yolu ve mevcut erişim engeli](GEMINI_VOICE_GUIDE.md)**
+- **[Çalışan Gemini + ElevenLabs avatar örneği](GEMINI_VOICE_GUIDE.md)**
 - **[Gemini’ye verilecek prompt](GEMINI_PROMPT.md)**
 - **[GitHub dışında sürekli çalışan sunucu kurulumu](WORKER.md)**
 - **[Medya ekleme, avatar ve günlük üretim rehberi](HYBRID_GUIDE.md)**
 
-**16 Kasım 2026 durumu:** kendi klon sesiniz, gerçek hareketli stok görüntüler ve
-altyazılarla 60 saniyelik örnek üretildi; **bu örnek avatar içermiyor**. Yerel dosya
-`video-output/ekgida-hazirlik-motion-preview-9745f40a25499fb9/video.mp4`; GitHub'da
-yayınlanmış bir indirme bağlantısı değildir. Taslağı
-`automation/drafts/ekgida-hazirlik-motion-preview.json` içinde ve günlük üretim
-için devre dışıdır. Ek gıdaya hazırlık için dört Pexels klibi (toplam 73,14 sn)
-kaynak/lisans kaydıyla edinildi ve örnek kareleri incelendi. Ham stok dosyaları
-GitHub'a yeniden dağıtılmak üzere eklenmez; runner'da gerektiğinde geri yüklenir.
+**17 Kasım 2026 durumu:** kendi fotoğrafınızdan Gemini ile konuşan video
+üretildi; konuşma ElevenLabs Voice Changer ile kendi klon sesinize çevrildi.
+**60 saniyelik örnek artık dört saniyelik konuşan avatar içeriyor:**
+`video-output/Ek-Gida-Mustafa-Avatarli-60sn.mp4`. Kalan 56 saniye lisanslı,
+hareketli stok görüntülerden oluşuyor. Ayrıntılı doğrulama ve tekrar kullanım
+[Gemini rehberinde](GEMINI_VOICE_GUIDE.md). Dosya yalnız bu çalışma alanında;
+GitHub'a video veya özel portre yüklenmedi.
 
-Fal Aurora ve ElevenLabs Aurora avatar adaptörleri uygulandı ve sahte yanıtlarla
-test edildi. **Fotoğrafınız özel klasörde hazır; canlı avatar üretimi henüz yapılmadı.**
-Fal dışında [Gemini + ElevenLabs ve doğrudan Seedance 2.5](DIRECT_API_OPTIONS.md)
-yolları da incelendi. `FAL_KEY` yalnız Fal yolu tercih edilirse gerekir.
-Mevcut ElevenLabs Creator hesabı video API'sinde Pro gerektiren 402 yanıtı veriyor.
-Bir paket yükseltmesi veya kredi satın alımı yapılmadı. GitHub iş akışı kodu
-bulunsa da depoda Actions kapalı olduğu için günlük otomasyon henüz canlı değil.
-Bu bulut bilgisayarın sürekli açık kalacağı varsayılmamalıdır.
+Fal ve ElevenLabs Aurora adaptörleri alternatif olarak kalır. Aktif Creator
+hesabının ElevenLabs Flows video API'sindeki Pro gereksinimi, çalışan Voice
+Changer yöntemiyle aynı özellik değildir. Fal anahtarı bu yeni yöntem için gerekmez.
+
+GitHub Actions engeli ve kalıcı sunucu dağıtımı ayrı işlerdir; **günlük otomasyon
+henüz canlı değil**. Kısa Gemini avatar komutu, eski studio'nun günlük üretim
+yöntemini kendiliğinden değiştirmez. Gerçek 60 saniyelik örnek ayrıca birleştirildi.
 
 ## İlk kurulum — şifre gerekmez
 

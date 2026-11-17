@@ -85,14 +85,21 @@ def source_labels(ass_path, segments):
     path.write_text('\n'.join(lines)+'\n')
 
 
-def render_hybrid(segments, audio, alignment, output):
-    """Return a verified 60-second MP4, preserving the original narration timing."""
+def render_hybrid(segments, audio, alignment, output, *, narration_delay=0.25):
+    """Render 60 seconds; use narration_delay=0 for speech already synced to a face."""
+    narration_delay = _number(narration_delay, 'Narration delay')
+    if not 0 <= narration_delay <= 1:
+        raise PipelineError('Narration delay must be between zero and one second.')
+    # FFmpeg's delay is specified in whole milliseconds. Use the same effective
+    # offset for subtitles and the validation report, including an explicit zero.
+    delay_ms = round(narration_delay*1000)
+    narration_delay = delay_ms/1000
     segments = validate_segments(segments)
     output = Path(output).resolve()
     output.mkdir(parents=True, exist_ok=True)
     audio = Path(audio).resolve()
     duration = float(probe(audio)['format']['duration'])
-    last_word = captions(alignment, output)
+    last_word = captions(alignment, output, delay=narration_delay)
     if not 45 <= duration <= 59.5 or last_word > 59.75:
         raise PipelineError('Narration must fit 45–59.5 seconds; the voice will not be stretched or truncated.')
     source_labels(output/'captions.ass', segments)
@@ -112,7 +119,7 @@ def render_hybrid(segments, audio, alignment, output):
         filters.append(vf+f'[v{i}]')
     joined = ''.join(f'[v{i}]' for i in range(len(segments)))
     filters.append(joined+f'concat=n={len(segments)}:v=1:a=0,ass=captions.ass[v]')
-    filters.append(f'[{len(segments)}:a]adelay=250:all=1,apad,atrim=duration=60,'
+    filters.append(f'[{len(segments)}:a]adelay={delay_ms}:all=1,apad,atrim=duration=60,'
                    'loudnorm=I=-16:TP=-1.5:LRA=9[a]')
     args += ['-i', str(audio), '-filter_complex_threads', '1', '-filter_complex', ';'.join(filters),
              '-map', '[v]', '-map', '[a]', '-t', '60', '-c:v', 'libx264', '-preset', 'fast',
@@ -141,7 +148,7 @@ def render_hybrid(segments, audio, alignment, output):
               'media_seconds': {kind: round(sum(s['duration'] for s in segments if s['kind']==kind), 6)
                                 for kind in sorted(KINDS)},
               'transitions': 'clean cuts by default; optional four-frame B-roll fades; hard cuts at avatar boundaries',
-              'voice_speed_changed': False, 'narration_delay_seconds': 0.25,
+              'voice_speed_changed': False, 'narration_delay_seconds': narration_delay,
               'synthetic_labels': 'generated/avatar intervals only',
               'avatar_lip_sync': 'source footage required; no face animation or lip-sync fabricated by compositor'}
     (output/'validation.json').write_text(json.dumps(report, ensure_ascii=False, indent=2))

@@ -5,7 +5,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from automation.hybrid_render import render_hybrid, source_labels, validate_segments
 from automation.render import captions, probe
@@ -65,6 +65,49 @@ class HybridLabelsTests(unittest.TestCase):
             path.write_bytes(b'placeholder')
             with self.assertRaisesRegex(PipelineError, 'not still images'):
                 validate_segments([{'path': path, 'kind': 'stock', 'duration': 60}])
+
+
+class HybridNarrationDelayTests(unittest.TestCase):
+    def test_invalid_delay_is_rejected_before_media_or_encoding(self):
+        for delay in [True, False, float('nan'), float('inf'), -0.01, 1.001, '0']:
+            with self.subTest(delay=delay), patch('automation.hybrid_render.probe') as inspect, \
+                    patch('automation.hybrid_render.subprocess.run') as encode:
+                with self.assertRaises(PipelineError):
+                    render_hybrid([], 'voice.wav', alignment(), 'unused', narration_delay=delay)
+                inspect.assert_not_called()
+                encode.assert_not_called()
+
+    def test_zero_delay_keeps_native_avatar_audio_and_captions_at_time_zero(self):
+        self._check_delay(0, '00:00:00,000', 0)
+
+    def test_existing_callers_keep_the_quarter_second_delay(self):
+        self._check_delay(None, '00:00:00,250', 250)
+
+    def _check_delay(self, delay, expected_caption_start, delay_ms):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            segments = [{'path': root/'clip.mp4', 'kind': 'avatar', 'start': 0,
+                         'duration': 60, 'source_start': 0, 'frames': 1440}]
+            final_probe = {'format': {'duration': '60'}, 'streams': [
+                {'codec_type': 'video', 'duration': '60', 'width': 720,
+                 'height': 1280, 'nb_frames': '1440'},
+                {'codec_type': 'audio', 'duration': '60'},
+            ]}
+            kwargs = {} if delay is None else {'narration_delay': delay}
+            with patch('automation.hybrid_render.validate_segments', return_value=segments), \
+                    patch('automation.hybrid_render.probe', side_effect=[
+                        {'format': {'duration': '58'}}, final_probe]), \
+                    patch('automation.hybrid_render.subprocess.run', return_value=Mock(returncode=0)) as encode, \
+                    patch('automation.hybrid_render.command'):
+                render_hybrid(segments, root/'voice.wav', alignment(), root/'output', **kwargs)
+            # Captions are written by the actual alignment implementation.
+            first_timing = (root/'output/captions.srt').read_text().splitlines()[1]
+            self.assertTrue(first_timing.startswith(expected_caption_start+' --> '))
+            args = encode.call_args.args[0]
+            filters = args[args.index('-filter_complex')+1]
+            self.assertIn(f'[1:a]adelay={delay_ms}:all=1,', filters)
+            report = json.loads((root/'output/validation.json').read_text())
+            self.assertEqual(report['narration_delay_seconds'], delay_ms/1000)
 
 
 @unittest.skipUnless(shutil.which('ffmpeg') and shutil.which('ffprobe'), 'FFmpeg required')

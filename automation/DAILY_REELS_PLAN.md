@@ -1,6 +1,9 @@
 # Günlük Reels ve Shorts planı
 
-**17 Kasım güncellemesi:** Portre fotoğrafı alındı ve özel klasörde hazır. Fal zorunlu değildir; [Gemini + ElevenLabs ve doğrudan Seedance 2.5 seçenekleri](DIRECT_API_OPTIONS.md) ayrıca incelendi. Aşağıdaki Fal kurulumu alternatif yollardan biridir.
+**17 Kasım güncellemesi:** Gemini + ElevenLabs Voice Changer çalıştı.
+Kullanıcının fotoğrafı ve kendi sesiyle dört saniyelik avatar üretildi ve
+60 saniyelik hareketli örneğin başına eklendi. [Çalışan örnek ve doğrulamalar](GEMINI_VOICE_GUIDE.md).
+Fal aşağıdaki planın zorunlu bir parçası değildir; eski maliyet hesabı yalnız o alternatif içindir.
 
 Hedef: her gün Türkiye saatiyle **09.00'da beş konu önerisi hazırlamak**, bunlardan
 birini seçip **sizin sesinizle, kısa konuşan avatar bölümleriyle ve hareketli ara
@@ -8,13 +11,12 @@ görüntülerle yaklaşık 60 saniyelik bir video** üretmek. Aynı dikey video 
 Reels ve YouTube Shorts için kullanılacak. Ek bütçe hedefi ayda **4.000 TL**.
 
 **Üretim kodu hazırlandı; sistem henüz baştan sona çalışan, her gün kendiliğinden
-video teslim eden bir hizmet değil.** Avatar hizmeti bağlantısı ve sürekli çalışacak ortam tamamlanmalı.
+video teslim eden bir hizmet değil.** Seçilen Gemini yönteminin günlük studio akışına bağlanması ve sürekli çalışacak ortam tamamlanmalı.
 
-**İlk gerçek örnek tamamlandı:** sizin klon sesiniz, hareketli stok çekimleri ve
-altyazılarla **60 saniyelik, 720×1280 MP4** oluşturuldu; dosyanın baştan sona
-çözümlenmesi de kontrol edildi. Bu örnekte **konuşan avatar yok**. Dosya bu bulut
-bilgisayarda [video.mp4](../video-output/ekgida-hazirlik-motion-preview-9745f40a25499fb9/video.mp4)
-konumunda; bu göreli bağlantı GitHub'da bir video yayını veya indirme servisi değildir.
+**Avatar içeren örnek tamamlandı:** kendi klon sesiniz, dört saniyelik konuşan
+avatar, 56 saniye hareketli stok ve altyazılarla 60 saniyelik, 720×1280 MP4
+oluşturuldu. Yerel dosya `video-output/Ek-Gida-Mustafa-Avatarli-60sn.mp4`.
+Bu dosya public GitHub'a veya sosyal medyaya yüklenmedi.
 
 ## Fal yolu tercih edilirse kalan adım
 
