@@ -28,6 +28,9 @@ Uygulama anlatımında aynı kişi/ortam/giysi ve işlemin devamlılığı korun
 - Giriş ve çıkışın onar saniyelik beğenilmiş performansını kesintisiz koru. Kaynak görüntü ile ona ait Voice Changer sesini aynı sıfır noktasında, aynı hızda kullan; sözcük veya hece kesme, ses kaydırma, avatarın üzerine farklı zamanlamalı TTS yerleştirme. Ara anlatım tek doğal kayıttan aksın; görüntü geçişleri konuşmayı kesmesin. Yeni ses kullanılırsa dudak eşleşmesi yeniden kontrol edilmelidir.
 - Kapanış kısa bir hatırlatma ve doğal paylaşım daveti içersin; kullanıcının tercihine göre takip/yorum daveti de eklenebilir. Konuşmaya sığmayan çağrıları sıkıştırma.
 
+## İki kişilik sohbet istendiğinde
+Kullanıcının verdiği fotoğraftaki iki kişiyi dikey kadrajda birlikte koru. Önce kısa soru, sonra doktor cevabı; doğal dinleme ve sıra alma, üst üste konuşma yok. Kullanıcının klon sesi yalnız kendi cevap aralığına uygulanır; diğer kişinin sesi aynı klona çevrilmez. Diğer konuşmacı için gerçek bir ses örneği kullanılmadıysa ayrı yapay ses olduğunu üretim kaydında açık belirt. Konuşmacıyı yalnız otomatik speaker etiketiyle eşleme: metindeki soru/cevap, gerçek kelime zamanları ve görünen konuşma hareketini birlikte incele. `automation.dialogue_audio` yalnız incelenmiş cevap aralığını aynı zaman yerine koyar; diğer konuşmacının ses örneklerini korur ve taşan konuşmayı kesmez. İlk ve son onar saniye sohbet; ortada açıklayıcı hareketli bölüm. Yeni kullanıcı tercihi olmadıkça yazısız ve 60 saniyelik teslim biçimi devam eder.
+
 ## Görüntü ve yazılar
 - Dikey 9:16; en az 720×1280. Gerçek lisanslı stok öncelikli. Eksik eylem için gerçekçi yapay canlandırma kullanılabilir; bunu gerçek hasta kaydı gibi sunma; kaynak ve yapay üretim bilgisini ayrı üretim kayıtlarında koru.
 - İşlemi gösteren sahneyi anatomik yer, el hareketi ve yaşa uygunluk bakımından kare kare kontrol et. Hatalı uygulama görüntüsünü doğru tekniğin altında gösterme.
