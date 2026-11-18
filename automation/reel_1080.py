@@ -108,6 +108,7 @@ def render(segments, audio, output, directory, *, last_spoken_word, ass=None, fo
         run(['ffmpeg', '-v', 'warning', '-nostdin', '-y', '-ss',
              str(segment.get('offset', 0)), '-i', str(segment['path']), '-an',
              '-vf', filters, '-frames:v', str(round(duration*30)),
+             '-r', '30', '-fps_mode', 'cfr',
              '-c:v', 'libx264', '-preset', 'fast', '-crf', '17', '-threads', '2',
              '-profile:v', 'high', '-level:v', '4.1', '-video_track_timescale', '30000',
              str(path)], directory/f'scene-{index:02}.log')
