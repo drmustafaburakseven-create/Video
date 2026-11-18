@@ -1,5 +1,6 @@
 """Recoverable short speaking proofs; no provider calls in this test suite."""
 import hashlib
+import base64
 import json
 import os
 from pathlib import Path
@@ -136,6 +137,33 @@ class SpeakingProofTests(unittest.TestCase):
         sent = self.api.request.call_args_list[-2].kwargs['json']
         self.assertEqual(sent['response_format']['duration'], '4s')
         self.assertIn('Ek gıdaya hazır mı?', sent['input'][1]['text'])
+
+    def test_original_reference_is_unchanged_and_new_episode_gets_new_receipt(self):
+        options = {'reference_locked': True, 'lead_in_seconds': 1, 'tail_seconds': 1,
+                   'performance': 'conversational', 'attempt': 'episode-one-intro'}
+        first = self.create(**options)
+        self.assertEqual(self.create(**options), first)
+        sent = self.api.request.call_args_list[0].kwargs['json']
+        self.assertEqual(base64.b64decode(sent['input'][0]['data']), self.portrait.read_bytes())
+        manifest = json.loads(first.with_name('proof-manifest.json').read_text())
+        self.assertEqual(manifest['requested_lead_in_seconds'], 1)
+        self.assertEqual(manifest['episode_take'], 'episode-one-intro')
+        self.assertEqual(manifest['hands_anatomy_review'], 'required')
+        self.api.request.side_effect = [response({'id': 'new-episode'}), response({'status': 'completed'})]
+        second = self.create(**{**options, 'attempt': 'episode-two-intro'})
+        self.assertNotEqual(first, second)
+        self.assertEqual(self.create(**{**options, 'attempt': 'episode-two-intro'}), second)
+        self.assertEqual(self.generator.download.call_count, 2)
+        self.assertEqual([c.args[0] for c in self.api.request.call_args_list].count('POST'), 2)
+
+    def test_missing_episode_or_impossible_listening_window_blocks_before_purchase(self):
+        invalid = [{'reference_locked': True}, {'reference_locked': 'yes'},
+                   *[{'lead_in_seconds': value, 'tail_seconds': 1}
+                     for value in (True, -1, 3, float('nan'), float('inf'), '1')]]
+        for options in invalid:
+            with self.subTest(options=options), self.assertRaises(PipelineError):
+                self.create(**options)
+        self.api.request.assert_not_called()
 
     def test_failed_resource_exhausted_receipt_never_buys_replacement(self):
         failure = {'status': 'failed', 'errors': [{'code': 'RESOURCE_EXHAUSTED',

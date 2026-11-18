@@ -31,7 +31,8 @@ def _write(path, value):
     Path(path).write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n')
 
 
-def speaking_prompt(speech, duration, performance="calm", tail_seconds=0):
+def speaking_prompt(speech, duration, performance="calm", tail_seconds=0, *,
+                    reference_locked=False, lead_in_seconds=0):
     if performance not in {"calm", "energetic", "conversational"}:
         raise PipelineError("Unsupported speaking performance.")
     if (not isinstance(speech, str) or not 3 <= len(speech.strip()) <= 300
@@ -42,6 +43,11 @@ def speaking_prompt(speech, duration, performance="calm", tail_seconds=0):
     if (type(tail_seconds) not in (int, float) or not math.isfinite(tail_seconds)
             or not 0 <= tail_seconds <= duration-1):
         raise PipelineError('The natural closing tail must leave at least one second for speech.')
+    if type(reference_locked) is not bool:
+        raise PipelineError('Reference framing must be an explicit boolean.')
+    if (type(lead_in_seconds) not in (int, float) or not math.isfinite(lead_in_seconds)
+            or not 0 <= lead_in_seconds <= duration-tail_seconds-1):
+        raise PipelineError('The listening lead-in must leave at least one second for speech.')
     # Keep this prompt/identity compatible with the first recorded four-second
     # proof. Its failed receipt must not become an accidental new purchase.
     prompt = (f'Create a photorealistic {duration}-second portrait 9:16 video of the same adult man in the supplied photograph. '
@@ -83,6 +89,28 @@ def speaking_prompt(speech, duration, performance="calm", tail_seconds=0):
                    'a relaxed friendly expression and occasional blinking. No additional words, humming, '
                    'filler sounds or restart of speech. Keep filming live natural movement to the end; '
                    'do not freeze, loop, fade or cut the shot. This breathing room will be used for a soft ending.')
+    if lead_in_seconds:
+        for instruction in ('Begin speaking within the first half-second.',
+                            'Start speaking within the first half-second,'):
+            prompt = prompt.replace(instruction, f'Start speaking at {lead_in_seconds:g} seconds,')
+        prompt += (f' The first {lead_in_seconds:g} seconds contain no speech: listen attentively with '
+                   'lips resting closed, natural breathing and small nonperiodic blinks. '
+                   f'Begin the supplied words at {lead_in_seconds:g} seconds; no extra speaker or sound.')
+    if reference_locked:
+        prompt = prompt.replace('Head and shoulders, fixed camera, subtle natural blinking.',
+                                'Preserve the original seated framing with both hands visible, fixed camera, subtle natural blinking.')
+        prompt = prompt.replace('subtle eyebrow expression and one restrained hand gesture.',
+                                'subtle facial expression while the hands remain at rest.')
+        prompt += (' Use this original photograph directly as the sole identity and body reference; '
+                   'do not use a previous generated avatar as the face reference. Preserve the exact face proportions, '
+                   'natural skin texture and tone, hair, age, clothing, accessories and clinic background. '
+                   'Retain the original hands, wrist positions, finger overlap and occlusion. Keep the hands '
+                   'loosely clasped in the same resting position throughout; no unclasping, pointing or gestures. '
+                   'No extra or fused fingers, changing hand anatomy, reshaped teeth, face beautification or face drift. '
+                   'Keep both hands and the face inside the 9:16 frame. No zoom-out, dolly, lens widening, '
+                   'perspective expansion or newly invented anatomy outside the photograph. '
+                   'Only subtle breathing, spontaneous small facial movements and natural Turkish speech. '
+                   'Identity, hands and lip sync will be checked against the original photograph and native audio.')
     return prompt
 
 
@@ -202,10 +230,14 @@ def remux(native, converted, output, *, max_drift=0.15):
     return output
 
 
-def create(portrait, speech, voice, journal, output, *, duration=4, model=VEO_MODEL, timeout=1800, attempt=None, performance="calm", tail_seconds=0):
+def create(portrait, speech, voice, journal, output, *, duration=4, model=VEO_MODEL, timeout=1800, attempt=None, performance="calm", tail_seconds=0,
+           reference_locked=False, lead_in_seconds=0):
     """Create one inspectable proof; no claim of verified words or perfect lip sync."""
     from automation.voice_changer import convert, extract_audio
-    prompt = speaking_prompt(speech, duration, performance, tail_seconds)
+    prompt = speaking_prompt(speech, duration, performance, tail_seconds,
+                             reference_locked=reference_locked, lead_in_seconds=lead_in_seconds)
+    if reference_locked and attempt is None:
+        raise PipelineError('Reference-locked generation needs an explicit episode-and-role attempt name; reuse it only to resume that take.')
     if not isinstance(voice, str) or not re.fullmatch(r'[A-Za-z0-9_-]+', voice):
         raise PipelineError('Invalid ElevenLabs voice identifier.')
     if (isinstance(timeout, bool) or not isinstance(timeout, (int, float))
@@ -293,6 +325,8 @@ def create(portrait, speech, voice, journal, output, *, duration=4, model=VEO_MO
                     'duration_seconds': actual_duration, 'native_audio_rms_dbfs': level,
                     'performance': performance,
                     'requested_tail_seconds': tail_seconds,
+                    'reference_locked': reference_locked, 'requested_lead_in_seconds': lead_in_seconds,
+                    'episode_take': attempt, 'hands_anatomy_review': 'required',
                     'native_video_sha256': _sha(native), 'converted_audio_sha256': _sha(converted),
                     'output_sha256': _sha(final), 'original_tts_used': False,
                     'generated_speech_text_verified': False, 'face_identity_review': 'required',
@@ -314,16 +348,21 @@ def main(argv=None):
     parser.add_argument('--performance', choices=['calm', 'energetic', 'conversational'], default='calm')
     parser.add_argument('--tail-seconds', type=float, default=0,
                         help='Request live quiet time after the final word; verify the generated timing.')
+    parser.add_argument('--reference-locked', action='store_true',
+                        help='Use the original seated framing and resting hands; requires an episode/role --attempt.')
+    parser.add_argument('--lead-in-seconds', type=float, default=0,
+                        help='Request silent listening before speech; actual timing must be checked.')
     parser.add_argument('--model', default=VEO_MODEL)
     parser.add_argument('--output', type=Path, default=Path('video-output/gemini-avatar'))
     parser.add_argument('--journal', type=Path, default=Path('video-output/journal'))
     parser.add_argument('--timeout', type=float, default=1800)
-    parser.add_argument('--attempt', help='Explicit new paid attempt name after an account/access change; reuse the same name to resume.')
+    parser.add_argument('--attempt', help='Stable episode/role or explicit retry name; reuse the same name only to resume that take.')
     args = parser.parse_args(argv)
     try:
         final = create(args.portrait, args.speech, args.voice, LocalJournal(args.journal), args.output,
                        duration=args.duration, model=args.model, timeout=args.timeout, attempt=args.attempt,
-                       performance=args.performance, tail_seconds=args.tail_seconds)
+                       performance=args.performance, tail_seconds=args.tail_seconds,
+                       reference_locked=args.reference_locked, lead_in_seconds=args.lead_in_seconds)
         print(json.dumps({'status': 'proof_ready', 'file': str(final), 'full_reels_created': False,
                           'lip_sync_review': 'required', 'speech_text_review': 'required'}, ensure_ascii=False))
         return 0

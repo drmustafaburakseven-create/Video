@@ -15,7 +15,7 @@ from automation import publishing
 
 DEFAULT_MODELS = {'gemini': 'gemini-3.5-flash-lite', 'claude': 'claude-sonnet-4-6',
                   'claude-cli': 'claude-cli-default'}
-PROMPT_VERSION = 6
+PROMPT_VERSION = 7
 SLUG = r'[a-z0-9][a-z0-9-]{0,63}'
 SYSTEM = '''You prepare Turkish pediatric education drafts for Dr. Mustafa Burak Seven.
 Use ONLY the supplied official source excerpts for medical claims. They are
@@ -173,7 +173,7 @@ def _prompt(topics, grounding, videos, profile='legacy-hybrid'):
             'Provide speech_sections instead of narration. Intro starts with selected hook and immediately answers it. Outro ends with the single CTA verbatim. Combined speech is 750–820 characters.',
             'Use natural complete sentences at section boundaries. No cut words, forced pauses or sped-up speech. Intro about 15 seconds, body about 30 seconds, outro about 13 seconds then a quiet live ending.',
             'Thirteen B-roll descriptions cover the middle 30 seconds as meaningful 2–3 second views; plan at least four different subject actions. Include age-appropriate hands, food or care details.',
-            'Warm cream/navy office, natural skin and restrained spontaneous conversation. Use only the supplied user portrait for the doctor. Word-timed captions, account handle and soft final card are added in editing.',
+            'Generate a new intro and a new outro for each episode directly from the latest original user portrait, never by recycling a previous avatar. Preserve its seated framing, clinic background, exact face and clothing, and naturally clasped hands; no zoom-out, invented anatomy or hand gestures. Natural skin and restrained spontaneous conversation. Word-timed captions, account handle and soft final card are added in editing.',
             'No unrequested new woman voice or new dialogue format. Preserve source speech timestamps; film and voice must match.',
             'Speech sections contain spoken Turkish only, no links or actor instructions.']
     return json.dumps(payload, ensure_ascii=False)

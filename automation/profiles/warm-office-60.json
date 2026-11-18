@@ -1,6 +1,6 @@
 {
   "name": "warm-office-60",
-  "version": 1,
+  "version": 2,
   "handle": "@Drmustafaburakseven",
   "output": {
     "width": 1080, "height": 1920, "fps": 30, "seconds": 60,
@@ -21,7 +21,11 @@
     "music_fade_seconds": 1.5, "live_motion_required": true},
   "body_chapters": 3,
   "minimum_distinct_motion_sources": 4,
-  "media": {"identity_reference": "private_original_portrait", "no_freeze_frames": true,
+  "media": {"identity_reference": "latest_private_original_portrait",
+    "reference_path": "automation/private/avatar-reference-current.jpg",
+    "fresh_intro_and_outro_per_episode": true, "reuse_previous_avatar_clip": false,
+    "source_framing_locked": true, "resting_hands_preserved": true,
+    "identity_and_hands_visual_review_required": true, "no_freeze_frames": true,
     "no_speech_retiming": true, "medical_visual_review_required": true},
   "production": {"female_voice": "eleven_v3_designed_voice", "body_voice": "eleven_v4_existing_user_clone",
     "avatar": "Gemini_native_performance_then_ElevenLabs_Voice_Changer",

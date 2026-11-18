@@ -6,6 +6,16 @@ kendi sesiniz, giriş/kapanış avatarı, en az dört hareketli ara kaynak, alty
 ve yumuşak kapanış. Her videonun yanında Reels ve Shorts için ayrı başlık,
 açıklama ve hashtag dosyaları bulunur. Otomatik sosyal yayın yapılmaz.
 
+En yeni fotoğraf/kimlik tercihi: her bölümün girişi ve kapanışı son özgün
+fotoğraftan yeniden üretilir; önceki avatar kesitleri kullanılmaz. Fotoğrafın
+kaynak kadrajı, kliniği ve ellerin doğal birleşik konumu korunur; zoom-out ve
+el hareketi istenmez. Özgün fotoğraf özel klasördedir, public Git'e girmez.
+`REELS_STYLE.md` ve `profiles/warm-office-60.json` bu tercihi kaydeder.
+`gemini_avatar --reference-locked --attempt <bolum-tarih-rol>` yeni isteklerin
+özgün fotoğrafı kullanmasını, aynı işin devamında ise mevcut ücretli kaydı
+korumasını sağlar. Çıktının yüz/el anatomisi ve konuşması yine incelenir;
+bu yönergeler yüzde yüz benzerlik veya hatasız parmak garantisi değildir.
+
 ## Şu anda doğrulanan durum
 
 - Üçlü konu/senaryo kuyruğu, iki platform için paylaşım metinleri, aynı günü tekrar
