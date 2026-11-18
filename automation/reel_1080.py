@@ -132,6 +132,9 @@ def render(segments, audio, output, directory, *, last_spoken_word, ass=None, fo
          '-pix_fmt', 'yuv420p',
          '-profile:v', 'high', '-level:v', '4.1', '-tag:v', 'avc1',
          '-color_primaries', 'bt709', '-color_trc', 'bt709', '-colorspace', 'bt709',
+         # Keep the H.264 VUI consistent with the container when a source carries
+         # an sRGB transfer tag that survives the filter graph.
+         '-bsf:v', 'h264_metadata=colour_primaries=1:transfer_characteristics=1:matrix_coefficients=1',
          '-c:a', 'aac', '-b:a', '320k', '-ar', '48000', '-ac', '2',
          '-video_track_timescale', '30000', '-movflags', '+faststart', str(output)],
         directory/'export.log')
