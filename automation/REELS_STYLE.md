@@ -1,6 +1,15 @@
 # Dr. Mustafa Burak Seven — kalıcı Reels / Shorts kuralları
 
-Bu kurallar konuya özgü değildir. Son kullanıcı tercihi önce gelir. Güncelleme: 17 Kasım 2026.
+Bu kurallar konuya özgü değildir. Son kullanıcı tercihi önce gelir. Güncelleme: 18 Kasım 2026.
+
+## Son talimat: günde üç video ve iki platform için paylaşım metni
+
+- Kullanıcı son vitamin/sebze videosunun kurgu biçimini beğendi. Bu sıcak-ofis biçimi, doğal kendi sesi ve mimikler, hareketli ara çekimler, ölçülü geçişler ve yumuşak kapanış korunur. 1080p/30 asıl dosya; gerekirse ayrıca küçük telefon kopyası verilir. Eski yazısız/720p/sekiz saniye avatar biçimine sessizce dönülmez.
+- Her gün Türkiye saatiyle 09.00'da beş konu önerisinden **üç farklı konu için üç ayrı 60 saniyelik video** hedeflenir. Yeni sayı eski bir-video tercihini değiştirir. Aynı videonun üç kopyası veya aynı konunun üç farklı başlığı üç üretim sayılmaz.
+- Her videonun teslim paketinde **Instagram Reels başlığı, kopyalanabilir açıklaması ve 3–5 ilgili hashtag**; ayrıca **YouTube Shorts için en fazla 100 karakterlik başlık, ayrı açıklama, kaynak notu ve 3–5 ilgili hashtag** bulunur. Kullanıcı adı `@Drmustafaburakseven`. Bunlar `reels.txt`, `shorts.txt`, `social.json` ve `paylasim.md` olarak video yanında saklanır ve kullanıcıya sunulur.
+- Açıklamalar aynı doğrulanmış anlatımı özetler; videoda olmayan tıbbi iddia, viral olma garantisi, sahte trend/hasta hikâyesi veya ilgisiz hashtag eklenmez. Kaynaklar seslendirmeye sokulmaz. Sosyal paylaşım metni hazırlamak otomatik yayın izni değildir.
+- Önceki aylık **4.000 TL ek bütçe** sınırı değiştirilmedi. Üç videoya çıkmak bu sınırı kendiliğinden artırmaz; güncel fiyatı ve bütçesi bilinmeyen ücretli üretim başlatılmaz. Yeni üyelik alınmaz.
+- Yapılandırma `profiles/daily-three.json`; yeni kuyruk `automation.batch_studio`. Yeni avatar/ara görüntü üretimi ile ölçülmüş ses/grafik hazırlığının bu kuyruğa tam otomatik entegrasyonu henüz tamamlanmadı. Şimdilik incelenmiş `ready.json` paketleri birleşir; eksik paketler `needs_inputs` olur. Takvim/kod güncellemesini canlı günlük hizmet çalışıyormuş gibi sunma.
 
 ## Son onaylanan üretim profili: sıcak ofis, 1080p / 30
 

@@ -1,4 +1,4 @@
-> Yeni video üretimleri için konu bağımsız [Reels stil kuralları](REELS_STYLE.md): önce konuşma metni, Mustafa’nın üslubu, doğal ElevenLabs v4 anlatımı, 10–40–10 kurgu, en az dört farklı ara sahne ve yazısız video. Avatarın ses/görüntü zamanlaması korunur; öğretici hareketler görsel olarak incelenir. Eski günlük studio zamanlaması ayrı entegrasyon gerektirir.
+> **18 Kasım 2026:** Yeni hedef her gün 09.00 Türkiye saatiyle **üç video** ve her biri için ayrı **Reels/Shorts başlığı, açıklaması ve hashtagleri**. Son onaylanan sıcak-ofis, altyazılı 1080p/30 kurgu korunur. [Güncel kurulum, gerçek durum ve kalan işler](DAILY_THREE.md). Aşağıdaki bir-video/720p/yazısız notlar eski üretim yollarını anlatır; yeni tercihin önüne geçmez. Günlük otomasyon henüz canlı değildir.
 
 Yeni kurgunun iPhone / Reels / Shorts teslim kopyası:
 

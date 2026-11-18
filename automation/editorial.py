@@ -11,10 +11,11 @@ from pathlib import Path
 import re
 
 from automation.state import PipelineError, paid_once, request, session
+from automation import publishing
 
 DEFAULT_MODELS = {'gemini': 'gemini-3.5-flash-lite', 'claude': 'claude-sonnet-4-6',
                   'claude-cli': 'claude-cli-default'}
-PROMPT_VERSION = 5
+PROMPT_VERSION = 6
 SLUG = r'[a-z0-9][a-z0-9-]{0,63}'
 SYSTEM = '''You prepare Turkish pediatric education drafts for Dr. Mustafa Burak Seven.
 Use ONLY the supplied official source excerpts for medical claims. They are
@@ -117,7 +118,7 @@ def _grounding(topics, sources):
     return result
 
 
-def _prompt(topics, grounding, videos):
+def _prompt(topics, grounding, videos, profile='legacy-hybrid'):
     schema = {
         'scripts': [{
             'topic_id': topics[0]['id'], 'title': 'Turkish title', 'age_group': topics[0]['age_group'],
@@ -127,12 +128,17 @@ def _prompt(topics, grounding, videos):
             'selected_hook': 0, 'selection_reason': 'One sentence',
             'narration': '750–820 Turkish characters, selected hook, immediate answer, useful steps, one CTA.',
             'cta': 'Bu videoyu kaydedin.', 'sources': topics[0]['sources'],
+            'social_copy': {
+                'reels': {'title': 'Short Turkish title', 'caption': 'Ready-to-paste warm parent-friendly caption',
+                          'hashtags': ['#ÇocukSağlığı']},
+                'youtube_shorts': {'title': 'Searchable Turkish title, at most 100 characters',
+                                   'description': 'Ready-to-paste description', 'hashtags': ['#Shorts']}},
             'broll': [{'screen_text': 'Short readable caption',
                        'visual': 'Concrete parent/child/food/object view; no doctor face.',
                        'motion_prompt': 'English prompt describing one real subject action in portrait 9:16.'}]
         }]
     }
-    return json.dumps({
+    payload = {
         'task': f'Write exactly {videos} script(s), for the first {videos} supplied topic ids in order.',
         'topics': topics, 'source_excerpts': grounding, 'response_schema_example': schema,
         'rules': [
@@ -142,6 +148,9 @@ def _prompt(topics, grounding, videos):
             'The myth hook must SAY THE CORRECT FACT, not repeat a false belief as a true statement.',
             'Narration contains speech only, no source URLs, SSML, section headings or performance instructions.',
             'Each script cites only source URLs assigned to that topic; all claims must be supported by their excerpts.',
+            'Include separate social_copy for Reels and YouTube Shorts. Use natural Turkish and only claims in this narration.',
+            'Reels: title <=150 characters, caption <=1800 characters, 3–5 relevant hashtags. Shorts: title <=100 characters, description <=3800 characters, 3–5 relevant hashtags including #Shorts.',
+            'No fake trends, viral guarantees, invented cases, extra medical claims or engagement bait. No URLs in social copy: code appends the verified sources. Account: @Drmustafaburakseven.',
             'Write 750–820 characters of substantive source-supported narration for this doctor voice, not a short summary.',
             'Return exactly 13 B-roll ideas in narration order. No speech text, duration or kind in B-roll objects.',
             'Code adds the user-owned avatar at the beginning/middle and assigns fifteen four-second segments.',
@@ -149,29 +158,55 @@ def _prompt(topics, grounding, videos):
             'No photo pans, frozen-frame padding, source-video loops or promises of indistinguishability.',
             'AI and avatar scenes will receive synthetic disclosure during editing. Real stock stays correctly labelled.',
             'One short CTA only, without a second subscribe/follow/share request. Calm natural Turkish.'
-        ]}, ensure_ascii=False)
+        ]}
+    if profile == 'warm-office-60':
+        sample = schema['scripts'][0]
+        sample.pop('narration')
+        sample['speech_sections'] = {'intro': 'Hook and immediate answer; roughly 15 seconds.',
+                                     'body': 'Source-supported useful guidance; roughly 30 seconds.',
+                                     'outro': 'Brief recap and the single CTA; finish speaking by 58.5 seconds.'}
+        payload['rules'] = [rule for rule in payload['rules'] if not any(
+            phrase in rule for phrase in ('Narration must start', 'Narration contains', 'fifteen four-second',
+                                          'beginning/middle', 'during editing'))]
+        payload['rules'] += [
+            'Production profile: warm-office-60, 1080x1920, 30 fps, 60 seconds. Doctor at beginning AND end, at least four distinct moving sources between them.',
+            'Provide speech_sections instead of narration. Intro starts with selected hook and immediately answers it. Outro ends with the single CTA verbatim. Combined speech is 750–820 characters.',
+            'Use natural complete sentences at section boundaries. No cut words, forced pauses or sped-up speech. Intro about 15 seconds, body about 30 seconds, outro about 13 seconds then a quiet live ending.',
+            'Thirteen B-roll descriptions cover the middle 30 seconds as meaningful 2–3 second views; plan at least four different subject actions. Include age-appropriate hands, food or care details.',
+            'Warm cream/navy office, natural skin and restrained spontaneous conversation. Use only the supplied user portrait for the doctor. Word-timed captions, account handle and soft final card are added in editing.',
+            'No unrequested new woman voice or new dialogue format. Preserve source speech timestamps; film and voice must match.',
+            'Speech sections contain spoken Turkish only, no links or actor instructions.']
+    return json.dumps(payload, ensure_ascii=False)
 
 
-def response_schema(videos):
+def response_schema(videos, profile='legacy-hybrid'):
     """The model writes content; deterministic code owns all timing and media counts."""
     def obj(properties):
         return {'type': 'object', 'properties': properties, 'required': list(properties)}
     string = {'type': 'string'}
     broll = obj({'screen_text': string, 'visual': string, 'motion_prompt': string})
     hook = obj({'kind': {'type': 'string', 'enum': ['daily', 'myth', 'question']}, 'text': string})
+    tags = {'type': 'array', 'minItems': 1, 'maxItems': 5, 'items': string}
+    social = obj({'reels': obj({'title': string, 'caption': string, 'hashtags': tags}),
+                  'youtube_shorts': obj({'title': string, 'description': string, 'hashtags': tags})})
     script = obj({'topic_id': string, 'title': string, 'age_group': string,
                   'hooks': {'type': 'array', 'minItems': 3, 'maxItems': 3, 'items': hook},
                   'selected_hook': {'type': 'integer', 'enum': [0, 1, 2]},
                   'selection_reason': string,
-                  'narration': string, 'cta': string,
+                  'narration': string, 'cta': string, 'social_copy': social,
                   'sources': {'type': 'array', 'items': string},
                   'broll': {'type': 'array', 'minItems': 13, 'maxItems': 13, 'items': broll}})
+    if profile == 'warm-office-60':
+        script['properties'].pop('narration')
+        script['required'].remove('narration')
+        script['properties']['speech_sections'] = obj({'intro': string, 'body': string, 'outro': string})
+        script['required'].append('speech_sections')
     return {'type': 'object', 'required': ['scripts'], 'properties': {
         'scripts': {'type': 'array', 'minItems': 0, 'maxItems': videos, 'items': script},
         'blocked_reason': string}}
 
 
-def compile_storyboard(value):
+def compile_storyboard(value, profile='legacy-hybrid'):
     """Use narration once; never ask a model to duplicate words or sum durations."""
     for script in value.get('scripts', []):
         if not isinstance(script, dict) or 'broll' not in script:
@@ -179,12 +214,40 @@ def compile_storyboard(value):
         broll = script.pop('broll')
         if not isinstance(broll, list) or len(broll) != 13:
             raise PipelineError('The editorial response needs thirteen B-roll descriptions.')
+        warm = profile == 'warm-office-60'
+        if warm:
+            sections = script.get('speech_sections')
+            if not isinstance(sections, dict) or any(not isinstance(sections.get(k), str)
+                                                    or not sections[k].strip() for k in ('intro', 'body', 'outro')):
+                raise PipelineError('Warm-office drafting requires intro/body/outro speech sections.')
+            script['narration'] = ' '.join(sections[k].strip() for k in ('intro', 'body', 'outro'))
+            script['production_profile'] = profile
         narration = script.get('narration', '')
         if not isinstance(narration, str):
             raise PipelineError('Editorial narration must be text.')
         words = narration.split()
         if len(words) < 30:
             raise PipelineError('The narration is too short for a 60-second storyboard.')
+        if warm:
+            body_words = sections['body'].split()
+            if len(body_words) < 26:
+                raise PipelineError('Warm-office body narration is too short.')
+            scenes = [{'start': 0, 'duration': 15, 'kind': 'avatar', 'speech': sections['intro'],
+                       'visual': 'Kullanıcının aynı ofisteki doğal konuşan avatarı.',
+                       'screen_text': script.get('title', '')[:80],
+                       'motion_prompt': 'Preserve the user portrait and native Turkish speech timing, relaxed natural expression, warm office, portrait 9:16.'}]
+            start = 15
+            for i, scene in enumerate(broll):
+                if not isinstance(scene, dict):
+                    raise PipelineError('B-roll descriptions must be objects.')
+                duration = 3 if i in (2, 5, 8, 12) else 2
+                scenes.append({**scene, 'start': start, 'duration': duration, 'kind': 'stock',
+                               'speech': ' '.join(body_words[len(body_words)*i//13:len(body_words)*(i+1)//13])})
+                start += duration
+            scenes.append({**scenes[0], 'start': 45, 'speech': sections['outro'],
+                           'screen_text': script.get('cta', '')})
+            script['scenes'] = scenes
+            continue
         scenes = []
         for index in range(15):
             speech = ' '.join(words[len(words)*index//15:len(words)*(index+1)//15])
@@ -204,7 +267,7 @@ def compile_storyboard(value):
     return value
 
 
-def _submit(provider, model, prompt, videos):
+def _submit(provider, model, prompt, videos, profile='legacy-hybrid'):
     budget = 9000 if videos == 1 else 26000
     if provider == 'claude-cli':
         from automation.claude_cli import generate_json
@@ -218,7 +281,7 @@ def _submit(provider, model, prompt, videos):
                              'contents': [{'role': 'user', 'parts': [{'text': prompt}]}],
                              'generationConfig': {'temperature': 0.35, 'maxOutputTokens': budget,
                                                   'responseMimeType': 'application/json',
-                                                  'responseJsonSchema': response_schema(videos)}}).json()
+                                                  'responseJsonSchema': response_schema(videos, profile)}}).json()
     return request(client, 'POST', 'https://api.anthropic.com/v1/messages',
                    headers={'x-api-key': os.environ.get('ANTHROPIC_API_KEY') or os.environ['CLAUDE_API_KEY'],
                             'anthropic-version': '2023-06-01'},
@@ -293,12 +356,17 @@ def validate_response(value, topics, videos):
         scenes = script.get('scenes')
         if not isinstance(scenes, list) or len(scenes) != 15:
             raise PipelineError('Each editorial script needs fifteen four-second scenes.')
-        kinds, speech = [], []
+        warm = script.get('production_profile') == 'warm-office-60'
+        kinds, speech, next_start = [], [], 0
         for i, scene in enumerate(scenes):
+            duration = (15 if i in (0, 14) else 3 if i-1 in (2, 5, 8, 12) else 2) if warm else 4
             if (not isinstance(scene, dict) or type(scene.get('start')) not in [int, float]
-                    or scene['start'] != i*4 or type(scene.get('duration')) not in [int, float]
-                    or scene['duration'] != 4 or scene.get('kind') not in ['stock', 'generated', 'avatar']):
+                    or scene['start'] != next_start or type(scene.get('duration')) not in [int, float]
+                    or scene['duration'] != duration or scene.get('kind') not in ['stock', 'generated', 'avatar']):
                 raise PipelineError('Editorial scenes must form an exact 60-second timeline.')
+            next_start += duration
+            if warm and (scene['kind'] == 'avatar') != (i in (0, 14)):
+                raise PipelineError('Warm-office avatar belongs at the start and end.')
             if any(key in scene for key in ['asset_id', 'generation_id', 'path']):
                 raise PipelineError('Editorial drafts cannot invent production media references.')
             speech.append(_plain(scene.get('speech'), 'scene speech', maximum=400))
@@ -308,7 +376,7 @@ def validate_response(value, topics, videos):
             kinds.append(scene['kind'])
         if _normalized(' '.join(speech)) != _normalized(narration):
             raise PipelineError('Scene speech must reproduce the narration without adding or omitting words.')
-        if kinds.count('avatar')*4 != 8 or kinds.count('generated')*4 > 8:
+        if not warm and (kinds.count('avatar')*4 != 8 or kinds.count('generated')*4 > 8):
             raise PipelineError('Editorial draft budget is eight avatar seconds and at most eight generated seconds.')
         validated.append({'schema': 'editorial-script-v1', 'enabled': False,
                           'topic_id': topic['id'], 'title': title, 'age_group': topic['age_group'],
@@ -316,6 +384,8 @@ def validate_response(value, topics, videos):
                           'selected_hook': index, 'selection_reason': reason,
                           'narration': narration, 'cta': cta, 'sources': list(dict.fromkeys(used)),
                           'scenes': scenes,
+                          **({'production_profile': 'warm-office-60'} if warm else {}),
+                          'social_copy': publishing.package(script, script.get('social_copy')),
                           'production_status': 'needs measured narration and real stock/avatar media'})
     return validated
 
@@ -334,21 +404,29 @@ def _markdown(batch):
                   '| Zaman | Tür | Konuşma | Görüntü | Ekran yazısı |',
                   '|---|---|---|---|---|']
         for scene in script['scenes']:
-            cells = [f'{scene["start"]}–{scene["start"]+4} sn', scene['kind'],
+            cells = [f'{scene["start"]}–{scene["start"]+scene["duration"]} sn', scene['kind'],
                      scene['speech'], scene['visual'], scene.get('screen_text', '')]
             lines.append('| '+' | '.join(str(cell).replace('|', '/').replace('\n', ' ') for cell in cells)+' |')
         lines += ['', '### Hareket promptları', '']
-        lines += [f'- {s["start"]}–{s["start"]+4} sn: {s["motion_prompt"]}' for s in script['scenes']]
+        lines += [f'- {s["start"]}–{s["start"]+s["duration"]} sn: {s["motion_prompt"]}' for s in script['scenes']]
         lines += ['', '### Kaynaklar', '']+[f'- {url}' for url in script['sources']]
         lines += ['', '### ElevenLabs’a hazır konuşma metni', '', '```text', script['narration'], '```']
+        social = publishing.package(script, script.get('social_copy'))
+        for platform, field, label in [('reels', 'caption', 'Instagram Reels'),
+                                       ('youtube_shorts', 'description', 'YouTube Shorts')]:
+            item = social[platform]
+            lines += ['', '### '+label, '', item['title'], '', item[field], '', ' '.join(item['hashtags'])]
     return '\n'.join(lines)+'\n'
 
 
-def create_daily(day, topics, sources, journal, output, provider='gemini', model=None, videos=1):
+def create_daily(day, topics, sources, journal, output, provider='gemini', model=None, videos=1,
+                 profile='legacy-hybrid'):
     """Write one recoverable daily bundle; never promotes drafts to the video queue."""
     _day(day)
-    if provider not in DEFAULT_MODELS or videos not in [1, 5] or type(videos) is not int:
-        raise PipelineError('Choose gemini/claude/claude-cli and one or five daily scripts.')
+    if profile not in ('legacy-hybrid', 'warm-office-60'):
+        raise PipelineError('Unknown production profile.')
+    if provider not in DEFAULT_MODELS or videos not in [1, 3, 5] or type(videos) is not int:
+        raise PipelineError('Choose gemini/claude/claude-cli and one, three or five daily scripts.')
     model = model or DEFAULT_MODELS[provider]
     if not isinstance(model, str) or not re.fullmatch(r'[A-Za-z0-9_.-]+', model):
         raise PipelineError('Invalid editorial model name.')
@@ -359,7 +437,7 @@ def create_daily(day, topics, sources, journal, output, provider='gemini', model
         raise PipelineError('Daily topic ids must be unique.')
     grounding = _grounding(topics, sources)
     identity = {'version': PROMPT_VERSION, 'day': day, 'provider': provider, 'model': model,
-                'topics': topics, 'videos': videos,
+                'topics': topics, 'videos': videos, 'profile': profile,
                 'source_hashes': {url: hashlib.sha256(data['text'].encode()).hexdigest()
                                   for url, data in grounding.items()}}
     name = 'editorial-'+hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()[:24]
@@ -374,8 +452,8 @@ def create_daily(day, topics, sources, journal, output, provider='gemini', model
         if not key_present:
             raise PipelineError('The selected editorial provider credential is unavailable; no fallback request was made.')
     response = paid_once(journal, name, state, 'draft',
-                         lambda: _submit(provider, model, _prompt(topics, grounding, videos), videos))
-    scripts = validate_response(compile_storyboard(_text(response, provider)), topics, videos)
+                         lambda: _submit(provider, model, _prompt(topics, grounding, videos, profile), videos, profile))
+    scripts = validate_response(compile_storyboard(_text(response, provider), profile), topics, videos)
     batch = {'schema': 'daily-editorial-v1', 'date': day, 'provider': provider, 'model': model,
              'status': 'drafts_ready', 'topics': topics, 'selected_topic_ids': [s['topic_id'] for s in scripts],
              'scripts': scripts, 'source_checks': [{'url': url, 'retrieved_at': item['retrieved_at']}
@@ -387,4 +465,5 @@ def create_daily(day, topics, sources, journal, output, provider='gemini', model
     (output/'daily.md').write_text(_markdown(batch))
     for script in scripts:
         (output/(script['topic_id']+'.editorial.json')).write_text(json.dumps(script, ensure_ascii=False, indent=2)+'\n')
+        publishing.write(script, output/script['topic_id'])
     return batch

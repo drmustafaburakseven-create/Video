@@ -138,6 +138,8 @@ def produce(plan_path, portrait, provider, output, journal=None):
         journal = journal if journal is not None else _journal(output)
         name = pipeline.job_name(plan, model, voice, False)
         state = journal.load(name)
+        from automation.publishing import write as write_social_copy
+        write_social_copy(plan, output/name)
         final = output/name/'video.mp4'
         if state.get('complete') and final.is_file():
             if hashlib.sha256(final.read_bytes()).hexdigest() != state.get('video_sha256'):

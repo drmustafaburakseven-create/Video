@@ -1,5 +1,11 @@
 # Günlük Reels ve Shorts planı
 
+**18 Kasım güncellemesi:** Kullanıcı hedefi günde **üç** videoya çıkardı; her
+videoya Reels ve Shorts için ayrı başlık/açıklama/hashtag paketi eklendi.
+[Yeni plan ve doğrulanan engeller](DAILY_THREE.md) aşağıdaki tarihî bir-video
+ve sekiz-saniye-avatar hesabının önüne geçer. Aylık ek bütçe hâlâ 4.000 TL;
+eski maliyet tablosu yeni 3×60 saniyelik avatar düzeninin fiyatı değildir.
+
 **17 Kasım güncellemesi:** Gemini + ElevenLabs Voice Changer çalıştı.
 Kullanıcının fotoğrafı ve kendi sesiyle dört saniyelik avatar üretildi ve
 60 saniyelik hareketli örneğin başına eklendi. [Çalışan örnek ve doğrulamalar](GEMINI_VOICE_GUIDE.md).

@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "timezone": "Europe/Istanbul",
+  "start_time": "09:00",
+  "cron_utc": "0 6 * * *",
+  "topic_suggestions": 5,
+  "videos_per_day": 3,
+  "production_profile": "warm-office-60",
+  "posting_copy_required": ["reels", "youtube_shorts"],
+  "monthly_extra_budget_try": 4000,
+  "automatic_social_publication": false,
+  "automatic_paid_retry": false
+}

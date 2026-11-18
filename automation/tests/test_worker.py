@@ -54,7 +54,8 @@ class ReceiptTests(unittest.TestCase):
             runner.assert_called_once()
             self.assertNotIn('PRIVATE-EXAMPLE', (root/'worker-state.json').read_text())
             command = runner.call_args.args[0]
-            self.assertIn('automation.studio', command)
+            self.assertIn('automation.batch_studio', command)
+            self.assertEqual(command[command.index('--videos')+1], '3')
             self.assertIn(DAY, command)
 
     def test_failed_or_timed_out_child_is_not_automatically_retried(self):

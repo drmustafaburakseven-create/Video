@@ -11,11 +11,12 @@ import time
 from zoneinfo import ZoneInfo
 
 from automation.daily import RunLock
+from automation.batch_studio import settings as batch_settings
 from automation.editorial import DEFAULT_MODELS, _day
 from automation.state import PipelineError
 
 TURKEY = ZoneInfo('Europe/Istanbul')
-STUDIO_STATUSES = {'completed', 'editorial_ready', 'needs_inputs', 'blocked'}
+STUDIO_STATUSES = {'completed', 'editorial_ready', 'needs_inputs', 'blocked', 'partially_completed'}
 
 
 def local_now(now=None):
@@ -93,15 +94,17 @@ def schedule_status(now, state, *, check_only=False):
             'today': effective_date(now), 'due_today': due_date(now, state['attempts']) is not None,
             'next_due': next_due(now, state['attempts']).isoformat(),
             'daily_attempt_limit': 1, 'check_only': check_only,
+            'videos_per_batch': batch_settings()['videos_per_day'],
+            'production_profile': batch_settings()['production_profile'],
             'message': 'Zamanlayıcı yalnız bu süreç ve makine çalışırken işler. Bu komut sunucu kurmaz veya sosyal medyada yayın yapmaz.'}
 
 
-def studio_command(day, output, provider, avatar_provider, portrait=None, model=None, editorial_only=False):
-    command = [sys.executable, '-m', 'automation.studio', '--date', day,
-               '--output', str(Path(output).resolve()), '--provider', provider,
-               '--avatar-provider', avatar_provider]
-    if portrait:
-        command += ['--portrait', str(portrait)]
+def studio_command(day, output, provider, avatar_provider, portrait=None, model=None, editorial_only=False,
+                   videos=3, ready_root=None):
+    command = [sys.executable, '-m', 'automation.batch_studio', '--date', day,
+               '--output', str(Path(output).resolve()), '--provider', provider, '--videos', str(videos)]
+    if ready_root:
+        command += ['--ready-root', str(ready_root)]
     if model:
         command += ['--model', model]
     if editorial_only:
@@ -110,32 +113,38 @@ def studio_command(day, output, provider, avatar_provider, portrait=None, model=
 
 
 def attempt_once(day, output, state, *, provider='gemini', avatar_provider='fal',
-                 portrait=None, model=None, editorial_only=False, now=None, runner=None):
+                 portrait=None, model=None, editorial_only=False, now=None, runner=None,
+                 videos=3, ready_root=None):
     """Record intent before launch; a crash, timeout or failure still consumes today."""
     _day(day)
     if day in state['attempts']:
         return state['attempts'][day]
     started = local_now(now).isoformat()
-    attempt = {'status': 'started', 'started_at': started, 'automatic_retry': False}
+    attempt = {'status': 'started', 'started_at': started, 'automatic_retry': False,
+               'requested_videos': videos, 'profile': 'warm-office-60'}
     state['attempts'][day] = attempt
     save_state(output, state)  # If this fails, the child and all paid work remain unstarted.
     runner = runner or subprocess.run
-    command = studio_command(day, output, provider, avatar_provider, portrait, model, editorial_only)
+    command = studio_command(day, output, provider, avatar_provider, portrait, model, editorial_only,
+                             videos=videos, ready_root=ready_root)
     try:
         child = runner(command, capture_output=True, text=True, timeout=3*60*60,
                        cwd=Path(__file__).resolve().parent.parent)
         code = child.returncode
         studio_status = None
+        completed_videos = 0
         try:
             result = json.loads((Path(output)/'status.json').read_text())
             if result.get('date') == day and result.get('status') in STUDIO_STATUSES:
                 studio_status = result['status']
+                completed_videos = result.get('completed_videos', 0)
         except (OSError, ValueError, AttributeError):
             pass
         success = code == 0 and studio_status in {'completed', 'editorial_ready'}
         attempt.update(status='finished' if success else 'blocked', exit_code=code,
                        studio_status=studio_status,
-                       video_created=success and studio_status == 'completed')
+                       completed_videos=completed_videos,
+                       video_created=completed_videos > 0)
     except subprocess.TimeoutExpired:
         attempt.update(status='timed_out', video_created=False)
     except OSError:
@@ -153,6 +162,8 @@ def main(argv=None):
     parser.add_argument('--avatar-provider', choices=['fal', 'elevenlabs'], default=os.environ.get('VIDEO_AVATAR_PROVIDER', 'fal'))
     parser.add_argument('--portrait', type=Path, default=os.environ.get('AVATAR_PORTRAIT_PATH'))
     parser.add_argument('--model', default=os.environ.get('VIDEO_EDITORIAL_MODEL'))
+    parser.add_argument('--videos', type=int, choices=[1, 3], default=int(os.environ.get('VIDEO_DAILY_COUNT', '3')))
+    parser.add_argument('--ready-root', type=Path, default=os.environ.get('VIDEO_READY_ROOT'))
     parser.add_argument('--editorial-only', action='store_true', default=os.environ.get('VIDEO_EDITORIAL_ONLY', '').lower() == 'true')
     parser.add_argument('--check-only', action='store_true', help='Inspect schedule only; no source, AI, speech or video calls.')
     parser.add_argument('--once', action='store_true', help='Run today once if due, then exit; may use provider credits.')
@@ -174,7 +185,8 @@ def main(argv=None):
                 if day:
                     result = attempt_once(day, args.output, state, provider=args.provider,
                                           avatar_provider=args.avatar_provider, portrait=args.portrait,
-                                          model=args.model, editorial_only=args.editorial_only, now=now)
+                                          model=args.model, editorial_only=args.editorial_only, now=now,
+                                          videos=args.videos, ready_root=args.ready_root)
                     print(json.dumps({'date': day, **result,
                                       'next_due': next_due(local_now(), state['attempts']).isoformat()}, ensure_ascii=False), flush=True)
                 if args.once:

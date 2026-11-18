@@ -1,11 +1,18 @@
 # GitHub dışında günlük çalıştırma
 
+**18 Kasım 2026:** Worker artık `automation.batch_studio --videos 3` çağırır.
+Her konu için Reels/Shorts metinleri çıkar; incelenmiş `ready.json` paketleri varsa
+son onaylı 1080p sıcak-ofis videolarını birleştirir. [Güncel üçlü akış ve sınırlar](DAILY_THREE.md).
+Yeni avatar/ara görüntü/ses paketlerinin tam otomatik hazırlığı henüz bağlı değildir.
+Aşağıdaki Fal/tek-video üretim komutu eski yolu açıkça çağıran alternatif içindir;
+yeni worker bu yola otomatik dönmez.
+
 Bu seçenek, sürekli açık bir bilgisayar veya sunucuda **her gün Türkiye saatiyle
 09.00** için hazırlanmıştır. Dosyaların depoya eklenmesi sunucu kurmaz ve günlük
 üretimin başladığı anlamına gelmez. Uyuyan veya kapanan bulut ortamında çalışmaz.
 
-Tek çalışma beş konu ve bir senaryo hazırlar; gerçek stok, portre ve sağlayıcı
-erişimi tamamlanmışsa video taslağını üretir. Sonuç otomatik paylaşılmaz.
+Tek çalışma beş konu, üç senaryo ve paylaşım metinlerini hazırlar; incelenmiş
+medya paketleri hazırsa üç video dosyasını üretir. Sonuç otomatik paylaşılmaz.
 
 ## Kurulum
 
@@ -19,8 +26,8 @@ docker compose -f automation/compose.yml build
 
 Gerçek API anahtarlarını yalnız `automation/.env` dosyasına girin. Bu dosya Git ve
 Docker image dışında tutulur. Gemini/Claude web üyeliği API erişimi yerine geçmez.
-Varsayılan metin sağlayıcısı Gemini, avatar sağlayıcısı fal’dır. Fal kullanımı ayrı
-hesap/ödeme erişimi gerektirir. Claude API isteğe bağlıdır; Claude Code bu image’a
+Varsayılan metin sağlayıcısı Gemini'dir. Yeni kuyruk hazırlanmış Gemini + ElevenLabs
+avatar kayıtlarını kullanır; Fal çağırmaz. Claude API isteğe bağlıdır; Claude Code bu image’a
 kurulu değildir. Yalnız içerik taslağı için `VIDEO_EDITORIAL_ONLY=true` kullanılır.
 
 Kendi net JPEG portrenizi `automation/private/portrait.jpg` olarak koyun.

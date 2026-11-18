@@ -1,4 +1,4 @@
-"""Prepare five daily pediatric topics and one grounded script, without publishing."""
+"""Prepare five topics and a frozen number of scripts with platform copy."""
 import argparse
 from datetime import datetime, timezone
 import fcntl
@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from automation import editorial
+from automation import editorial, publishing
 from automation.sources import fetch_sources
 from automation.state import GitHubJournal, LocalJournal, PipelineError
 
@@ -73,12 +73,18 @@ def _record_success(journal, day, batch):
 
 def _saved_batch(state, day):
     batch = state.get('batch')
+    videos = state.get('videos')
+    if type(videos) is not int or videos not in (1, 3, 5):
+        raise PipelineError('Kaydedilmiş günlük video sayısı geçersiz.')
     if (not isinstance(batch, dict) or batch.get('schema') != 'daily-editorial-v1'
             or batch.get('date') != day or batch.get('topics') != state.get('topics')
             or batch.get('provider') != state.get('provider') or batch.get('model') != state.get('model')
-            or batch.get('selected_topic_ids') != [state['topics'][0]['id']]):
+            or batch.get('selected_topic_ids') != [topic['id'] for topic in state['topics'][:videos]]):
         raise PipelineError('Kaydedilmiş günlük içerik eşleşmiyor; otomatik yeniden satın alma yapılmadı.')
-    editorial.validate_response({'scripts': batch.get('scripts')}, state['topics'], 1)
+    editorial.validate_response({'scripts': batch.get('scripts')}, state['topics'], videos)
+    if state.get('profile') == 'warm-office-60' and any(
+            s.get('production_profile') != 'warm-office-60' for s in batch['scripts']):
+        raise PipelineError('Kaydedilmiş senaryo sıcak-ofis profiliyle eşleşmiyor.')
     return batch
 
 
@@ -90,6 +96,7 @@ def _write_batch(batch, output):
     for script in batch['scripts']:
         (output/(script['topic_id']+'.editorial.json')).write_text(
             json.dumps(script, ensure_ascii=False, indent=2)+'\n')
+        publishing.write(script, output/script['topic_id'])
 
 
 def _preview(day, topics, directory):
@@ -106,13 +113,17 @@ def _preview(day, topics, directory):
 
 
 def run_daily(day, output, provider='gemini', model=None, *, offline_topics=False,
-              journal=None, catalog_path=ROOT/'editorial_catalog.json'):
+              journal=None, catalog_path=ROOT/'editorial_catalog.json', videos=1, profile='legacy-hybrid'):
     """Freeze the daily choice and evidence, then draft one script or restore it.
 
 The caller must serialize remote GitHub runners with workflow concurrency;
 the file lock below protects local callers sharing this output directory.
 """
     editorial._day(day)
+    if type(videos) is not int or videos not in (1, 3, 5):
+        raise PipelineError('Günlük video sayısı 1, 3 veya 5 olmalı.')
+    if profile not in ('legacy-hybrid', 'warm-office-60'):
+        raise PipelineError('Günlük üretim profili geçersiz.')
     if provider not in editorial.DEFAULT_MODELS:
         raise PipelineError('Geçersiz içerik sağlayıcısı.')
     output = Path(output)
@@ -121,6 +132,11 @@ the file lock below protects local callers sharing this output directory.
         journal = journal or LocalJournal(output/'journal')
         name = 'daily-'+day
         state = journal.load(name)
+        if state and state.get('videos') != videos and not offline_topics:
+            raise PipelineError('Bu gün farklı video sayısıyla zaten kaydedilmiş; ücretli kayıtlar korunuyor. '
+                                'Yeni sayı bir sonraki yeni günde uygulanır.')
+        if state and state.get('profile', 'legacy-hybrid') != profile and not offline_topics:
+            raise PipelineError('Bugünün kayıtlı kurgu profili farklı; eski ücretli kayıt korunuyor.')
         directory = output/day
         if offline_topics:
             if state.get('topics'):
@@ -143,30 +159,33 @@ the file lock below protects local callers sharing this output directory.
                 catalog = json.loads(Path(catalog_path).read_text())
                 topics = editorial.propose_topics(day, catalog, _history(journal))
                 state.update(version=1, date=day, topics=topics, provider=provider,
-                             model=model or editorial.DEFAULT_MODELS[provider], videos=1,
+                             model=model or editorial.DEFAULT_MODELS[provider], videos=videos, profile=profile,
                              created_at=datetime.now(timezone.utc).isoformat())
                 journal.save(name, state)  # Freeze the choice before any paid request.
             if (state.get('date') != day or state.get('provider') not in editorial.DEFAULT_MODELS
                     or not isinstance(state.get('topics'), list) or len(state['topics']) != 5
-                    or state.get('videos') != 1):
+                    or state.get('videos') != videos):
                 raise PipelineError('Günlük hazırlık kaydı geçersiz; yeni üretim başlatılmadı.')
             if 'sources' not in state:
                 urls = {url for topic in state['topics'] for url in topic['sources']}
                 state['sources'] = fetch_sources(urls, output/'research')
                 journal.save(name, state)  # Keep receipt identity stable if the live pages change.
+            profile_args = {'profile': profile} if profile != 'legacy-hybrid' else {}
             batch = editorial.create_daily(day, state['topics'], state['sources'], journal, directory,
-                                           provider=state['provider'], model=state['model'], videos=1)
+                                           provider=state['provider'], model=state['model'], videos=videos, **profile_args)
             # Do not mark a failed or partially validated model response complete.
             state['batch'] = batch
             _saved_batch(state, day)
             state['complete'] = True
             journal.save(name, state)
             _record_success(journal, day, batch)
+            _write_batch(batch, directory)
             reused = False
-        return {'status': 'editorial_ready', 'date': day, 'topics': 5, 'scripts': 1,
+        return {'status': 'editorial_ready', 'date': day, 'topics': 5, 'scripts': videos,
                 'directory': str(directory), 'provider': batch['provider'], 'model': batch['model'],
                 'reused': reused, 'video_not_created': True,
-                'message': 'Beş konu ve bir video senaryosu hazır. Ses ölçümü, gerçek görüntüler ve avatar tamamlanmadan bitmiş video oluşmaz.'}
+                'message': f'Beş konu, {videos} senaryo ve her biri için Reels/Shorts metinleri hazır. '
+                           'Ses ölçümü ve görüntüler tamamlanmadan bitmiş video oluşmaz.'}
 
 
 def _journal(output, offline=False):
@@ -187,12 +206,14 @@ def main(argv=None):
                         help='Used when starting a new day; saved days preserve their original provider.')
     parser.add_argument('--model', help='Optional model for a new day; saved days preserve their original model.')
     parser.add_argument('--offline-topics', action='store_true', help='Five curated suggestions only, without network or paid calls.')
+    parser.add_argument('--videos', type=int, choices=[1, 3, 5], default=3)
+    parser.add_argument('--profile', choices=['legacy-hybrid', 'warm-office-60'], default='warm-office-60')
     args = parser.parse_args(argv)
     args.output.mkdir(parents=True, exist_ok=True)
     try:
         journal = _journal(args.output, offline=args.offline_topics)
         summary = run_daily(args.date, args.output, args.provider, args.model,
-                            offline_topics=args.offline_topics, journal=journal)
+                            offline_topics=args.offline_topics, journal=journal, videos=args.videos, profile=args.profile)
         code = 0
     except Exception as error:
         message = str(error) if isinstance(error, PipelineError) else f'Hazırlık durdu ({type(error).__name__}); işlem kaydı korundu.'

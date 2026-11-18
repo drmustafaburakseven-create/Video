@@ -6,7 +6,7 @@ import os
 import re
 from pathlib import Path
 
-from automation import assembly, daily, editorial, hybrid, produce
+from automation import assembly, daily, editorial, hybrid, produce, publishing
 from automation.state import PipelineError
 
 ROOT = Path(__file__).resolve().parent
@@ -122,6 +122,7 @@ def run_studio(day, output, portrait=None, avatar_provider='fal', *, editorial_o
                                        'ses, avatar ve video üretimi başlatılmadı.'}, output)
 
         final = produce.produce(draft, portrait, avatar_provider, output, journal=journal)
+        publishing.write(script, Path(final).parent)
         return _status({**result, 'status': 'completed', 'video': str(final),
                         'video_not_created': False,
                         'message': '60 saniyelik video taslağı hazır. Yayın öncesi tıbbi içerik, '

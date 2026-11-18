@@ -329,6 +329,8 @@ def main(argv=None):
                            'message': 'Narration and exact avatar speech slices exported; no video generation.'}
                 break
             state = journal.load(name)
+            from automation.publishing import write as write_social_copy
+            write_social_copy(plan, args.output/name)
             if state.get('complete'):
                 continue
             if not all(shutil.which(cmd) for cmd in ['ffmpeg', 'ffprobe']):

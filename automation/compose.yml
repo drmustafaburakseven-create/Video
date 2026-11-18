@@ -14,6 +14,8 @@ services:
     environment:
       TZ: Europe/Istanbul
       VIDEO_OUTPUT_ROOT: /data
+      VIDEO_DAILY_COUNT: '3'
+      VIDEO_READY_ROOT: /data/ready-reels
       AVATAR_PORTRAIT_PATH: /private/portrait.jpg
     volumes:
       - ../video-output:/data
