@@ -14,12 +14,15 @@ from automation.state import LocalJournal, PipelineError, paid_once, request
 STUDIO_MODEL = 'gemini-omni-1.1-flash'
 
 
-def receipt_key(model, photo_hash, prompt):
-    identity = json.dumps([model, photo_hash, prompt, '720p/16:9/10s'])
+def receipt_key(model, photo_hash, prompt, aspect_ratio='16:9'):
+    identity = json.dumps([model, photo_hash, prompt, f'720p/{aspect_ratio}/10s'])
     return 'google-'+hashlib.sha256(identity.encode()).hexdigest()
 
 
-def generate(root, portrait, prompts):
+def generate(root, portrait, prompts, *, aspect_ratio='16:9'):
+    if aspect_ratio not in ('9:16', '16:9'):
+        raise ValueError('Klip en boy oranı geçersiz.')
+    dimensions = (720, 1280) if aspect_ratio == '9:16' else (1280, 720)
     picture, photo_hash, ext = _portrait(portrait)
     journal = LocalJournal(root/'makbuzlar')
     image = {'type': 'image', 'data': base64.b64encode(picture).decode(),
@@ -27,11 +30,11 @@ def generate(root, portrait, prompts):
     with RunLock(root/'.google.lock'):
         for role, prompt in prompts.items():
             target = root/f'{role}.mp4'
-            old_key = receipt_key(VEO_MODEL, photo_hash, prompt)
+            old_key = receipt_key(VEO_MODEL, photo_hash, prompt, aspect_ratio)
             # A previously submitted photo clip must continue on its original model.
             model = VEO_MODEL if journal.load(old_key) else STUDIO_MODEL
             generator = Omni(model)
-            key = receipt_key(model, photo_hash, prompt)
+            key = receipt_key(model, photo_hash, prompt, aspect_ratio)
             state = journal.load(key)
             if target.exists():
                 if state.get('sha256') == hashlib.sha256(target.read_bytes()).hexdigest():
@@ -42,7 +45,7 @@ def generate(root, portrait, prompts):
                 response = request(generator.client, 'POST', generator.base+'/interactions', json={
                     'model': model, 'input': [image, {'type': 'text', 'text': prompt}],
                     'background': True, 'store': True,
-                    'response_format': {'type': 'video', 'aspect_ratio': '16:9', 'duration': '10s',
+                    'response_format': {'type': 'video', 'aspect_ratio': aspect_ratio, 'duration': '10s',
                                         'resolution': '720p', 'delivery': 'uri'}}).json()
                 return {'interaction_id': _identifier(response.get('id'))}
 
@@ -51,10 +54,10 @@ def generate(root, portrait, prompts):
             generator.download(receipt, temporary)
             streams = probe(temporary)['streams']
             video = next((s for s in streams if s.get('codec_type') == 'video'), {})
-            if ((video.get('width'), video.get('height')) != (1280, 720)
+            if ((video.get('width'), video.get('height')) != dimensions
                     or abs(float(video.get('duration', 0))-10) > 1/60
                     or not any(s.get('codec_type') == 'audio' for s in streams)):
-                raise PipelineError('Google klibinin sesi, 10 saniyelik süresi veya 720p yatay kadrajı doğrulanamadı.')
+                raise PipelineError('Google klibinin sesi, 10 saniyelik süresi veya 720p kadrajı doğrulanamadı.')
             state['sha256'] = hashlib.sha256(temporary.read_bytes()).hexdigest()
             journal.save(key, state)
             temporary.replace(target)

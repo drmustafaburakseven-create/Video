@@ -10,7 +10,7 @@ Bu depoyu açan Codex sohbetinde `$google-reels-studyosu Konu: Yatarken bir masa
 
 Konuyu verdiğinizde önce konuşma tarzınıza uygun kadın sorusu, doktor cevabı, ara anlatım ve kapanış birlikte yazılır. Yeni bölüm profilinin adı `google-api-720p`. Google API özgün portrenizden 10 saniye giriş ve 10 saniye kapanış üretir. ElevenLabs Voice Changer doktorun iki çekimdeki sesini klonunuza dönüştürür. Kadın sorusu ayrı kalır. Aradaki 40 saniyede aynı klonla anlatım ve her biri 5–10 saniye süren hareketli stok çekimleri kullanılır.
 
-Yatay 1280×720 iPhone dosyası ile aynı kurgunun dikey Reels/Shorts dosyası ayrı hazırlanır. Ayrıntılı [komut sırası](../.agents/skills/google-reels-studyosu/references/studyo.md), [örnek konuşma](ornek/konusma.txt) ve [platform metinleri](ornek/paylasim.md). Özel medya klasöründe API ile üretim ve seslendirme ücretli olabilir. Plan ve montaj yereldir. Önceden hazırlanmış profilsiz sekiz-on saniyelik kullanıcı klibi paketleri eski kurgu ayarlarıyla açılır.
+Dikey 720×1280 iPhone dosyası ile aynı kurgunun dikey Reels/Shorts dosyası ayrı hazırlanır. Ayrıntılı [komut sırası](../.agents/skills/google-reels-studyosu/references/studyo.md), [örnek konuşma](ornek/konusma.txt) ve [platform metinleri](ornek/paylasim.md). Özel medya klasöründe API ile üretim ve seslendirme ücretli olabilir. Plan ve montaj yereldir. Önceden hazırlanmış profilsiz sekiz-on saniyelik kullanıcı klibi paketleri eski kurgu ayarlarıyla açılır.
 
 ## GitHub Actions ile özel montaj
 

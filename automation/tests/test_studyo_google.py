@@ -18,7 +18,7 @@ class GoogleStudioTest(unittest.TestCase):
 
     def test_reuse_after_interrupted_download(self):
         prompts = studyo.google_prompts(self.plan)
-        streams = {'streams': [{'codec_type': 'video', 'width': 1280, 'height': 720,
+        streams = {'streams': [{'codec_type': 'video', 'width': 720, 'height': 1280,
                                 'duration': '10.0'}, {'codec_type': 'audio'}]}
         with tempfile.TemporaryDirectory() as temp, patch.object(doktor, 'Omni') as omni, \
                 patch.object(doktor, '_portrait', return_value=(b'photo', 'hash', '.jpg')), \
@@ -28,16 +28,16 @@ class GoogleStudioTest(unittest.TestCase):
             download = omni.return_value.download
             download.side_effect = TimeoutError()
             with self.assertRaises(TimeoutError):
-                doktor.generate(root, root/'portrait.jpg', prompts)
+                doktor.generate(root, root/'portrait.jpg', prompts, aspect_ratio=self.plan['aspect_ratio'])
             download.side_effect = lambda receipt, path: path.write_bytes(path.name.encode())
-            doktor.generate(root, root/'portrait.jpg', prompts)
-            doktor.generate(root, root/'portrait.jpg', prompts)
+            doktor.generate(root, root/'portrait.jpg', prompts, aspect_ratio=self.plan['aspect_ratio'])
+            doktor.generate(root, root/'portrait.jpg', prompts, aspect_ratio=self.plan['aspect_ratio'])
             self.assertEqual(request.call_count, 2)
             for role, call in zip(('giris', 'cikis'), request.call_args_list):
                 payload = call.kwargs['json']
                 self.assertEqual(payload['model'], doktor.STUDIO_MODEL)
                 self.assertEqual(payload['response_format']['duration'], '10s')
-                self.assertEqual(payload['response_format']['aspect_ratio'], '16:9')
+                self.assertEqual(payload['response_format']['aspect_ratio'], '9:16')
                 self.assertEqual(payload['input'][1]['text'], prompts[role])
                 self.assertTrue((root/f'{role}.mp4').is_file())
 

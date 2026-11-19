@@ -4,34 +4,34 @@
   "hook": "38 derece. Şimdi ne yapalım?",
   "question": "Hocam, otuz sekiz dereceyi gördüm. Hemen acile mi gidelim?",
   "answer": "Kaç aylık? İlk sorum bu. Bir de şu an nasıl görünüyor?",
-  "body": "Bebeğiniz üç aydan küçükse, otuz sekiz derece ve üzerinde beklemeden çocuk acile gidin. İyi görünse bile. Üç ile altı aylık bir bebekte otuz dokuz dereceyi görürseniz aynı gün doktorunuzla görüşün. Her yaşta şuna dikkat edin. Nefes almakta zorlanıyorsa, dudakları morarıyorsa ya da uyandıramıyorsanız hemen yüz on ikiyi arayın. Daha büyük bir çocuk sizinle konuşuyor, rahat nefes alıyor ve su içiyorsa evde yakından izleyebilirsiniz. Ama içmesi ya da çişi belirgin azalırsa, kötüleşirse veya ateş beş güne ulaşırsa o gün muayene olsun.",
+  "body": "Mesela iki aylık bir bebekte ateş otuz sekiz dereceye ulaştıysa, keyfi yerinde olsa bile beklemeden çocuk acile gidin. Üç ile altı aylık bebeklerde ise ateş otuz dokuz dereceyi bulursa aynı gün doktorunuzla görüşün. Peki, ya daha büyükse? Rahat nefes alıyor, su içiyor ve sizinle ilgileniyorsa evde takip edebilirsiniz. Ama yaşı kaç olursa olsun, nefes almakta zorlanıyorsa, dudakları morarıyorsa ya da uyandıramıyorsanız hemen yüz on ikiyi arayın. Daha az içmeye, daha az çiş yapmaya başladıysa, durumu kötüleşiyorsa ya da ateşi beş gündür sürüyorsa o gün muayene olsun.",
   "outro": "Ateşi not edin. Doktoru aradığınızda yaşını ve nasıl davrandığını da söyleyin. Bu videoyu ihtiyaç duyacağınız gün için kaydedebilirsiniz.",
   "stock_seconds": [
-    9,
+    8,
     6,
-    10,
-    7,
-    8
+    8,
+    9,
+    9
   ],
   "cards": [
     "3 aydan küçük  ·  38 °C ve üzeri",
     "3–6 ay  ·  39 °C ve üzeri",
-    "Acil belirtiler  ·  112",
     "Nefes, sıvı alımı ve iletişim",
+    "Acil belirtiler  ·  112",
     "Sıvı veya çiş azalırsa muayene"
   ],
   "stocks": [
     "Uyanık küçük bebeği kucağında tutan yetişkin",
     "Bir yetişkin termometredeki ölçümü okuyor",
-    "Yetişkin telefonu eline alıyor, yardım çağrısı temsili",
     "Oturur durumdaki daha büyük çocuk su içiyor",
+    "Yetişkin telefonu eline alıyor, yardım çağrısı temsili",
     "Ebeveyn muayene odasında çocuk doktoruyla görüşüyor"
   ],
   "queries": [
     "parent holding newborn awake",
     "parent calls pediatrician",
-    "adult making urgent phone call",
     "child drinking water at home",
+    "adult making urgent phone call",
     "parent checking on child at home"
   ],
   "sources": [
@@ -58,5 +58,6 @@
         "#çocukdoktoru"
       ]
     }
-  }
+  },
+  "aspect_ratio": "9:16"
 }

@@ -41,7 +41,7 @@ def script(plan):
 
 
 def google_prompts(plan):
-    landscape = plan.get('profile') == API_PROFILE
+    landscape = plan.get('profile') == API_PROFILE and plan.get('aspect_ratio', '16:9') == '16:9'
     aspect = 'landscape 16:9' if landscape else 'vertical 9:16'
     common = (
         f'Create one 10-second {aspect} video with synchronized audio. Use the attached '
@@ -131,7 +131,7 @@ def stock_materials(root, plan, save_selection):
 
     if not save_selection:
         durations = plan.get('stock_seconds', [10]*len(plan['queries']))
-        orientation = 'landscape' if plan.get('profile') == API_PROFILE else 'portrait'
+        orientation = 'portrait'
         candidates = [stock.search_clips(query, min_duration=n+1, orientation=orientation)
                       for query, n in zip(plan['queries'], durations, strict=True)]
         (root/'adaylar.json').write_text(json.dumps(candidates, ensure_ascii=False, indent=2))
@@ -199,21 +199,10 @@ def progress_graphic(scenes):
     return result
 
 
-def landscape_captions(text):
-    # Re-layout the native ASS canvas so fonts and shapes keep their proportions.
-    for old, new in [('PlayResX: 720', 'PlayResX: 1280'), ('PlayResY: 1280', 'PlayResY: 720'),
-                     ('pos(360,850)', 'pos(640,570)'), ('pos(360,640)', 'pos(640,360)'), ('pos(340,180)', 'pos(640,115)'),
-                     ('pos(100,220)', 'pos(380,91)'), ('pos(360,244)', 'pos(640,115)'),
-                     ('pos(653,155)', 'pos(1170,86)'), ('pos(360,245)', 'pos(640,168)'), ('58,72,260,1', '96,96,146,1'),
-                     ('l 720 0 720 1280 0 1280', 'l 1280 0 1280 720 0 720')]:
-        text = text.replace(old, new)
-    return text
-
-
 def render(root, dest):
     from automation import reel_1080, reels_captions
     from automation.render import timestamp
-    from telefon import phone_copy, verify_phone
+    from telefon import phone_copy
 
     plan = script(read(root/'bolum.json'))
     segments, review, closing = timing(plan, root)
@@ -275,15 +264,7 @@ def render(root, dest):
         ff([*args,'-filter_complex',tracks,'-ar','48000','-ac','2',mix])
         master = tmp/'Video-1080p.mp4'
         reel_1080.render(segments, mix, master, tmp, last_spoken_word=closing+review['outro'][1], ass=sub)
-        phone = tmp/'Video-Telefon.mp4'
-        if plan.get('profile') == API_PROFILE:
-            wide = tmp/'yatay.ass'
-            wide.write_text(landscape_captions(sub.read_text()), encoding='utf-8')
-            reel_1080.render(segments, mix, phone, tmp, last_spoken_word=closing+review['outro'][1],
-                             ass=wide, landscape=True)
-            verify_phone(phone, (1280, 720))
-        else:
-            phone_copy(master, phone)
+        phone_copy(master, tmp/'Video-Telefon.mp4')
         publishing.write(plan, tmp)
         for file in ('Video-1080p.mp4', 'Video-Telefon.mp4', 'paylasim.md'):
             (tmp/file).replace(dest/file)
@@ -300,7 +281,7 @@ if __name__ == '__main__':
         plan = script(read(args.input/'bolum.json'))
         if args.output is None or plan.get('profile') != API_PROFILE:
             parser.error('google için google-api-720p bölüm klasörü ve özgün portre dosyası gerekli.')
-        generate(args.input, args.output, google_prompts(plan))
+        generate(args.input, args.output, google_prompts(plan), aspect_ratio=plan.get('aspect_ratio', '16:9'))
     elif args.step in ('stok-ara','stok-al'):
         stock_materials(args.input, read(args.input/'bolum.json'), args.step == 'stok-al')
     elif args.step == 'ses':
