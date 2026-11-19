@@ -167,7 +167,7 @@ class PexelsImportTests(unittest.TestCase):
         self.metadata['streams'][0]['duration'] = '2'
         client = client_with(response())
         with patch('automation.stock.session', return_value=client):
-            with self.assertRaisesRegex(PipelineError, 'portrait interval'):
+            with self.assertRaisesRegex(PipelineError, 'selected orientation or interval'):
                 stock.import_clip(candidate(), root=self.root)
         self.assertFalse((self.root/'media/catalog.json').exists())
 
