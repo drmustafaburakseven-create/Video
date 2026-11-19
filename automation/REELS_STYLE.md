@@ -2,7 +2,11 @@
 
 Bu kurallar konuya özgü değildir. Son kullanıcı tercihi önce gelir. Güncelleme: 19 Kasım 2026.
 
-## En yeni üretim yolu: Gemini uygulamasından kullanıcı klipleri
+## Güncel tercih — Google API, 10–40–10 ve yatay iPhone kopyası
+
+Konu verildiğinde önce `mustafa-writing-style` ile tüm konuşmayı yaz. Google API özgün portreden iki yeni 10 saniyelik klip üretir. Girişte dış ses sorar. Doktorun cevap ve kapanışını ElevenLabs Voice Changer ile dönüştür, 40 saniyelik ara anlatımı aynı klonla üret. Her stok çekim 5–10 saniye sürer. Ana telefon dosyası 1280×720 yatay, Shorts/Reels kopyası dikeydir. Yeni konularda [stüdyo becerisini](../.agents/skills/google-reels-studyosu/SKILL.md) uygula.
+
+## Önceki üretim yolu — Gemini uygulamasından kullanıcı klipleri
 
 - 19 Kasım'daki ek talimat: kullanıcı API'ye bakiye yüklediğini belirterek bu
   diş çıkarma/ateş örneğini API ile yeniden üretmemizi açıkça istedi. Bu tek

@@ -31,23 +31,27 @@ def phone_copy(master, target):
         capture_output=True)
     if r.returncode:
         raise PipelineError('Telefon kopyası hazırlanamadı; asıl video korundu.')
-    d = probe(temporary)
-    v = next(s for s in d['streams'] if s['codec_type'] == 'video')
-    a = next(s for s in d['streams'] if s['codec_type'] == 'audio')
-    if (abs(float(d['format']['duration'])-60) > .001 or v.get('nb_frames') != '1800'
-            or v.get('avg_frame_rate') != '30/1' or not fast_start(temporary)
-            or (v.get('width'), v.get('height')) != (720, 1280)
-            or v.get('codec_name') != 'h264' or v.get('pix_fmt') != 'yuv420p'
-            or v.get('color_space') != 'bt709' or a.get('codec_name') != 'aac'
-            or a.get('sample_rate') != '48000' or a.get('channels') != 2):
-        raise PipelineError('Telefon kopyası süre/kare doğrulamasını geçemedi.')
-    r = subprocess.run(['ffmpeg', '-v', 'error', '-nostdin', '-i', str(temporary),
-                        '-f', 'null', '-'], capture_output=True)
-    if r.returncode:
-        raise PipelineError('Telefon kopyası tam çözümleme kontrolünü geçemedi.')
+    verify_phone(temporary, (720, 1280))
     temporary.replace(target)
     record.write_text(json.dumps({'source_sha256': digest(master),
                                  'output_sha256': digest(target),
                                  'seconds': 60, 'full_decode': 'passed', 'fps': 30,
                                  'fast_start': True, 'physical_iphone_tested': False}, indent=2)+'\n')
     return target
+
+
+def verify_phone(path, dimensions):
+    d = probe(path)
+    v = next(s for s in d['streams'] if s['codec_type'] == 'video')
+    a = next(s for s in d['streams'] if s['codec_type'] == 'audio')
+    if (abs(float(d['format']['duration'])-60) > .001 or v.get('nb_frames') != '1800'
+            or v.get('avg_frame_rate') != '30/1' or not fast_start(path)
+            or (v.get('width'), v.get('height')) != dimensions
+            or v.get('codec_name') != 'h264' or v.get('pix_fmt') != 'yuv420p'
+            or v.get('color_space') != 'bt709' or a.get('codec_name') != 'aac'
+            or a.get('sample_rate') != '48000' or a.get('channels') != 2):
+        raise PipelineError('Telefon kopyası süre/kare doğrulamasını geçemedi.')
+    r = subprocess.run(['ffmpeg', '-v', 'error', '-nostdin', '-i', str(path),
+                        '-f', 'null', '-'], capture_output=True)
+    if r.returncode:
+        raise PipelineError('Telefon kopyası tam çözümleme kontrolünü geçemedi.')

@@ -9,7 +9,7 @@ def safe(text):
     return text.replace('\\', '').replace('{', '').replace('}', '').replace('\n', r'\N')
 
 
-def write(alignment, directory, delay=0, *, beats=()):
+def write(alignment, directory, delay=0, *, beats=(), max_words=4):
     """Validate original alignment, retaining SRT; add short ASS caption groups."""
     last = captions(alignment, directory, delay)
     path = Path(directory)/'captions.ass'
@@ -23,7 +23,7 @@ def write(alignment, directory, delay=0, *, beats=()):
              for m in re.finditer(r'\S+', ''.join(chars))]
     groups, group = [], []
     for word in words:
-        if group and (len(group) >= 4 or len(' '.join(w[0] for w in group+[word])) > 29
+        if group and (len(group) >= max_words or len(' '.join(w[0] for w in group+[word])) > 29
                       or word[1]-group[-1][2] > .5):
             groups.append(group)
             group = []

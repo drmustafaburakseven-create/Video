@@ -1,19 +1,21 @@
 # Instagram Reels
 
-Bir masal daha mı?
+Yatarken bir masal daha mı?
 
-Tam ışık kapanırken yeni bir masal isteği geliyor mu?
-Dişleri fırçalayın, birlikte bir kitap seçin, sarılıp iyi geceler deyin. Sizin evin favori kitabı hangisi?
+Çocuğunuz tam ışık kapanırken bir masal daha mı istiyor?
+Bu akşam iki kitabı yan yana koyun ve son kitabı birlikte seçin. Videoda kitap bittiğinde kullanabileceğiniz kısa bir kapanışı gösteriyorum.
+Sizin evde iyi geceler demeyi ne kolaylaştırıyor?
 Bu video genel bilgilendirme amaçlıdır; çocuğunuza özel durumlar için doktorunuza danışın.
 
 #uykurutini #çocukuykusu #ebeveynlik
 
 # YouTube Shorts
 
-Çocuğunuz yatarken bir masal daha mı istiyor? #shorts
+Çocuklarda uyku rutini: Son masalı kim seçsin? #shorts
 
-Okul öncesi çocuklarla akşamı bitirmek için kısa bir örnek.
-Bir kitap seçmesine izin verin. Her akşam tanıdık bir sırayla ilerleyin.
+Okul öncesi çocuklar için akşam uyku rutini nasıl kurulur?
+Diş fırçalamadan son kitaba kadar akşamın sırasını bir örnekle izleyin.
+Evde sürdürebildiğiniz kısa bir rutinle başlayın.
 Bu video genel bilgilendirme amaçlıdır; çocuğunuza özel durumlar için doktorunuza danışın.
 
 @Drmustafaburakseven

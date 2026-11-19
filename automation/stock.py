@@ -47,6 +47,14 @@ def _url(value, hosts, *, mp4=False):
     return value
 
 
+def _fits(width, height, orientation):
+    if type(width) is not int or type(height) is not int:
+        return False
+    if orientation == 'landscape':
+        return width > height >= 720
+    return orientation == 'portrait' and height > width >= 720
+
+
 def _candidate(value):
     if not isinstance(value, dict):
         raise PipelineError('Invalid Pexels candidate.')
@@ -72,24 +80,26 @@ def _candidate(value):
     if not _positive(minimum) or not _positive(value.get('duration')) or value['duration'] < minimum:
         raise PipelineError('Pexels candidate is shorter than the requested interval.')
     width, height = value.get('width'), value.get('height')
-    if type(width) is not int or type(height) is not int or width < 720 or height <= width:
-        raise PipelineError('Pexels candidates must be portrait video with width at least 720 pixels.')
+    if not _fits(width, height, value.get('orientation', 'portrait')):
+        raise PipelineError('Pexels dimensions must match the requested orientation with at least 720p.')
     return asset_id
 
 
-def search_clips(query, min_duration=4):
-    """Return up to ten attributed portrait candidates; never auto-approve them."""
+def search_clips(query, min_duration=4, *, orientation='portrait'):
+    """Return up to ten attributed candidates in the requested orientation; never auto-approve them."""
     if not isinstance(query, str) or not 1 <= len(query.strip()) <= 200:
         raise PipelineError('Provide a short stock footage search query.')
     if not _positive(min_duration) or min_duration > 60:
         raise PipelineError('Stock minimum duration must be between zero and 60 seconds.')
+    if orientation not in ('portrait', 'landscape'):
+        raise PipelineError('Unsupported stock orientation.')
     key = os.environ.get('PEXELS_API_KEY', '').strip()
     if not key:
         raise PipelineError('Missing secure binding: PEXELS_API_KEY')
     client = session()
     try:
         response = request(client, 'GET', API, headers={'Authorization': key},
-                           params={'query': query.strip(), 'orientation': 'portrait', 'per_page': 10})
+                           params={'query': query.strip(), 'orientation': orientation, 'per_page': 10})
         try:
             body = response.json()
         except ValueError:
@@ -112,7 +122,7 @@ def search_clips(query, min_duration=4):
             if not isinstance(media, dict) or media.get('file_type') != 'video/mp4':
                 continue
             width, height = media.get('width'), media.get('height')
-            if type(width) is not int or type(height) is not int or width < 720 or height <= width:
+            if not _fits(width, height, orientation):
                 continue
             try:
                 _url(media.get('link'), {'videos.pexels.com'}, mp4=True)
@@ -131,6 +141,8 @@ def search_clips(query, min_duration=4):
                      'width': selected['width'], 'height': selected['height'],
                      'download_url': selected['link'], 'minimum_duration': min_duration,
                      'requires_review': True}
+        if orientation == 'landscape':
+            candidate['orientation'] = orientation
         try:
             _candidate(candidate)
         except PipelineError:
@@ -220,8 +232,8 @@ def import_clip(candidate, root=ROOT):
             video = next((s for s in info.get('streams', []) if s.get('codec_type') == 'video'), {})
             available = float(video.get('duration', info.get('format', {}).get('duration', 0)))
             if (not math.isfinite(available) or available+0.001 < candidate.get('minimum_duration', 4)
-                    or video.get('width', 0) < 720 or video.get('height', 0) <= video.get('width', 0)):
-                raise PipelineError('Downloaded stock video does not match the selected portrait interval.')
+                    or not _fits(video.get('width'), video.get('height'), candidate.get('orientation', 'portrait'))):
+                raise PipelineError('Downloaded stock video does not match the selected orientation or interval.')
             import_media(path, asset_id, 'stock', root=root, source_url=candidate['source_url'],
                          license_text=f'Pexels License: {LICENSE} Creator: {candidate["creator"]["name"]}')
             _attribution(root, asset_id, candidate)

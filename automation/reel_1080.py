@@ -83,7 +83,7 @@ def validate_audio_timeline(audio_seconds, last_spoken_word):
         raise PipelineError('Reviewed speech must finish before the final 1.5-second card.')
 
 
-def render(segments, audio, output, directory, *, last_spoken_word, ass=None, fonts=None):
+def render(segments, audio, output, directory, *, last_spoken_word, ass=None, fonts=None, landscape=False):
     """Render exact-time scenes and optional reviewed ASS typography at 1080p30."""
     validate_segments(segments)
     validate_audio_timeline(float(probe(audio)['format']['duration']), last_spoken_word)
@@ -97,6 +97,10 @@ def render(segments, audio, output, directory, *, last_spoken_word, ass=None, fo
         duration = segment['end']-segment['start']
         filters = ('scale=1080:1920:force_original_aspect_ratio=increase,'
                    'crop=1080:1920,setsar=1,fps=30,format=yuv420p')
+        if landscape or segment.get('keep_frame'):
+            width, height = (1280, 720) if landscape else (1080, 1920)
+            filters = (f'scale={width}:{height}:force_original_aspect_ratio=decrease:force_divisible_by=2,'
+                       f'pad={width}:{height}:(ow-iw)/2:(oh-ih)/2:color=0x202337,setsar=1,fps=30,format=yuv420p')
         # Brief zoom entry is entirely spatial: it never changes speech speed.
         if segment.get('entry') == 'zoom':
             filters += (",scale=w='trunc(1080*(1.02+0.06*max(0,1-t/0.3))/2)*2'"
@@ -124,18 +128,19 @@ def render(segments, audio, output, directory, *, last_spoken_word, ass=None, fo
         vf += ",ass=filename='"+escape(ass)+"'"
         if fonts:
             vf += ":fontsdir='"+escape(fonts)+"'"
+    bitrate = '1800k' if landscape else '14M'
     run(['ffmpeg', '-v', 'warning', '-nostdin', '-y', '-f', 'concat', '-safe', '0',
          '-i', str(listing), '-i', str(normalized), '-map', '0:v:0', '-map', '1:a:0',
          '-vf', vf, '-t', '60', '-r', '30', '-fps_mode', 'cfr', '-c:v', 'libx264',
-         '-preset', 'slow', '-threads', '4', '-b:v', '14M', '-minrate', '14M',
-         '-maxrate', '14M', '-bufsize', '28M', '-x264-params', 'nal-hrd=cbr:force-cfr=1',
+         '-preset', 'slow', '-threads', '4', '-b:v', bitrate, '-minrate', bitrate,
+         '-maxrate', bitrate, '-bufsize', '3600k' if landscape else '28M', '-x264-params', 'nal-hrd=cbr:force-cfr=1',
          '-pix_fmt', 'yuv420p',
          '-profile:v', 'high', '-level:v', '4.1', '-tag:v', 'avc1',
          '-color_primaries', 'bt709', '-color_trc', 'bt709', '-colorspace', 'bt709',
          # Keep the H.264 VUI consistent with the container when a source carries
          # an sRGB transfer tag that survives the filter graph.
          '-bsf:v', 'h264_metadata=colour_primaries=1:transfer_characteristics=1:matrix_coefficients=1',
-         '-c:a', 'aac', '-b:a', '320k', '-ar', '48000', '-ac', '2',
+         '-c:a', 'aac', '-b:a', '160k' if landscape else '320k', '-ar', '48000', '-ac', '2',
          '-video_track_timescale', '30000', '-movflags', '+faststart', str(output)],
         directory/'export.log')
     return Path(output)

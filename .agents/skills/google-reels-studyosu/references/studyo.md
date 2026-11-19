@@ -1,6 +1,6 @@
-# Çalışma düzeni
+# Konudan teslim dosyalarına
 
-Bu beceri tek başına yeni sohbette konuşma metnini ve iki Google komutunu üretir. Dosya tabanlı kurgu için proje [Video](https://github.com/drmustafaburakseven-create/Video) ve içindeki [Reels Stüdyosu](https://github.com/drmustafaburakseven-create/Video/tree/main/reels-studyosu) kullanılır. Komutları depo kökünde çalıştır. Aşağıdaki özel klasör uyku rutini örneğinindir. Her konu ve sürüm için ayrı klasör kullan.
+[Video deposunun](https://github.com/drmustafaburakseven-create/Video) kökünde çalış. Yeni konuyu hazırlarken örnekteki alanları kullan. Her bölüm için ayrı bir özel klasör aç.
 
 ```bash
 BOLUM=video-output/uyku-rutini
@@ -9,16 +9,20 @@ cp -n reels-studyosu/konular/uyku-rutini.json "$BOLUM/bolum.json"
 python3 reels-studyosu/studyo.py plan "$BOLUM/bolum.json" "$BOLUM/plan"
 ```
 
-Yeni konuda örnek JSON'un alanlarını kullan. Başlık, kanca, soru, ilk cevap, gövde, kapanış, dört kısa kart, dört çekim, dört stok arama ifadesi, kaynaklar ve iki platformun ayrı metinlerini doldur. Plan adımı Python standart kütüphanesiyle çalışır. Sohbette önce plan klasöründeki konuşma ve iki Google komutunu göster.
+1. Konu geldiğinde ilk iş konuşma metnidir. Tüm replikleri aynı konuda yaz ve çekim metinlerini bu metinden üret. Planın `profile` alanı `google-api-720p` olsun. `stock_seconds` içindeki her süre 5–10 saniye, toplam 40 olmalı. Her süre için aynı sırada bir stok tarifi, arama sorgusu ve kart metni gir. Çekim değişikliğini anlatımdaki anlam değişimine bağla.
+2. Fotoğraftan Google API ile iki taze klip üret. Aşağıdaki ikinci argümana kullanıcının istediği özgün portreyi ver. İki istek 720p, 16:9 ve onar saniyedir. Google'ın model ve faturalandırma erişimi kullanılan projeye bağlıdır. API anahtarı `GEMINI_API_KEY` ortam değişkeninden okunur. Aynı bölüm dizininde tekrar başlatınca kayıtlı işlem kimliği kullanılır. Hatalı çıktı ya da belirsiz ödeme için kendiliğinden yeni ücretli iş başlatma.
 
-1. Kullanıcının aynı özgün fotoğraftan aldığı sesli Google kliplerini özel bölüm klasörüne `giris.mp4` ve `cikis.mp4` olarak al. Hedef iki kez 10 saniyedir. Montaj yazılımı 8–10 saniyelik çekimleri de kabul eder. Bu durumda gerçek zaman çizelgesindeki farklılığı bildir.
-2. Google kliplerini dinleyerek `zamanlar.json` içine `question`, `answer` ve `outro` için saniye cinsinden ölçülmüş başlangıç ve bitiş çiftlerini yaz. Her klibin sayacı sıfırdan başlar. Kapanışta son sözcükten sonra en az 1,5 saniye bırak. Şablondaki saniyeleri tahmin olarak kullanma.
-3. Dört farklı lisanslı hareketli çekimi bölüm klasörüne `stok-1.mp4` … `stok-4.mp4` olarak koy. Her kaynak en az 11 saniye olsun. Pexels kullanılacaksa `stok-ara` adımı adayları getirir. Seçilen dört kimliği sırayla `secimler.json` içine yaz ve `stok-al` adımını çalıştır.
-4. Doktor sesini üretme istendiğinde, yerleşik Python ortamıyla aşağıdaki adımları çalıştır. `ses` adımı ElevenLabs kotası kullanabilir. Hazır ve kontrol edilmiş sesler ile hizalama dosyası varsa doğrudan montaja geç. Kimlik bilgilerini ve ham kişisel medyayı özel çalışma alanında sakla.
+   ```bash
+   .venv/bin/python reels-studyosu/studyo.py google "$BOLUM" automation/private/avatar-reference-current.jpg
+   ```
+
+3. `giris.mp4` ve `cikis.mp4` dosyalarını dinleyip izle. `zamanlar.json` içinde `question`, `answer`, `outro` alanlarına saniye cinsinden gerçek başlangıç ve bitişleri yaz. Her klip sıfırdan başlar. Son replik en geç 8,5 saniyede biter. Kadın ve doktor üst üste konuşmuşsa o bölümü doğru sesle dönüştürmek için önce çekimi düzelt.
+4. `stok-ara` ile adayları getir. Lisansını, klinik doğruluğu ve kadrajını kontrol ettiğin kimlikleri sırayla `secimler.json` içine yazıp `stok-al` ile indir. Kendi lisanslı arşivinden kullanıyorsan çekimleri `stok-1.mp4` ve devamı olarak koy. Kurgudaki süre boyunca gerçek hareket olmalı.
+5. `ELEVENLABS_API_KEY` ve `DOKTOR_VOICE_ID` ile `ses` adımını çalıştır. Kamera arkasındaki kadının sorusunu korur. Girişte ve kapanışta doktorun gerçek konuşma aralıklarına Voice Changer uygular. Stokların altındaki anlatım aynı ses kimliğiyle zaman damgalı TTS olarak üretilir. Yeniden çalıştırırken makbuz klasörünü koru.
 
    ```bash
    .venv/bin/python reels-studyosu/studyo.py ses "$BOLUM"
    .venv/bin/python reels-studyosu/studyo.py montaj "$BOLUM" "$BOLUM/teslim"
    ```
 
-5. `Video-1080p.mp4`, `Video-Telefon.mp4` ve `paylasim.md` dosyalarını kontrol et. Telefon kopyasında H.264, yuv420p, AAC, hızlı açılma ve tam süreyi doğrula. Ses ve ağız uyumunu, ara sahnelerdeki öğretici hareketleri ve son 1,5 saniyeyi izle. Teslim bağlantısını gerçekten var olan dosyadan oluştur. Platforma yükleme ayrı işlemdir.
+6. Yatay `Video-Telefon.mp4`, dikey `Video-1080p.mp4` ve `paylasim.md` dosyalarını teslim et. Her ikisi 60 saniye, 30 fps. Son sözcüğü, yazıların okunaklılığını, Google dudak senkronunu ve telefona uygun kopyanın açıldığını doğrula.

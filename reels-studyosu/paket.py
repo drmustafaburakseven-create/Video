@@ -1,5 +1,6 @@
 """Move a strict set of media files between the studio and GitHub, encrypted."""
 import argparse
+import json
 import os
 from pathlib import Path
 import shutil
@@ -17,13 +18,19 @@ def transfer(action, stage, source, target):
     if len(password) < 32 or '\n' in password or '\r' in password:
         raise ValueError('REELS_MEDIA_KEY için en az 32 karakterlik rastgele gizli anahtar gerekli.')
     required = INPUT if stage == 'girdi' else OUTPUT
-    allowed = required | ({'muzik.wav'} if stage == 'girdi' else set())
+    allowed = required | ({'muzik.wav', *(f'stok-{i}.mp4' for i in range(5, 9))} if stage == 'girdi' else set())
     with tempfile.TemporaryDirectory() as tmp:
         archive = Path(tmp)/'paket.zip'
         # Use a private, short-lived GnuPG home. Passphrase never appears in argv.
         args = ['gpg', '--homedir', tmp, '--batch', '--quiet', '--pinentry-mode', 'loopback',
                 '--passphrase-fd', '0']
         if action == 'kilitle':
+            if stage == 'girdi':
+                count = len(json.loads((source/'bolum.json').read_text())['stocks'])
+                if not 4 <= count <= 8:
+                    raise ValueError('Bölümde 4–8 stok çekimi olmalı.')
+                required = INPUT | {f'stok-{i}.mp4' for i in range(5, count+1)}
+                allowed = required | {'muzik.wav'}
             with zipfile.ZipFile(archive, 'w') as z:
                 for name in sorted(allowed):
                     path = source/name
