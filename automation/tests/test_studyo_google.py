@@ -35,10 +35,25 @@ class GoogleStudioTest(unittest.TestCase):
             self.assertEqual(request.call_count, 2)
             for role, call in zip(('giris', 'cikis'), request.call_args_list):
                 payload = call.kwargs['json']
+                self.assertEqual(payload['model'], doktor.STUDIO_MODEL)
                 self.assertEqual(payload['response_format']['duration'], '10s')
                 self.assertEqual(payload['response_format']['aspect_ratio'], '16:9')
                 self.assertEqual(payload['input'][1]['text'], prompts[role])
                 self.assertTrue((root/f'{role}.mp4').is_file())
+
+    def test_saved_old_model_receipt_is_polled_without_new_purchase(self):
+        with tempfile.TemporaryDirectory() as temp, patch.object(doktor, 'Omni') as omni, \
+                patch.object(doktor, '_portrait', return_value=(b'picture', 'hash', '.jpg')), \
+                patch.object(doktor, 'request') as submit:
+            root = Path(temp)
+            key = doktor.receipt_key(doktor.VEO_MODEL, 'hash', 'my prompt')
+            receipt = {'interaction_id': 'original'}
+            doktor.LocalJournal(root/'makbuzlar').save(key, {'video': {'status': 'received', 'response': receipt}})
+            omni.return_value.download.side_effect = TimeoutError()
+            with self.assertRaises(TimeoutError):
+                doktor.generate(root, root/'photo.jpg', {'giris': 'my prompt'})
+            omni.assert_called_once_with(doktor.VEO_MODEL)
+            submit.assert_not_called()
 
     def test_only_full_forty_seconds_of_supported_shots(self):
         self.assertEqual(len(studyo.stock_names(studyo.script(self.plan))), 5)

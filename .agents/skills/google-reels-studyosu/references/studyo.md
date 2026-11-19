@@ -10,7 +10,7 @@ python3 reels-studyosu/studyo.py plan "$BOLUM/bolum.json" "$BOLUM/plan"
 ```
 
 1. Konu geldiğinde ilk iş konuşma metnidir. Tüm replikleri aynı konuda yaz ve çekim metinlerini bu metinden üret. Planın `profile` alanı `google-api-720p` olsun. `stock_seconds` içindeki her süre 5–10 saniye, toplam 40 olmalı. Her süre için aynı sırada bir stok tarifi, arama sorgusu ve kart metni gir. Çekim değişikliğini anlatımdaki anlam değişimine bağla.
-2. Fotoğraftan Google API ile iki taze klip üret. Aşağıdaki ikinci argümana kullanıcının istediği özgün portreyi ver. İki istek 720p, 16:9 ve onar saniyedir. Google'ın model ve faturalandırma erişimi kullanılan projeye bağlıdır. API anahtarı `GEMINI_API_KEY` ortam değişkeninden okunur. Aynı bölüm dizininde tekrar başlatınca kayıtlı işlem kimliği kullanılır. Hatalı çıktı ya da belirsiz ödeme için kendiliğinden yeni ücretli iş başlatma.
+2. Fotoğraftan Google API ile iki taze klip üret. Aşağıdaki ikinci argümana kullanıcının istediği özgün portreyi ver. Yeni çekimlerde AI Studio üzerinden doğrulanmış Gemini Omni 1.1 Flash kullanılır. İki istek 720p, 16:9 ve onar saniyedir. Kullanıcıdan Google’da oturum açıp çekim hazırlaması beklenmez. Google'ın model ve faturalandırma erişimi kullanılan projeye bağlıdır. API anahtarı `GEMINI_API_KEY` ortam değişkeninden okunur. Aynı bölüm dizininde tekrar başlatınca kayıtlı işlem kimliği kullanılır. Hatalı çıktı ya da belirsiz ödeme için kendiliğinden yeni ücretli iş başlatma.
 
    ```bash
    .venv/bin/python reels-studyosu/studyo.py google "$BOLUM" automation/private/avatar-reference-current.jpg
