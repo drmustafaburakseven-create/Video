@@ -4,6 +4,7 @@ import base64
 import hashlib
 import json
 import os
+import re
 import shutil
 from pathlib import Path
 import subprocess
@@ -95,6 +96,30 @@ def seconds(path, kind):
     return float(stream.get('duration') or info['format']['duration'])
 
 
+def spoken_alignment(alignment, body):
+    """Keep the provider's spoken character times, omitting silent direction tags."""
+    chars = alignment['characters']
+    text = ''.join(chars)
+    if text == body:
+        return alignment
+    keep = [True]*len(text)
+    for match in re.finditer(r'\[[^\]\n]*\] *', text):
+        keep[match.start():match.end()] = [False]*(match.end()-match.start())
+    starts = alignment['character_start_times_seconds']
+    ends = alignment['character_end_times_seconds']
+    rows = []
+    offset = 0
+    for token, start, end in zip(chars, starts, ends, strict=True):
+        spoken = ''.join(c for c, present in zip(token, keep[offset:offset+len(token)]) if present)
+        if spoken:
+            rows.append((spoken, start, end))
+        offset += len(token)
+    if ' '.join(''.join(row[0] for row in rows).split()) != ' '.join(body.split()):
+        raise ValueError('ElevenLabs hizalaması konuşma metniyle eşleşmiyor.')
+    return {key: [row[i] for row in rows] for i, key in enumerate(
+        ('characters', 'character_start_times_seconds', 'character_end_times_seconds'))}
+
+
 def voice(root, plan):
     """Run only on explicit local invocation; keep paid receipts outside CI."""
     from automation import dialogue_audio, voice_changer
@@ -115,14 +140,21 @@ def voice(root, plan):
             mixed = tmp/f'{name}-mix.wav'
             dialogue_audio.replace_turn(original, converted, start, end, mixed)
             mixed.replace(root/f'{name}.wav')
-        identity = json.dumps([speaker, plan['body'], 'multilingual-v2/v1'], ensure_ascii=False)
+        performance = plan.get('body_performance')
+        if performance:
+            if re.sub(r'\[[^\]\n]*\] *', '', performance) != plan['body']:
+                raise ValueError('Ses yönergeleri dışında anlatım metni aynı olmalı.')
+            model, speech, version = 'eleven_v4', performance, 'eleven_v4/tr/v1'
+        else:
+            model, speech, version = 'eleven_multilingual_v2', plan['body'], 'multilingual-v2/v1'
+        identity = json.dumps([speaker, speech, version], ensure_ascii=False)
         key = 'body-'+hashlib.sha256(identity.encode()).hexdigest()
-        saved = paid_once(journal, key, journal.load(key), 'tts', lambda: synthesize(plan['body'], speaker))
+        saved = paid_once(journal, key, journal.load(key), 'tts', lambda: synthesize(speech, speaker, model=model))
         narration = tmp/'anlatim.mp3'
         narration.write_bytes(base64.b64decode(saved['audio_base64'], validate=True))
         ff(['-i', narration, '-ar', '48000', '-ac', '1', tmp/'anlatim.wav'])
         (tmp/'anlatim.wav').replace(root/'anlatim.wav')
-        (root/'hizalama.json').write_text(json.dumps(saved['alignment'], ensure_ascii=False))
+        (root/'hizalama.json').write_text(json.dumps(spoken_alignment(saved['alignment'], plan['body']) if performance else saved['alignment'], ensure_ascii=False))
 
 
 def stock_materials(root, plan, save_selection):

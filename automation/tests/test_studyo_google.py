@@ -55,6 +55,16 @@ class GoogleStudioTest(unittest.TestCase):
             omni.assert_called_once_with(doktor.VEO_MODEL)
             submit.assert_not_called()
 
+    def test_voice_directions_are_hidden_without_retiming_spoken_characters(self):
+        text = '[warm] Bir soru. [firm] Arayın.'
+        alignment = {'characters': list(text), 'character_start_times_seconds': list(range(len(text))),
+                     'character_end_times_seconds': list(range(1, len(text)+1))}
+        clean = studyo.spoken_alignment(alignment, 'Bir soru. Arayın.')
+        self.assertEqual(''.join(clean['characters']), 'Bir soru. Arayın.')
+        self.assertEqual(clean['character_start_times_seconds'][10], text.index('Arayın'))
+        with self.assertRaises(ValueError):
+            studyo.spoken_alignment(alignment, 'Başka bir cümle.')
+
     def test_only_full_forty_seconds_of_supported_shots(self):
         self.assertEqual(len(studyo.stock_names(studyo.script(self.plan))), 5)
         for lengths in ([5]*5, [4, 9, 10, 10, 7], [11, 6, 8, 8, 7]):

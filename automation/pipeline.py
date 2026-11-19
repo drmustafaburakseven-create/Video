@@ -102,13 +102,13 @@ def direct_shots(plan):
     return prompts
 
 
-def synthesize(text, voice):
+def synthesize(text, voice, *, model='eleven_multilingual_v2'):
     response = request(session(), 'POST',
                        f'https://api.elevenlabs.io/v1/text-to-speech/{voice}/with-timestamps',
                        headers={'xi-api-key': os.environ['ELEVENLABS_API_KEY']},
                        params={'output_format': 'mp3_44100_128'},
-                       json={'text': text, 'model_id': 'eleven_multilingual_v2', 'language_code': 'tr',
-                             'voice_settings': {'stability': 0.5, 'similarity_boost': 0.75}}).json()
+                       json={'text': text, 'model_id': model, 'language_code': 'tr',
+                             'voice_settings': {'stability': 0.5, 'similarity_boost': 0.85 if model == 'eleven_v4' else 0.75}}).json()
     # This complete response is persisted once, so a later runner can recover the paid audio.
     return {'audio_base64': response.get('audio_base64'),
             'alignment': response.get('alignment') or response.get('normalized_alignment')}

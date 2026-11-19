@@ -18,7 +18,7 @@ python3 reels-studyosu/studyo.py plan "$BOLUM/bolum.json" "$BOLUM/plan"
 
 3. `giris.mp4` ve `cikis.mp4` dosyalarını dinleyip izle. `zamanlar.json` içinde `question`, `answer`, `outro` alanlarına saniye cinsinden gerçek başlangıç ve bitişleri yaz. Her klip sıfırdan başlar. Son replik en geç 8,5 saniyede biter. Kadın ve doktor üst üste konuşmuşsa o bölümü doğru sesle dönüştürmek için önce çekimi düzelt.
 4. `stok-ara` ile adayları getir. Lisansını, klinik doğruluğu ve kadrajını kontrol ettiğin kimlikleri sırayla `secimler.json` içine yazıp `stok-al` ile indir. Kendi lisanslı arşivinden kullanıyorsan çekimleri `stok-1.mp4` ve devamı olarak koy. Kurgudaki süre boyunca gerçek hareket olmalı.
-5. `ELEVENLABS_API_KEY` ve `DOKTOR_VOICE_ID` ile `ses` adımını çalıştır. Kamera arkasındaki kadının sorusunu korur. Girişte ve kapanışta doktorun gerçek konuşma aralıklarına Voice Changer uygular. Stokların altındaki anlatım aynı ses kimliğiyle zaman damgalı TTS olarak üretilir. Yeniden çalıştırırken makbuz klasörünü koru.
+5. `ELEVENLABS_API_KEY` ve `DOKTOR_VOICE_ID` ile `ses` adımını çalıştır. Kamera arkasındaki kadının sorusunu korur. Girişte ve kapanışta doktorun gerçek konuşma aralıklarına Voice Changer uygular. Yeni bölümlerde stok anlatımı için ElevenLabs `eleven_v4` ve Türkçe dilini kullan. Bölüm JSON’unda `body` alanı temiz metindir. `body_performance` alanında aynı metne duygunun değiştiği yerlere kısa oyunculuk yönergeleri ekle. Soruyu merakla, izlem önerisini sıcak, acil başvuru eşiğini sakin ve net söyle. Bu yönergeler altyazı dışında kalır. Yeniden çalıştırırken makbuz klasörünü koru.
 
    ```bash
    .venv/bin/python reels-studyosu/studyo.py ses "$BOLUM"
