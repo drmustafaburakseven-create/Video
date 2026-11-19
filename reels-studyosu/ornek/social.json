@@ -1,0 +1,28 @@
+{
+  "schema": "social-copy-v1",
+  "handle": "@Drmustafaburakseven",
+  "narration_sha256": "1b2eb2998cc1708e27b8bf3043c562db341de6696d320ac78115ff71aa71e530",
+  "sources": [
+    "https://www.nhs.uk/baby/health/sleep-and-young-children/",
+    "https://www.healthychildren.org/English/healthy-living/oral-health/Pages/Brush-Book-Bed.aspx"
+  ],
+  "auto_published": false,
+  "reels": {
+    "title": "Bir masal daha mı?",
+    "caption": "Tam ışık kapanırken yeni bir masal isteği geliyor mu?\nDişleri fırçalayın, birlikte bir kitap seçin, sarılıp iyi geceler deyin. Sizin evin favori kitabı hangisi?\nBu video genel bilgilendirme amaçlıdır; çocuğunuza özel durumlar için doktorunuza danışın.",
+    "hashtags": [
+      "#uykurutini",
+      "#çocukuykusu",
+      "#ebeveynlik"
+    ]
+  },
+  "youtube_shorts": {
+    "title": "Çocuğunuz yatarken bir masal daha mı istiyor? #shorts",
+    "description": "Okul öncesi çocuklarla akşamı bitirmek için kısa bir örnek.\nBir kitap seçmesine izin verin. Her akşam tanıdık bir sırayla ilerleyin.\nBu video genel bilgilendirme amaçlıdır; çocuğunuza özel durumlar için doktorunuza danışın.",
+    "hashtags": [
+      "#çocuksağlığı",
+      "#uykurutini",
+      "#masal"
+    ]
+  }
+}

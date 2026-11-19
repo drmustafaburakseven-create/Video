@@ -1,0 +1,16 @@
+{
+  "title": "Yatarken bir masal daha mı?",
+  "question": "Hocam, her gece bir masal daha mı okuyacağız?",
+  "answer": "Son masalı başlamadan seçin.",
+  "body": "Dört yaşındaki çocuğunuz en heyecanlı sorusunu tam ışığı kapatırken mi buluyor? Akşamın nasıl biteceğini bilmek işini kolaylaştırabilir. Önce birlikte dişlerinizi fırçalayın. Sonra iki kitaptan birini seçmesine izin verin. Kucağınıza sokulup aynı sayfaya bir daha bakmak isterse o anın tadını çıkarın. Kitap bittiğinde sarılın ve iyi geceler deyin. Ertesi akşam yine aynı sırayı izleyin. Uzun bir hazırlık gerekmiyor. Sizin de keyif aldığınız, çoğu akşam sürdürebileceğiniz kısa bir sıra yeter.",
+  "outro": "Bu akşam son kitabı birlikte seçin. Sizin evde en sevilen masal hangisi?",
+  "hook": "Bir masal daha mı?",
+  "cards": ["Önce dişler", "Bir kitap seçin", "Sarılma zamanı", "Yarın aynı sırayla"],
+  "stocks": ["Ebeveyn ve okul öncesi çocuk birlikte diş fırçalıyor", "Çocuk raftan bir kitap seçiyor", "Birlikte kitap okuyan aile", "Kitabı kapatan ebeveyn çocuğuna sarılıyor"],
+  "queries": ["parent child brushing teeth", "preschool child choosing a book", "parent reading bedtime story", "parent child bedtime hug"],
+  "sources": ["https://www.nhs.uk/baby/health/sleep-and-young-children/", "https://www.healthychildren.org/English/healthy-living/oral-health/Pages/Brush-Book-Bed.aspx"],
+  "social_copy": {
+    "reels": {"title": "Bir masal daha mı?", "caption": "Tam ışık kapanırken yeni bir masal isteği geliyor mu?\nDişleri fırçalayın, birlikte bir kitap seçin, sarılıp iyi geceler deyin. Sizin evin favori kitabı hangisi?\nBu video genel bilgilendirme amaçlıdır; çocuğunuza özel durumlar için doktorunuza danışın.", "hashtags": ["#uykurutini", "#çocukuykusu", "#ebeveynlik"]},
+    "youtube_shorts": {"title": "Çocuğunuz yatarken bir masal daha mı istiyor? #shorts", "description": "Okul öncesi çocuklarla akşamı bitirmek için kısa bir örnek.\nBir kitap seçmesine izin verin. Her akşam tanıdık bir sırayla ilerleyin.\nBu video genel bilgilendirme amaçlıdır; çocuğunuza özel durumlar için doktorunuza danışın.", "hashtags": ["#çocuksağlığı", "#uykurutini", "#masal"]}
+  }
+}

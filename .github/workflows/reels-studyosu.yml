@@ -1,0 +1,62 @@
+name: Reels Stüdyosu
+on:
+  workflow_dispatch:
+    inputs:
+      adim:
+        description: Yapılacak iş
+        type: choice
+        options: [plan, montaj]
+        required: true
+      konu:
+        description: Konu dosyası veya medya etiketinin kısa adı
+        type: string
+        default: uyku-rutini
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: reels-studyosu-${{ inputs.adim }}-${{ inputs.konu }}
+  cancel-in-progress: false
+jobs:
+  bolum:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      KONU: ${{ inputs.konu }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - run: '[[ "$KONU" =~ ^[a-z0-9][a-z0-9-]{0,63}$ ]]'
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r automation/requirements.txt
+      - name: Google komutları ve paylaşım metinleri
+        if: inputs.adim == 'plan'
+        run: python reels-studyosu/studyo.py plan "reels-studyosu/konular/$KONU.json" teslim
+      - name: Montaj araçları
+        if: inputs.adim == 'montaj'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg fonts-dejavu-core gnupg
+      - name: Özel medya paketini al
+        if: inputs.adim == 'montaj'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download "reels-$KONU" --pattern girdi.gpg --dir "$RUNNER_TEMP"
+      - name: İki MP4 oluştur ve teslimi şifrele
+        if: inputs.adim == 'montaj'
+        env:
+          REELS_MEDIA_KEY: ${{ secrets.REELS_MEDIA_KEY }}
+        run: |
+          python reels-studyosu/paket.py ac girdi "$RUNNER_TEMP/girdi.gpg" "$RUNNER_TEMP/medya"
+          python reels-studyosu/studyo.py montaj "$RUNNER_TEMP/medya" "$RUNNER_TEMP/sonuc"
+          mkdir teslim
+          python reels-studyosu/paket.py kilitle sonuc "$RUNNER_TEMP/sonuc" teslim/sonuc.gpg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reels-${{ inputs.konu }}-${{ inputs.adim }}-${{ github.run_attempt }}
+          path: teslim/
+          retention-days: 7
+          if-no-files-found: error
