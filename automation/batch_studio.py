@@ -42,7 +42,6 @@ def run(day, output, *, provider='gemini', model=None, videos=3, ready_root=None
         ready_root = Path(ready_root) if ready_root else output/'ready-reels'
         result = {'schema': 'warm-daily-batch-v1', 'date': day, 'topics': 5,
                   'requested_videos': videos, 'scripts': len(batch['scripts']),
-                  'avatar_provider_preference': settings().get('avatar_provider', 'unspecified'),
                   'profile': 'warm-office-60', 'editorial_reused': summary['reused'],
                   'completed_videos': 0, 'items': [], 'auto_published': False,
                   'status': 'in_progress', 'video_not_created': True}

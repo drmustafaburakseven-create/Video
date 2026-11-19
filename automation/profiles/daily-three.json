@@ -6,8 +6,6 @@
   "topic_suggestions": 5,
   "videos_per_day": 3,
   "production_profile": "warm-office-60",
-  "avatar_provider": "higgsfield",
-  "avatar_policy": "profiles/higgsfield-elevenlabs.json",
   "posting_copy_required": ["reels", "youtube_shorts"],
   "monthly_extra_budget_try": 4000,
   "automatic_social_publication": false,
