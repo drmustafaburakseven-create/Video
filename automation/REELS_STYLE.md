@@ -2,6 +2,12 @@
 
 Bu kurallar konuya özgü değildir. Son kullanıcı tercihi önce gelir. Güncelleme: 19 Kasım 2026.
 
+## Güncel model tercihi — Veo Standart
+
+Higgsfield üzerinden Google Veo 3.1 Standart kullanılır (CLI modeli `veo3_1`, varyantı `veo-3-1-preview`). Dinleme ve yanıt ile kapanışın iki parçası için dört adet sekiz saniyelik çekim oluşturulur. Doktorun Türkçe konuşması denetlenir, sonra aynı performans ElevenLabs Voice Changer ile klon sese dönüştürülür. Kadın soruları ve ara bölüm Eleven v3 ile hazırlanır. En son seçilen masada gülümseyen portrenin özel yolu güncel profildedir. Bu tercihler aşağıdaki önceki model/ses seçimlerinin yerini alır.
+
+Her yeni işin fiyatını çalışma alanından sorgula. 19 Kasım'da dört çekim toplam 320 krediydi. Günlük üç bölüm aynı fiyattan 960 kredi gerektirir. Bu bölüm için harcanan kredi günlük satın alma yetkisi değildir.
+
 ## En yeni üretim yolu: Higgsfield + ElevenLabs
 
 - 19 Kasım'daki en son kullanıcı talimatı: giriş ve kapanıştaki doktor görüntüsü
