@@ -72,6 +72,13 @@ jobs:
           EDITORIAL_PROVIDER: ${{ vars.EDITORIAL_PROVIDER || 'gemini' }}
         run: |
           if [ -n "$INPUT_PLAN" ] || [ "$PREPARE_ONLY" = "true" ]; then
+            # The current provider policy must not silently enter the archived
+            # Gemini/Fal paid video route. Audio-only preparation is still useful.
+            avatar_provider=$(python -c 'import json; print(json.load(open("automation/profiles/higgsfield-elevenlabs.json"))["provider"])')
+            if [ "$avatar_provider" = "higgsfield" ] && [ "$PREPARE_ONLY" != "true" ]; then
+              echo 'Current video provider is Higgsfield. Legacy plan rendering would call Gemini/Fal and is blocked. Use the private Higgsfield episode package; see automation/HIGGSFIELD_ELEVENLABS.md.'
+              exit 2
+            fi
             args=()
             if [ -n "$INPUT_PLAN" ]; then args+=(--plan "$INPUT_PLAN"); fi
             if [ "$PREPARE_ONLY" = "true" ]; then args+=(--prepare); fi

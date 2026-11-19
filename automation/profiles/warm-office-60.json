@@ -1,6 +1,6 @@
 {
   "name": "warm-office-60",
-  "version": 2,
+  "version": 3,
   "handle": "@Drmustafaburakseven",
   "output": {
     "width": 1080, "height": 1920, "fps": 30, "seconds": 60,
@@ -25,11 +25,15 @@
     "reference_path": "automation/private/avatar-reference-current.jpg",
     "fresh_intro_and_outro_per_episode": true, "reuse_previous_avatar_clip": false,
     "source_framing_locked": true, "resting_hands_preserved": true,
+    "unseen_hands_must_stay_out_of_frame": true,
     "identity_and_hands_visual_review_required": true, "no_freeze_frames": true,
     "no_speech_retiming": true, "medical_visual_review_required": true},
   "production": {"female_voice": "eleven_v3_designed_voice", "body_voice": "eleven_v4_existing_user_clone",
-    "avatar": "Gemini_native_performance_then_ElevenLabs_Voice_Changer",
-    "avatar_external_audio_input_supported": false,
+    "avatar": "Higgsfield_with_ElevenLabs",
+    "avatar_external_audio_input_supported": "model_dependent_verify_account_catalog",
+    "avatar_policy": "profiles/higgsfield-elevenlabs.json",
+    "automatic_gemini_video_fallback": false,
+    "female_audio_is_separate_from_doctor_lipsync": true,
     "generated_avatar_max_seconds_used": 15,
     "automatic_social_publication": false}
 }

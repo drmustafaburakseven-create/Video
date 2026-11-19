@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "provider": "higgsfield",
+  "connection": "official_higgsfield_cli_oauth_or_connected_mcp",
+  "render_profile": "warm-office-60",
+  "duration_seconds": 60,
+  "timeline": {"intro": [0, 15], "body": [15, 45], "outro": [45, 60]},
+  "avatar": {
+    "reference": "automation/private/avatar-reference-current.jpg",
+    "fresh_per_episode": true,
+    "hands": "keep_out_of_frame_when_absent_from_original",
+    "preferred_route": "elevenlabs_audio_then_higgsfield_lipsync",
+    "native_speech_alternative": "higgsfield_native_speech_then_elevenlabs_voice_changer",
+    "model": null,
+    "model_selection": "account_catalog_and_actual_quote_required",
+    "free_web_offer_is_not_api_entitlement": true,
+    "automatic_gemini_fallback": false,
+    "generations_per_video": 2
+  },
+  "voices": {
+    "doctor": "existing_user_clone",
+    "doctor_tts_model": "eleven_v4",
+    "female": "separate_designed_female_voice",
+    "female_tts_model": "eleven_v3",
+    "female_drives_doctor_lips": false,
+    "retime_speech": false,
+    "reuse_same_script_audio": true
+  },
+  "body": {"minimum_distinct_motion_sources": 4, "prefer_reviewed_licensed_stock": true,
+           "generate_video_for_each_body_scene": false},
+  "budget": {
+    "monthly_extra_try_limit": 4000,
+    "max_credits_per_clip": 0,
+    "monthly_credit_limit": 0,
+    "credit_limits_status": "awaiting_authenticated_account_quote",
+    "automatic_paid_retry": false,
+    "automatic_purchase_or_topup": false
+  },
+  "schedule": {"timezone": "Europe/Istanbul", "time": "09:00", "videos_per_day": 3,
+               "live_verified": false},
+  "delivery": {"iphone_copy": true, "reels_copy": true, "shorts_copy": true,
+               "auto_publish": false}
+}

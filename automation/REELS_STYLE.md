@@ -2,7 +2,40 @@
 
 Bu kurallar konuya özgü değildir. Son kullanıcı tercihi önce gelir. Güncelleme: 19 Kasım 2026.
 
-## En yeni üretim yolu: Gemini uygulamasından kullanıcı klipleri
+## En yeni üretim yolu: Higgsfield + ElevenLabs
+
+- 19 Kasım'daki en son kullanıcı talimatı: giriş ve kapanıştaki doktor görüntüsü
+  **Higgsfield** ile, kendi sesi ve kamera arkasından soran ayrı kadın sesi
+  **ElevenLabs** ile hazırlanır. Ara bölümde önceden incelenmiş uygun hareketli
+  stoklar kullanılabilir. Yeni Google/Gemini video çağrısı yapılmaz; önceki
+  Gemini belgeleri ve ücretli işlem kayıtları yalnız arşiv/kurtarma içindir.
+- Yeni yüklenen prodüksiyon metnindeki 15–30–15 düzeni kullanılır: ilk 15 saniye
+  soru/dinleme/cevap, 15–45 saniye en az dört farklı hareketli kaynak, son 15 saniye
+  doktor kapanışı. Yazılı sıcak-ofis profili, kullanıcı adı ve iki platformun
+  paylaşım metinleri korunur. Kapanış sözü son karttan önce biter.
+- Kullanıcı **açık mavi gömlekli, beyaz önlüklü yakın portresini** yeniden seçti.
+  Özel özgün referans güncellendi. Bu fotoğrafta eller görünmez; önceki iki eli
+  görünür tutma kuralı bu portreye uygulanmaz. Görünmeyen elleri veya bedeni
+  uyduracak kadraj genişlemesi istenmez. Yüz/kıyafet korunur; kusursuz benzerlik
+  veya dudak senkronu yalnız promptla garanti edilmiş sayılmaz.
+- Tercih edilen ucuz yol: önce gerçek klonla ölçülmüş doktor sesi, sonra bu sesi
+  kabul eden Higgsfield dudak senkronu modeli. Kadın sorusu **yalnız son miksin**
+  ayrı kanalına eklenir; doktorun dudak sürücüsünün ilk dinleme aralığı sessizdir.
+  Model kendi konuşmasını üretiyorsa mevcut ElevenLabs Voice Changer akışı
+  kullanılabilir; iki yolun sesleri farklı zamanlamayla birbirinin üstüne konmaz.
+- `profiles/higgsfield-elevenlabs.json` güncel tercihi kaydeder. Model ve ücret
+  hesabın gerçek kataloğu/teklifiyle belirlenir. Ekrandaki Genjutsu ücretsiz
+  hakkı, Lipsync Studio/CLI/API için ücretsiz erişim kanıtı değildir. Başka
+  model/API ile sessiz ücretli yedekleme veya otomatik bakiye yükleme yapılmaz.
+- Önceden aynı metinle üretilmiş doğru ses, stok ve müzik yeniden kullanılabilir;
+  avatar görüntüleri her yeni bölümde özgün fotoğraftan yeniden üretilir.
+  Günlük üç videoluk hedef ve 4.000 TL ek aylık sınır korunur; hesap bağlantısı,
+  fiyat ve gerçek üretim doğrulanmadan canlı otomasyon çalışıyor denmez.
+- Tıbbi doğruluk: her şurubun demir içermediği varsayılmaz; besin kabulü için
+  kesin deneme sayısı/uydurma olasılık grafiği kullanılmaz. Küçük çocukların
+  sahnelerinde bütün çeri domates yerine güvenli hazırlanmış parçalar kullanılır.
+
+## Önceki üretim yolu: Gemini uygulamasından kullanıcı klipleri (arşiv)
 
 - 19 Kasım'daki ek talimat: kullanıcı API'ye bakiye yüklediğini belirterek bu
   diş çıkarma/ateş örneğini API ile yeniden üretmemizi açıkça istedi. Bu tek
