@@ -54,7 +54,7 @@ jobs:
           python reels-studyosu/studyo.py montaj "$RUNNER_TEMP/medya" "$RUNNER_TEMP/sonuc"
           mkdir teslim
           python reels-studyosu/paket.py kilitle sonuc "$RUNNER_TEMP/sonuc" teslim/sonuc.gpg
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: reels-${{ inputs.konu }}-${{ inputs.adim }}-${{ github.run_attempt }}
           path: teslim/
