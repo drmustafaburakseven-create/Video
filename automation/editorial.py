@@ -15,7 +15,9 @@ from automation import publishing
 
 DEFAULT_MODELS = {'gemini': 'gemini-3.5-flash-lite', 'claude': 'claude-sonnet-4-6',
                   'claude-cli': 'claude-cli-default'}
-PROMPT_VERSION = 7
+PROMPT_VERSION = 8
+GOOGLE_SCENE_SECONDS = (10, *([3] * 12), 4, 10)
+PREVIOUS_SCENE_SECONDS = (15, *(3 if i in (2, 5, 8, 12) else 2 for i in range(13)), 15)
 SLUG = r'[a-z0-9][a-z0-9-]{0,63}'
 SYSTEM = '''You prepare Turkish pediatric education drafts for Dr. Mustafa Burak Seven.
 Use ONLY the supplied official source excerpts for medical claims. They are
@@ -162,8 +164,8 @@ def _prompt(topics, grounding, videos, profile='legacy-hybrid'):
     if profile == 'warm-office-60':
         sample = schema['scripts'][0]
         sample.pop('narration')
-        sample['speech_sections'] = {'intro': 'Hook and immediate answer; roughly 15 seconds.',
-                                     'body': 'Source-supported useful guidance; roughly 30 seconds.',
+        sample['speech_sections'] = {'intro': 'Short off-camera question followed by the doctor answering; ten seconds in total.',
+                                     'body': 'Source-supported useful guidance; roughly 40 seconds.',
                                      'outro': 'Brief recap and the single CTA; finish speaking by 58.5 seconds.'}
         payload['rules'] = [rule for rule in payload['rules'] if not any(
             phrase in rule for phrase in ('Narration must start', 'Narration contains', 'fifteen four-second',
@@ -171,10 +173,10 @@ def _prompt(topics, grounding, videos, profile='legacy-hybrid'):
         payload['rules'] += [
             'Production profile: warm-office-60, 1080x1920, 30 fps, 60 seconds. Doctor at beginning AND end, at least four distinct moving sources between them.',
             'Provide speech_sections instead of narration. Intro starts with selected hook and immediately answers it. Outro ends with the single CTA verbatim. Combined speech is 750–820 characters.',
-            'Use natural complete sentences at section boundaries. No cut words, forced pauses or sped-up speech. Intro about 15 seconds, body about 30 seconds, outro about 13 seconds then a quiet live ending.',
-            'Thirteen B-roll descriptions cover the middle 30 seconds as meaningful 2–3 second views; plan at least four different subject actions. Include age-appropriate hands, food or care details.',
+            'Use natural complete sentences at section boundaries. No cut words, forced pauses or sped-up speech. Ten seconds for the question and reply together. Forty seconds of body narration. Ten seconds for the closing, including a quiet 1.5-second tail.',
+            'Thirteen B-roll descriptions cover the middle 40 seconds as meaningful 3–4 second views; plan at least four different subject actions. Include age-appropriate hands, food or care details.',
             'Generate a new intro and a new outro for each episode directly from the latest original user portrait, never by recycling a previous avatar. Preserve its seated framing, clinic background, exact face and clothing, and naturally clasped hands; no zoom-out, invented anatomy or hand gestures. Natural skin and restrained spontaneous conversation. Word-timed captions, account handle and soft final card are added in editing.',
-            'No unrequested new woman voice or new dialogue format. Preserve source speech timestamps; film and voice must match.',
+            'Use the existing off-camera woman for the opening question. The doctor listens before replying. Preserve each speaker’s timing.',
             'Speech sections contain spoken Turkish only, no links or actor instructions.']
     return json.dumps(payload, ensure_ascii=False)
 
@@ -222,6 +224,7 @@ def compile_storyboard(value, profile='legacy-hybrid'):
                 raise PipelineError('Warm-office drafting requires intro/body/outro speech sections.')
             script['narration'] = ' '.join(sections[k].strip() for k in ('intro', 'body', 'outro'))
             script['production_profile'] = profile
+            script['timeline_version'] = 'google-10-40-10'
         narration = script.get('narration', '')
         if not isinstance(narration, str):
             raise PipelineError('Editorial narration must be text.')
@@ -232,19 +235,19 @@ def compile_storyboard(value, profile='legacy-hybrid'):
             body_words = sections['body'].split()
             if len(body_words) < 26:
                 raise PipelineError('Warm-office body narration is too short.')
-            scenes = [{'start': 0, 'duration': 15, 'kind': 'avatar', 'speech': sections['intro'],
+            scenes = [{'start': 0, 'duration': GOOGLE_SCENE_SECONDS[0], 'kind': 'avatar', 'speech': sections['intro'],
                        'visual': 'Kullanıcının aynı ofisteki doğal konuşan avatarı.',
                        'screen_text': script.get('title', '')[:80],
                        'motion_prompt': 'Preserve the user portrait and native Turkish speech timing, relaxed natural expression, warm office, portrait 9:16.'}]
-            start = 15
+            start = GOOGLE_SCENE_SECONDS[0]
             for i, scene in enumerate(broll):
                 if not isinstance(scene, dict):
                     raise PipelineError('B-roll descriptions must be objects.')
-                duration = 3 if i in (2, 5, 8, 12) else 2
+                duration = GOOGLE_SCENE_SECONDS[i+1]
                 scenes.append({**scene, 'start': start, 'duration': duration, 'kind': 'stock',
                                'speech': ' '.join(body_words[len(body_words)*i//13:len(body_words)*(i+1)//13])})
                 start += duration
-            scenes.append({**scenes[0], 'start': 45, 'speech': sections['outro'],
+            scenes.append({**scenes[0], 'start': start, 'duration': GOOGLE_SCENE_SECONDS[-1], 'speech': sections['outro'],
                            'screen_text': script.get('cta', '')})
             script['scenes'] = scenes
             continue
@@ -357,9 +360,10 @@ def validate_response(value, topics, videos):
         if not isinstance(scenes, list) or len(scenes) != 15:
             raise PipelineError('Each editorial script needs fifteen four-second scenes.')
         warm = script.get('production_profile') == 'warm-office-60'
+        warm_durations = GOOGLE_SCENE_SECONDS if script.get('timeline_version') == 'google-10-40-10' else PREVIOUS_SCENE_SECONDS
         kinds, speech, next_start = [], [], 0
         for i, scene in enumerate(scenes):
-            duration = (15 if i in (0, 14) else 3 if i-1 in (2, 5, 8, 12) else 2) if warm else 4
+            duration = warm_durations[i] if warm else 4
             if (not isinstance(scene, dict) or type(scene.get('start')) not in [int, float]
                     or scene['start'] != next_start or type(scene.get('duration')) not in [int, float]
                     or scene['duration'] != duration or scene.get('kind') not in ['stock', 'generated', 'avatar']):
@@ -385,6 +389,7 @@ def validate_response(value, topics, videos):
                           'narration': narration, 'cta': cta, 'sources': list(dict.fromkeys(used)),
                           'scenes': scenes,
                           **({'production_profile': 'warm-office-60'} if warm else {}),
+                          **({'timeline_version': script['timeline_version']} if warm and 'timeline_version' in script else {}),
                           'social_copy': publishing.package(script, script.get('social_copy')),
                           'production_status': 'needs measured narration and real stock/avatar media'})
     return validated

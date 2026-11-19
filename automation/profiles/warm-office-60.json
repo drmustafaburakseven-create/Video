@@ -1,6 +1,6 @@
 {
   "name": "warm-office-60",
-  "version": 2,
+  "version": 3,
   "handle": "@Drmustafaburakseven",
   "output": {
     "width": 1080, "height": 1920, "fps": 30, "seconds": 60,
@@ -14,9 +14,9 @@
   "captions": {"enabled": true, "max_words": 3, "center_y": 1260,
     "normal_font": "Inter Bold", "emphasis_font": "Playfair Display Bold Italic",
     "normal_color": "#FFFFFF", "emphasis_color": "#F2B43C"},
-  "timeline": {"intro": [0, 15], "body": [15, 45], "outro": [45, 60],
-    "opening_question": [0, 4.5], "reaction": [4.5, 6],
-    "doctor_answer": [6, 15], "final_card": [58.5, 60]},
+  "timeline": {"intro": [0, 10], "body": [10, 50], "outro": [50, 60],
+    "opening_question": [0, 4.5], "reaction": [4.5, 5],
+    "doctor_answer": [5, 10], "final_card": [58.5, 60]},
   "ending": {"speech_finished_by": 58.5, "dark_overlay_opacity": 0.7,
     "music_fade_seconds": 1.5, "live_motion_required": true},
   "body_chapters": 3,

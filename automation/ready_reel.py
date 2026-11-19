@@ -62,6 +62,8 @@ def prepare(script, path):
     if len(body_sources) < 4:
         raise PipelineError('En az dört farklı hareketli ara görüntü kaynağı gerekli.')
     reel_1080.validate_segments(segments)
+    if script.get('timeline_version') == 'google-10-40-10' and (segments[0]['end'], segments[-1]['start']) != (10, 50):
+        raise PipelineError('Google kurgusunda giriş 10. saniyede biter ve kapanış 50. saniyede başlar.')
     if not 8 <= segments[0]['end'] <= 16 or not 44 <= segments[-1]['start'] <= 50:
         raise PipelineError('Giriş/kapanış uzunluğu onaylanan sıcak ofis biçimine uymuyor.')
     audio = _file(root, data.get('audio'))

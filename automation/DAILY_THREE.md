@@ -1,5 +1,7 @@
 # Üç günlük video ve paylaşım metinleri
 
+Google sürümüne dönüşte yeni bölümlerin akışı 10 saniye soru ve yanıt, 40 saniye hareketli ara görüntü, 10 saniye kapanıştır.
+
 19 Kasım güncellemesi: Yeni giriş/kapanış üretimi maliyet nedeniyle kullanıcının
 Gemini/Flow uygulamasında hazırlayıp yüklediği sesli kliplerden yapılacak.
 `MANUAL_GEMINI_WORKFLOW.md` ve `examples/dis-cikarma-ates-20261119/` ilk örnektir.

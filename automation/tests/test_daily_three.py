@@ -62,9 +62,9 @@ class ThreeDailyTests(unittest.TestCase):
     def test_warm_timeline_starts_and_ends_with_doctor(self):
         script = warm_script(topics()[0])
         scenes = script['scenes']
-        self.assertEqual([(s['start'], s['duration']) for s in scenes if s['kind'] == 'avatar'], [(0, 15), (45, 15)])
+        self.assertEqual([(s['start'], s['duration']) for s in scenes if s['kind'] == 'avatar'], [(0, 10), (50, 10)])
         self.assertEqual(sum(s['duration'] for s in scenes), 60)
-        self.assertTrue(all(s['duration'] in (2, 3) for s in scenes[1:-1]))
+        self.assertTrue(all(s['duration'] in (3, 4) for s in scenes[1:-1]))
         self.assertEqual(' '.join(s['speech'] for s in scenes).split(), script['narration'].split())
 
     def test_one_missing_package_does_not_erase_two_successes_or_social_copy(self):
