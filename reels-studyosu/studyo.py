@@ -13,7 +13,7 @@ import tempfile
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from automation import clinical_review, dialogue_audio, publishing, reel_1080, reels_captions, stock, voice_changer
 from automation.media import digest
-from automation.higgsfield_episode import phone_copy
+from telefon import phone_copy
 from automation.pipeline import synthesize
 from automation.render import probe, timestamp
 from automation.state import LocalJournal, paid_once
