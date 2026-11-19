@@ -43,6 +43,37 @@ list` ve `higgsfield workspace set <id>` ile kullanıcının hesabı seçilir. T
 çıktısı sohbete, public depoya veya Actions günlüğüne yazılmaz. ChatGPT'deki bir
 uygulama bağlantısının GitHub Actions'a veya bu CLI'ye aktarıldığı varsayılmaz.
 
+### Bulut girişinin açılmaması
+
+19 Kasım incelemesinde resmi giriş sayfası HTTP 200 verdi; önceki CLI girişini
+bekleyen işlem ise bulut yeniden başladığında artık çalışmıyordu. CLI, sonucu
+`http://localhost:8765/callback` adresinde bekler. Bağlantı kullanıcının kendi
+tarayıcısında açılırsa bu adres buluta değil kullanıcının cihazına döner.
+OAuth sunucusunun cihaz kodu desteği bulunmasına rağmen resmi CLI istemcisinde
+bu izin kapalıdır; cihaz koduyla giriş başarılıymış gibi gösterilmez.
+
+`higgsfield_login.py`, resmi CLI 1.2.2'nin public OAuth istemcisini ve standart
+PKCE akışını kullanır. Giriş eşleştirme bilgisi yalnız bellekte tutulmaz;
+`automation/private/higgsfield-login/` altında 0600 izinleriyle saklanır.
+Dört saat içinde yeniden başlatılırsa aynı bekleyen giriş kullanılabilir.
+Sağlayıcının tek kullanımlık kod süresi ayrıca geçerlidir.
+
+```bash
+python -m automation.higgsfield_login begin
+python -m automation.higgsfield_login listen
+```
+
+Üretilen bağlantı **bulut tarayıcısında** açılırsa dönüş kendiliğinden alınır.
+Kişisel tarayıcı kullanılırsa giriş sonunda localhost sayfası açılmayabilir;
+adres çubuğundaki tek kullanımlık dönüş adresi gecikmeden özel bir dosyaya
+alınıp `complete --callback-file PRIVATE/callback.txt` ile tamamlanabilir.
+Bu dosya sohbette, public Git'te veya günlükte yayımlanmaz. Kod alışverişinde
+origin, state, süre ve tek kod kontrol edilir; mevcut hesap bilgisi ezilmez.
+Başarılı alışveriş resmi CLI'nin özel credentials dosyasına yazılır. Sonrasında
+`higgsfield workspace list --json` ile **gerçek** hesap erişimi doğrulanmalıdır.
+Bu yardımcı şifre istemez, ücretli işlem yapmaz ve uzaktaki tarayıcı kontrolünün
+yerini tutmaz. Bu görevde bulut tarayıcısını kontrol eden araç henüz sunulmuyor.
+
 `higgsfield model list --video --json` ve `higgsfield model get MODEL --json`
 gerçek katalog ve parametreleri verir. Fotoğraf/ses girişi ile 15 saniyelik çıkış
 desteklenmeli. Örnek paketteki `wan2_6`, resmi CLI belgesinde bu girdileri
