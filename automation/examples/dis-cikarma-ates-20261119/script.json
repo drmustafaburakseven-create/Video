@@ -1,0 +1,57 @@
+{
+  "topic_id": "dis-cikarma-ates-20261119",
+  "title": "Diş çıkarma ateş yapar mı?",
+  "target_age": "Yaklaşık 6–30 aylık çocuğu olan aileler; ayrıca üç aydan küçük bebek için ateş başvuru eşiği belirtilir.",
+  "message": "38°C ve üzeri ateşi yalnız diş çıkarmaya bağlamayın; ölçüm ve genel durumla değerlendirin.",
+  "narration": "Ateşi diştendir deyip geçiyor muyuz? Otuz sekiz derece ve üzerini sadece diş çıkarmaya bağlamayalım. Diş çıkarırken salya artabilir, diş etleri hassaslaşabilir. Bebeğiniz elini ağzına götürebilir. Hafif sıcaklık artışı da olabilir. Ama ateşi dişe bağlayıp başka bir hastalığı gözden kaçırmayalım. Önce dijital termometreyle ölçelim. Keyfine ve sıvı almasına bakalım. Bezleri daha az ıslanıyorsa veya sıvı alamıyorsa doktor değerlendirsin. Nefes almakta zorlanıyorsa acil yardım alın. Üç aydan küçük bebekte otuz sekiz derece ve üzeri ateşte de beklemeyin; acil değerlendirme gerekir. Diş etleri için buzdolabında soğutulmuş bir diş kaşıyıcı kullanabilirsiniz. Dondurmayın. Donmuş ürünler diş etine zarar verebilir. Diş çıkarıyor diye ateşi gözden kaçırmayalım. Bu videoyu, diş çıkaran bebeği olan bir arkadaşınıza gönderin.",
+  "sources": [
+    "https://www.healthychildren.org/English/ages-stages/baby/teething-tooth-care/Pages/Teething-Pain.aspx",
+    "https://www.nhs.uk/baby/babys-development/teething/baby-teething-symptoms/",
+    "https://www.nhs.uk/symptoms/fever-in-children/",
+    "https://www.nhs.uk/baby/babys-development/teething/tips-for-helping-your-teething-baby/"
+  ],
+  "narration_parts": {
+    "intro": "Ateşi diştendir deyip geçiyor muyuz? Otuz sekiz derece ve üzerini sadece diş çıkarmaya bağlamayalım.",
+    "body": "Diş çıkarırken salya artabilir, diş etleri hassaslaşabilir. Bebeğiniz elini ağzına götürebilir. Hafif sıcaklık artışı da olabilir. Ama ateşi dişe bağlayıp başka bir hastalığı gözden kaçırmayalım. Önce dijital termometreyle ölçelim. Keyfine ve sıvı almasına bakalım. Bezleri daha az ıslanıyorsa veya sıvı alamıyorsa doktor değerlendirsin. Nefes almakta zorlanıyorsa acil yardım alın. Üç aydan küçük bebekte otuz sekiz derece ve üzeri ateşte de beklemeyin; acil değerlendirme gerekir. Diş etleri için buzdolabında soğutulmuş bir diş kaşıyıcı kullanabilirsiniz. Dondurmayın. Donmuş ürünler diş etine zarar verebilir.",
+    "outro": "Diş çıkarıyor diye ateşi gözden kaçırmayalım. Bu videoyu, diş çıkaran bebeği olan bir arkadaşınıza gönderin."
+  },
+  "timing": {
+    "status": "estimated_not_measured",
+    "intro": [
+      0,
+      10
+    ],
+    "body": [
+      10,
+      50
+    ],
+    "outro": [
+      50,
+      60
+    ],
+    "total_seconds": 60,
+    "last_word_target": 57.8
+  },
+  "social_copy": {
+    "reels": {
+      "title": "“Ateşi diştendir” deyip geçmeyelim 🦷🌡️",
+      "caption": "Diş çıkarırken salya artışı ve diş eti hassasiyeti olabilir. Ancak 38°C ve üzerindeki ateşi yalnız diş çıkarmaya bağlamayalım. Dijital termometreyle ölçün; çocuğun genel durumunu, sıvı almasını ve bezlerinin ıslanmasını izleyin.\n\nSıvı alamama veya belirgin az idrarda doktor değerlendirmesi gerekir. Nefes almakta zorlanıyorsa acil yardım alın. Üç aydan küçük bebekte 38°C ve üzeri ateşte beklemeden acil değerlendirme gerekir.\n\nDiş kaşıyıcıyı ürün talimatına göre buzdolabında soğutabilirsiniz; dondurmayın.\n\nDiş çıkaran bebeği olan bir arkadaşınıza gönderin.",
+      "hashtags": [
+        "#DişÇıkarma",
+        "#BebeklerdeAteş",
+        "#ÇocukSağlığı",
+        "#DrMustafaBurakSeven"
+      ]
+    },
+    "youtube_shorts": {
+      "title": "Diş çıkarma ateş yapar mı? 38°C ayrımını kaçırmayın | Dr. Mustafa Burak Seven",
+      "description": "Diş çıkarma belirtileriyle ateşi karıştırmayalım. 38°C ve üzerindeki ateşi sadece dişe bağlamayın; dijital termometreyle ölçün ve genel durumu izleyin. Sıvı alamama veya idrar azalması değerlendirme gerektirir. Nefes almakta zorlanmada ve üç aydan küçük bebekte 38°C ve üzeri ateşte acil değerlendirme gerekir.\n\nDiş etini rahatlatmak için ürün talimatına uygun, buzdolabında soğutulmuş diş kaşıyıcı kullanılabilir. Dondurmayın. Bu video genel ebeveyn bilgilendirmesidir.",
+      "hashtags": [
+        "#Shorts",
+        "#DişÇıkarma",
+        "#BebeklerdeAteş",
+        "#ÇocukSağlığı"
+      ]
+    }
+  }
+}

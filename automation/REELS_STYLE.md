@@ -1,6 +1,22 @@
 # Dr. Mustafa Burak Seven — kalıcı Reels / Shorts kuralları
 
-Bu kurallar konuya özgü değildir. Son kullanıcı tercihi önce gelir. Güncelleme: 18 Kasım 2026.
+Bu kurallar konuya özgü değildir. Son kullanıcı tercihi önce gelir. Güncelleme: 19 Kasım 2026.
+
+## En yeni üretim yolu: Gemini uygulamasından kullanıcı klipleri
+
+- Maliyeti azaltmak için giriş/kapanışı kullanıcı kendi Gemini/Flow hesabında
+  üretip sesli özgün MP4 dosyalarını sağlar. `MANUAL_GEMINI_WORKFLOW.md` bu yolu
+  tanımlar. Google video API'sine otomatik geçiş veya eksik klibi yeniden ücretli
+  üretimle doldurma yapılmaz. Önce iki kopyalanabilir prompt ve konu planı verilir.
+- Son özgün fotoğraf, sabit kadraj, dinlenen eller ve her bölüm için yeni çekim
+  kuralları aynen geçerlidir. Klipler buradan veya erişilebilir özel medya
+  deposundan alınır; herkese açık `Video` deposuna kişisel medya konmaz.
+- Bu yol yarı otomatiktir: uygulamada üretim/aktarma kullanıcıdadır; gerçek
+  kliplerin incelenmesi, kendi sesine dönüşüm, ara görüntü seçimi ve kurgu ayrı
+  adımlardır. Dosyalar gelmeden video tamamlandı veya otomasyon çalışıyor denmez.
+- İlk örnek `examples/dis-cikarma-ates-20261119/`: hedef 10 saniye giriş,
+  40 saniye hareketli ara bölüm, 10 saniye kapanış. Gerçek süreler dosya
+  geldiğinde ölçülür; uygulama sınırı farklıysa metin/kurgu yeniden planlanır.
 
 ## En yeni talimat: her videoda özgün fotoğraftan yeni giriş ve kapanış
 

@@ -1,5 +1,12 @@
 # Üç günlük video ve paylaşım metinleri
 
+19 Kasım güncellemesi: Yeni giriş/kapanış üretimi maliyet nedeniyle kullanıcının
+Gemini/Flow uygulamasında hazırlayıp yüklediği sesli kliplerden yapılacak.
+`MANUAL_GEMINI_WORKFLOW.md` ve `examples/dis-cikarma-ates-20261119/` ilk örnektir.
+Bu yarı otomatik yol için Google video API'sine kendiliğinden geçilmez. Aşağıdaki
+üç-video takvimi hedef olarak korunur; klip yüklenmesi ve incelemesi tamamlanmadan
+üç bitmiş videonun günlük otomatik teslimi sağlanmış sayılmaz.
+
 18 Kasım 2026 tercihi: **Her gün 09.00 Türkiye saati, beş öneriden üç farklı konu,
 üç adet 60 saniyelik video.** Son onaylanan sıcak-ofis biçimi, 1080×1920/30 fps,
 kendi sesiniz, giriş/kapanış avatarı, en az dört hareketli ara kaynak, altyazılar

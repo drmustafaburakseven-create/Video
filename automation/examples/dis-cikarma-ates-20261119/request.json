@@ -1,0 +1,63 @@
+{
+  "schema": "manual-avatar-request-v1",
+  "topic_id": "dis-cikarma-ates-20261119",
+  "status": "awaiting_user_clips",
+  "video_created": false,
+  "google_video_api_requests": 0,
+  "source_mode": "user_generated_gemini_flow_app",
+  "reference": {
+    "sha256": "6bc207ec55a8f0c51d4bb1c1d3c1c5d76931744846df9d5fd58ea0501926df26",
+    "source": "latest_original_user_portrait",
+    "new_take_each_role": true,
+    "keep_hands_at_rest": true,
+    "fixed_camera": true
+  },
+  "final_profile": "warm-office-60",
+  "target_timeline": {
+    "status": "estimated_not_measured",
+    "intro": [
+      0,
+      10
+    ],
+    "body": [
+      10,
+      50
+    ],
+    "outro": [
+      50,
+      60
+    ],
+    "total_seconds": 60,
+    "last_word_target": 57.8
+  },
+  "minimum_distinct_body_sources": 4,
+  "clips": [
+    {
+      "role": "intro",
+      "preferred_filename": "dis-ates-giris.mp4",
+      "target_seconds": 10,
+      "prompt": "giris-gemini.txt",
+      "expected_speech": "Ateşi diştendir deyip geçiyor muyuz? Otuz sekiz derece ve üzerini sadece diş çıkarmaya bağlamayalım.",
+      "native_speech_required": true,
+      "review_status": "awaiting_file"
+    },
+    {
+      "role": "outro",
+      "preferred_filename": "dis-ates-cikis.mp4",
+      "target_seconds": 10,
+      "prompt": "cikis-gemini.txt",
+      "expected_speech": "Diş çıkarıyor diye ateşi gözden kaçırmayalım. Bu videoyu, diş çıkaran bebeği olan bir arkadaşınıza gönderin.",
+      "native_speech_required": true,
+      "speech_end_target_seconds": 7.8,
+      "live_tail_target_seconds": 2.2,
+      "review_status": "awaiting_file"
+    }
+  ],
+  "body_narration": "ara-anlatim-elevenlabs.txt",
+  "social_copy": "paylasim.md",
+  "no_automatic_paid_video_fallback": true,
+  "github_media_repository": null,
+  "github_media_setup_status": "createRepository_permission_denied",
+  "available_upload_channel": "this_chat",
+  "automatic_social_publication": false
+}
