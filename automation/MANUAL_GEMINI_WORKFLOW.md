@@ -6,6 +6,11 @@ dönüştürür, hareketli ara görüntüleri ve anlatımı hazırlayıp son kur
 Bu yol için yeni Google video API çağrısı gerekmez. Gemini/Flow kendi üyelik
 sınırlarını, ElevenLabs ise kendi kullanım kotasını uygular.
 
+19 Kasım'da kullanıcı daha sonra API'ye bakiye yükleyip diş çıkarma/ateş
+örneğinin yeniden üretilmesini istedi. Bu bölümde açık isteğiyle API yolu
+kullanıldı. Bu, sonraki manuel yüklemeleri veya günlük üçlü kuyruğu otomatik
+ücretli video üretimine dönüştürmez.
+
 ## Kullanıcının yapacağı üç adım
 
 1. Konu paketindeki `giris-gemini.txt` komutunu Gemini'ye yapıştırın ve son

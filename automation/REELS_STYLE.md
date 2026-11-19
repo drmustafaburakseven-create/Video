@@ -4,6 +4,10 @@ Bu kurallar konuya özgü değildir. Son kullanıcı tercihi önce gelir. Günce
 
 ## En yeni üretim yolu: Gemini uygulamasından kullanıcı klipleri
 
+- 19 Kasım'daki ek talimat: kullanıcı API'ye bakiye yüklediğini belirterek bu
+  diş çıkarma/ateş örneğini API ile yeniden üretmemizi açıkça istedi. Bu tek
+  üretim için Google video ve kendi ElevenLabs sesi kullanılır; aşağıdaki
+  manuel yol veya günlük üçlü kuyruk kendiliğinden ücretli üretime geçirilmez.
 - Maliyeti azaltmak için giriş/kapanışı kullanıcı kendi Gemini/Flow hesabında
   üretip sesli özgün MP4 dosyalarını sağlar. `MANUAL_GEMINI_WORKFLOW.md` bu yolu
   tanımlar. Google video API'sine otomatik geçiş veya eksik klibi yeniden ücretli

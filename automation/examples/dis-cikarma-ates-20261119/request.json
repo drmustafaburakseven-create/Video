@@ -1,10 +1,10 @@
 {
   "schema": "manual-avatar-request-v1",
   "topic_id": "dis-cikarma-ates-20261119",
-  "status": "awaiting_user_clips",
-  "video_created": false,
-  "google_video_api_requests": 0,
-  "source_mode": "user_generated_gemini_flow_app",
+  "status": "completed_via_explicit_api_request",
+  "video_created": true,
+  "google_video_api_requests": 4,
+  "source_mode": "user_authorized_gemini_api",
   "reference": {
     "sha256": "6bc207ec55a8f0c51d4bb1c1d3c1c5d76931744846df9d5fd58ea0501926df26",
     "source": "latest_original_user_portrait",
@@ -39,7 +39,7 @@
       "prompt": "giris-gemini.txt",
       "expected_speech": "Ateşi diştendir deyip geçiyor muyuz? Otuz sekiz derece ve üzerini sadece diş çıkarmaya bağlamayalım.",
       "native_speech_required": true,
-      "review_status": "awaiting_file"
+      "review_status": "reviewed_in_completed_api_run"
     },
     {
       "role": "outro",
@@ -50,7 +50,7 @@
       "native_speech_required": true,
       "speech_end_target_seconds": 7.8,
       "live_tail_target_seconds": 2.2,
-      "review_status": "awaiting_file"
+      "review_status": "reviewed_in_completed_api_run"
     }
   ],
   "body_narration": "ara-anlatim-elevenlabs.txt",
@@ -59,5 +59,6 @@
   "github_media_repository": null,
   "github_media_setup_status": "createRepository_permission_denied",
   "available_upload_channel": "this_chat",
-  "automatic_social_publication": false
+  "automatic_social_publication": false,
+  "production_report": "production-report.json"
 }

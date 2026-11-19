@@ -2,7 +2,7 @@
 
 **Hedef:** Yaklaşık 6–30 aylık çocuğu olan aileler. Üç aydan küçük bebek için ateş başvuru eşiği ayrıca belirtilir.
 **Ana mesaj:** 38°C ve üzeri ateşi yalnız diş çıkarmaya bağlamayın.
-**Süre:** Tahmini 60 saniye: 10 saniye giriş + 40 saniye hareketli ara bölüm + 10 saniye kapanış. Henüz video veya ses üretilmedi; gerçek konuşma süreleri ölçülmüş değildir. Ara anlatım tek akışta okunur; aşağıdaki kesmeler gerçek sözcük zamanlarına göre ayarlanır.
+**Süre:** Tahmini 60 saniye: 10 saniye giriş + 40 saniye hareketli ara bölüm + 10 saniye kapanış. 19 Kasım tarihinde kullanıcının açık API üretimi isteğiyle video tamamlandı; iki teslim dosyası da tam 60,000 saniye olarak ölçüldü. Ayrıntı: `production-report.json`. Ara anlatım tek akışta okunur; aşağıdaki kesmeler gerçek sözcük zamanlarına göre ayarlanır.
 
 ## Üç açılış
 
@@ -27,7 +27,7 @@
 | B8 / 38–42 | 4 sn | ateşte de beklemeyin; acil değerlendirme gerekir. | Acil değerlendirme | S6: Klinikte bir sağlık çalışanı ebeveyni ve küçük bebeği karşılar; 9:16, okunabilir hasta kaydı veya özel kimlik yok. |
 | B9 / 42–46 | 4 sn | Diş etleri için buzdolabında soğutulmuş bir diş kaşıyıcı kullanabilirsiniz. | Buzdolabında soğut | S7: Temiz, yaşa uygun ve üretici talimatına göre soğutulabilen tek parça diş kaşıyıcı; buzdolabının normal soğutucu rafı, 9:16 yakın plan. Buz, dondurucu ve donmuş meyve yok. |
 | B10 / 46–50 | 4 sn | Dondurmayın. Donmuş ürünler diş etine zarar verebilir. | Dondurmayın | S8: 8–12 aylık bebek dik ve destekli oturur; ebeveyn gözetiminde, 9:16. Yaşa uygun temiz tek parça diş kaşıyıcı, kordon veya kolye yok. |
-| Kapanış / 50–60 | 10 sn | Diş çıkarıyor diye ateşi gözden kaçırmayalım. Bu videoyu, diş çıkaran bebeği olan bir arkadaşınıza gönderin. | @Drmustafaburakseven | Aynı özgün fotoğraftan ayrı yeni çekim. Son söz hedefi 57,8; canlı bekleme, 58,5–60 arası yumuşak final. |
+| Kapanış / 50–60 | 10 sn | Diş çıkarıyor diye ateşi gözden kaçırmayalım. Bu videoyu, diş çıkaran bebeği olan bir arkadaşınıza gönderin. | @Drmustafaburakseven | Aynı özgün fotoğraftan ayrı yeni çekim. Son söz ölçümü 58,16; canlı bekleme, 59,2–60 arası yumuşak görüntü sönümü. |
 
 ## Ara görüntülerin editör planı
 

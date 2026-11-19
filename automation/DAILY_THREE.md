@@ -31,17 +31,20 @@ bu yönergeler yüzde yüz benzerlik veya hatasız parmak garantisi değildir.
   Yeni Gemini avatar/ara görüntü üretimi, doğal ses ve grafik hazırlığının bu
   kuyruğa tam otomatik bağlantısı henüz tamamlanmadı. `ready.json` paketi yoksa
   kod eski kurguya dönmez; `needs_inputs` bildirir.
-- Google video erişimi son kontrolde **403 / faturalandırma sorunu** verdi.
-  [Google AI Studio ödeme ekranı](https://aistudio.google.com/usage?tab=billing)
-  üzerinden projedeki ödeme sorununu çözmek gerekiyor.
+- Kullanıcı 19 Kasım'da bakiye yüklediğini bildirdikten sonra Google model
+  erişimi **200** döndü; açıkça istediği diş çıkarma/ateş örneğinin yeni giriş
+  ve kapanış üretimleri tamamlandı. Önceki 403 faturalandırma hatası bu kontrolde
+  görülmedi. Bu sonuç gelecekteki bakiye/kota veya günlük üretim garantisi değildir.
 - GitHub Actions depoda kapalı. Açmak için bağlantıyla yapılan istek **403 /
   bağlantı yetkisi yetersiz** yanıtı aldı. Depo sahibi
   [Actions ayarlarını](https://github.com/drmustafaburakseven-create/Video/settings/actions)
   kontrol etmeli. Hesap/billing nedeniyle kapatılmışsa GitHub'ın o ekrandaki
   yönlendirmesi uygulanmalı; yalnız workflow dosyasını değiştirmek açmaz.
-- ElevenLabs Creator aboneliği erişilebilir. Yeni üyelik veya yeni ücretli video
-  çağrısı bu güncellemede başlatılmadı. Aylık 4.000 TL ek bütçe sınırı korunuyor;
-  yeni avatar düzeni için güncel fiyat doğrulanmadan maliyet garantisi verilmez.
+- ElevenLabs Creator aboneliği erişilebilir. Yeni üyelik satın alınmadı.
+  Kullanıcının açık API isteğiyle tamamlanan diş çıkarma/ateş örneğinde bir giriş
+  düzeltmesi dahil 38 saniyelik Google görüntü üretildi; video çıktısının liste
+  fiyatı tahmini yaklaşık 2,64 USD'dir (girdi, ElevenLabs ve vergi hariç).
+  Aylık 4.000 TL ek bütçe sınırı korunuyor; günlük üçlü ücretli üretim açılmadı.
 
 ## Çalıştırma
 
