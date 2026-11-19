@@ -10,9 +10,7 @@ from pathlib import Path
 
 import requests
 
-
-class PipelineError(Exception):
-    """Credential-free message safe to include in a GitHub Actions log."""
+from automation.errors import PipelineError
 
 
 def session():

@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import re
 
-from automation.state import PipelineError
+from automation.errors import PipelineError
 
 HANDLE = '@Drmustafaburakseven'
 

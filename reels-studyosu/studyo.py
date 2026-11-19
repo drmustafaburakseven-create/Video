@@ -11,12 +11,7 @@ import sys
 import tempfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from automation import clinical_review, dialogue_audio, publishing, reel_1080, reels_captions, stock, voice_changer
-from automation.media import digest
-from telefon import phone_copy
-from automation.pipeline import synthesize
-from automation.render import probe, timestamp
-from automation.state import LocalJournal, paid_once
+from automation import publishing
 
 STOCK = [f'stok-{i}.mp4' for i in range(1, 5)]
 CLIPS = ['giris.mp4', *STOCK, 'cikis.mp4']
@@ -38,18 +33,27 @@ def script(plan):
 def prepare(plan, dest):
     plan = script(plan)
     dest.mkdir(parents=True, exist_ok=True)
-    common = ('Eklediğim özgün fotoğrafı referans al. Dikey 9:16, sesli, tek ve sabit çekim. '
-              'Yüzümü, kıyafetimi, ışığı ve arka planı koru. Fotoğraftaki kadrajı koru. '
-              'Ellerim görünüyorsa doğal konumunda tut. Hafif bir gülümseme, doğal nefes ve göz kırpma olsun. '
-              'Görüntüye yazı, müzik veya başka ses ekleme. Replikleri doğal İstanbul Türkçesiyle aynen söyle. ')
-    intro = (f'Kamera arkasındaki kadın merakla sorar: “{plan["question"]}” '
-             f'Kadın görünmez. Ben dudaklarım kapalı dinlerim. Kısa bir duraktan sonra '
-             f'kameraya bakıp sıcak bir sesle cevap veririm: “{plan["answer"]}”')
-    ending = (f'Bu kez yalnız ben konuşuyorum: “{plan["outro"]}” '
-              'Son kelimeden sonra en az bir buçuk saniye göz temasını koru.')
+    common = (
+        'Create one 10-second vertical 9:16 video with synchronized audio. Use the attached '
+        'original portrait as the identity and framing reference. Preserve the face, hair, '
+        'skin texture, clothing, office and lighting. Keep the reference camera angle and '
+        'hand positions. Use a stable chest-up shot with natural breathing and blinking. '
+        'Speak the quoted lines verbatim in conversational Istanbul Turkish. '
+        'Record clean room sound without music, captions, logos or cuts. '
+    )
+    intro = (
+        f'An unseen woman just left of camera asks with warm curiosity: “{plan["question"]}” '
+        'The doctor listens with lips closed, briefly smiles, then looks at the lens. '
+        f'Only now does he speak, warmly and clearly: “{plan["answer"]}” '
+        'Keep the two voices distinct and let each speaker finish.'
+    )
+    ending = (
+        f'The doctor looks at the viewer and says: “{plan["outro"]}” '
+        'Finish speaking by 8.5 seconds. Hold eye contact with a small spontaneous smile '
+        'for the final 1.5 seconds. Leave that live tail for the fade in editing.'
+    )
     for name, prompt in [('giris', intro), ('cikis', ending)]:
-        (dest/f'google-{name}.txt').write_text(common + prompt + '\nHedef 10 saniye. '
-            'Araç 8 saniye sunuyorsa kısa repliği kesmeden doğal hızda tamamla.\n')
+        (dest/f'google-{name}.txt').write_text(common + prompt + '\n', encoding='utf-8')
     (dest/'konusma.txt').write_text('\n\n'.join(plan[k] for k in ROLES)+'\n')
     (dest/'ara-sahneler.txt').write_text('\n'.join(plan['stocks'])+'\n')
     publishing.write(plan, dest)
@@ -60,6 +64,8 @@ def ff(args):
 
 
 def seconds(path, kind):
+    from automation.render import probe
+
     info = probe(path)
     stream = next(x for x in info['streams'] if x['codec_type'] == kind)
     return float(stream.get('duration') or info['format']['duration'])
@@ -67,6 +73,10 @@ def seconds(path, kind):
 
 def voice(root, plan):
     """Run only on explicit local invocation; keep paid receipts outside CI."""
+    from automation import dialogue_audio, voice_changer
+    from automation.pipeline import synthesize
+    from automation.state import LocalJournal, paid_once
+
     speaker = os.environ['DOKTOR_VOICE_ID']
     review = read(root/'zamanlar.json')
     journal = LocalJournal(root/'makbuzlar')
@@ -93,6 +103,8 @@ def voice(root, plan):
 
 def stock_materials(root, plan, save_selection):
     """Find candidates first. Preserve license and provenance for the selected shots."""
+    from automation import clinical_review, stock
+
     if not save_selection:
         candidates = [stock.search_clips(query, min_duration=11) for query in plan['queries']]
         (root/'adaylar.json').write_text(json.dumps(candidates, ensure_ascii=False, indent=2))
@@ -112,6 +124,9 @@ def stock_materials(root, plan, save_selection):
 
 
 def timing(plan, root):
+    from automation.media import digest
+    from automation import reel_1080
+
     review = read(root/'zamanlar.json')
     clips = [root/name for name in CLIPS]
     hashes = {digest(p) for p in clips[1:-1]}
@@ -134,6 +149,10 @@ def timing(plan, root):
 
 
 def render(root, dest):
+    from automation import reel_1080, reels_captions
+    from automation.render import timestamp
+    from telefon import phone_copy
+
     plan = script(read(root/'bolum.json'))
     segments, review, closing = timing(plan, root)
     for name, limit in [('giris', segments[0]['end']), ('anlatim', 40), ('cikis', 60-closing)]:

@@ -2,6 +2,10 @@
 
 Her bölüm bir konu ve bir özgün doktor fotoğrafıyla başlar. “Vitamin şurubu sebzenin yerini tutar mı?” videosundan aldığımız örnekler sabit doktor kadrajı, sıcak ışık, krem renkli soru başlığı, altta kısa altyazılar, konu değiştikçe değişen hareketli çekimler ve konuşmadan sonra yumuşak kapanıştır. Eski videonun kareleri ve sesi yeni bölüme girmez.
 
+## Sohbette hızlı başlangıç
+
+Bu depoyu açan Codex sohbetinde `$google-reels-studyosu Konu: Yatarken bir masal daha mı?` yazın. [Beceri](../.agents/skills/google-reels-studyosu/SKILL.md) ilk yanıtta konuşma metnini, dört ara çekimi ve aynı fotoğrafla ayrı ayrı kullanacağınız iki Google komutunu verir. Yerelde ve GitHub Actions’ta `plan` adımı yalnız Python standart kütüphanesini kullanır.
+
 ## Sizin yapacağınız üç şey
 
 1. Sohbete tek konu ve kullanmak istediğiniz özgün fotoğrafı gönderin. Metni, kaynakları, iki Google komutunu ve dört ara sahneyi biz hazırlarız.
