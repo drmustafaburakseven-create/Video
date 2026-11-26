@@ -25,7 +25,25 @@ el hareketi istenmez. Özgün fotoğraf özel klasördedir, public Git'e girmez.
 korumasını sağlar. Çıktının yüz/el anatomisi ve konuşması yine incelenir;
 bu yönergeler yüzde yüz benzerlik veya hatasız parmak garantisi değildir.
 
-## Şu anda doğrulanan durum
+## 26 Kasım · GitHub'da günlük teslim ve kaldığı yerden devam
+
+Günlük çalıştırma üç senaryoyu ve iki platform için metinleri kaydeder. Her konu için
+`reels-YYYY-MM-DD-KONU_ID` adlı GitHub Release içindeki `girdi.gpg` dosyasını arar.
+Paket henüz yoksa özet `awaiting_media` ve gerçek tamamlanan video sayısını gösterir.
+Bu durum MP4 teslimi değildir. API erişimi, paket, senaryo doğrulaması veya montaj
+hatası başarısız çalıştırma olarak raporlanır.
+
+Görüntü ve sesler incelendikten sonra Reels Stüdyosu'nun mevcut şifreli girdi
+biçimini kullanın. `bolum.json` içindeki soru, cevap, gövde ve kapanış o günün
+senaryosuyla eşleşmeli. Gerçek kontroller tamamlandığında `zamanlar.json` içine
+`visual_review` ve `speech_timing_review` için `approved` yazın. Yerel paketleme
+ve Actions aynı `REELS_MEDIA_KEY` anahtarını kullanır. Taslak Release'e yalnız
+şifrelenmiş `girdi.gpg` yükleyip Release'i yayımlayın. Bu olay o tarihi yeniden
+işler. Daha önce yayımlanmış bir pakete dosya sonradan eklendiyse Actions'ta
+`batch_date` ile ilgili günü seçin. Tamamlanmış senaryolar yeniden satın alınmaz.
+Ana video ve telefon kopyası çalıştırmanın çıktısında `sonuc.gpg` içindedir.
+
+## Önceki kurulum notları (18–19 Kasım)
 
 - Üçlü konu/senaryo kuyruğu, iki platform için paylaşım metinleri, aynı günü tekrar
   satın almadan devam etme ve hazır kurgu paketlerini birleştirme kodu var.

@@ -4,11 +4,17 @@ on:
   push:
     # An explicit release-style trigger for starting a requested render via Git.
     tags: ['render-video-*']
+  release:
+    types: [published]
   schedule:
     # Turkey remains UTC+3: 06:00 UTC = 09:00 Europe/Istanbul.
     - cron: '0 6 * * *'
   workflow_dispatch:
     inputs:
+      batch_date:
+        description: 'Optional date of an existing daily batch (YYYY-MM-DD)'
+        required: false
+        type: string
       plan:
         description: 'Legacy plan filename; blank runs three warm-office video slots and social copy. Prepare accepts drafts.'
         required: false
@@ -35,6 +41,8 @@ concurrency:
 
 jobs:
   produce:
+    if: ${{ github.event_name != 'release' || startsWith(github.event.release.tag_name, 'reels-') }}
+    name: Senaryolar ve hazır medya paketlerinin kurgusu
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:
@@ -66,6 +74,9 @@ jobs:
           CLAUDE_MODEL: ${{ vars.CLAUDE_MODEL }}
           USE_CLAUDE_DIRECTOR: ${{ vars.USE_CLAUDE_DIRECTOR }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BATCH_DATE: ${{ inputs.batch_date }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          REELS_MEDIA_KEY: ${{ secrets.REELS_MEDIA_KEY }}
           INPUT_PLAN: ${{ inputs.plan }}
           PREPARE_ONLY: ${{ inputs.prepare_only }}
           EDITORIAL_ONLY: ${{ inputs.editorial_only }}
@@ -81,7 +92,16 @@ jobs:
               gemini|claude) ;;
               *) echo 'Hosted workflow supports EDITORIAL_PROVIDER=gemini or claude. Claude Code subscription login requires a configured persistent worker.'; exit 2 ;;
             esac
-            args=(--videos 3 --provider "$EDITORIAL_PROVIDER")
+            args=(--videos 3 --provider "$EDITORIAL_PROVIDER" --hosted-releases)
+            if [ -n "$RELEASE_TAG" ]; then
+              if [[ "$RELEASE_TAG" =~ ^reels-([0-9]{4}-[0-9]{2}-[0-9]{2})-[a-z0-9][a-z0-9-]{0,63}$ ]]; then
+                BATCH_DATE="${BASH_REMATCH[1]}"
+              else
+                echo 'Bu etiket günlük medya paketi değil.'
+                exit 0
+              fi
+            fi
+            if [ -n "$BATCH_DATE" ]; then args+=(--date "$BATCH_DATE" --resume-only); fi
             if [ "$EDITORIAL_ONLY" = "true" ]; then args+=(--editorial-only); fi
             # The warm-office queue uses reviewed ready.json packages. It does
             # not fall back to the legacy Fal/eight-second-avatar layout.
@@ -105,6 +125,7 @@ jobs:
             video-output/studio/*/*/shorts.txt
             video-output/studio/*/*/paylasim.md
             video-output/warm-studio/*/status.json
+            video-output/warm-studio/*/*/sonuc.gpg
             video-output/warm-studio/*/*/video.mp4
             video-output/warm-studio/*/*/delivery.json
             video-output/warm-studio/*/*/social.json
@@ -145,6 +166,8 @@ jobs:
           result = json.loads(p.read_text()) if p.exists() else {'status': 'validation/setup only'}
           with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
               f.write('## Günlük hareketli video\n\n')
+              if result.get('status') == 'awaiting_media':
+                  f.write(f"**Medya bekleniyor · {result['completed_videos']}/{result['requested_videos']} video hazır.**\\n\\n")
               f.write('Saat: 09.00 Türkiye (06.00 UTC).\n\n')
               f.write('```json\n' + json.dumps(result, ensure_ascii=False, indent=2) + '\n```\n\n')
               f.write('Başarılı üretimde MP4 ve altyazılar **Artifacts** bölümündedir. `needs_inputs` ise incelenmiş ses/görüntü/grafik paketlerini tamamlayın.\n')
