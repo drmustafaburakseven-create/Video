@@ -1,1 +1,1 @@
-{"previous_rejected_draft":{"previous_status":"submitting","status":"http_400_rejected","run_id":45859648392,"reason":"Gemini refused schema before generation; verified with controlled request.","fixed_commit":"d2aa9a722d042a9f7e45d35e10ff6fdcfa620642"}}
+{"previous_rejected_draft": {"previous_status": "submitting", "status": "http_400_rejected", "run_id": 45859648392, "reason": "Gemini refused schema before generation; verified with controlled request.", "fixed_commit": "d2aa9a722d042a9f7e45d35e10ff6fdcfa620642"}, "draft": {"status": "submitting"}}
