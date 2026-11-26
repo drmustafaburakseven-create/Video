@@ -13,7 +13,7 @@ from automation.tests.test_editorial import script as old_script, topics, eviden
 DAY = '2026-11-18'
 
 
-def warm_script(topic):
+def warm_script(topic, *, label_speakers=False):
     value = old_script(topic['id'])
     value.update(title=topic['title'], age_group=topic['age_group'], sources=topic['sources'])
     chunks = value.pop('scenes')
@@ -22,6 +22,11 @@ def warm_script(topic):
         'intro': ' '.join(s['speech'] for s in chunks[:3]),
         'body': ' '.join(s['speech'] for s in chunks[3:12]),
         'outro': ' '.join(s['speech'] for s in chunks[12:])}
+    if label_speakers:
+        opening = value['hooks'][value['selected_hook']]['text']
+        intro = value['speech_sections']['intro']
+        assert intro.startswith(opening)
+        value['speech_sections']['intro'] = f"Dış ses: {opening} Dr. Mustafa Burak Seven: {intro[len(opening):].strip()}"
     value['broll'] = [{k: chunks[1][k] for k in ('visual', 'screen_text', 'motion_prompt')} for _ in range(13)]
     result = editorial.compile_storyboard({'scripts': [value]}, 'warm-office-60')
     return editorial.validate_response(result, [topic], 1)[0]
@@ -58,6 +63,10 @@ class ThreeDailyTests(unittest.TestCase):
             self.assertEqual(len(list((root/'two'/DAY).glob('*/shorts.txt'))), 3)
             with self.assertRaisesRegex(PipelineError, 'farklı video sayısıyla'):
                 daily.run_daily(DAY, root/'two', journal=journal, videos=1, profile='warm-office-60')
+
+    def test_spoken_text_excludes_gemini_speaker_labels(self):
+        topic = topics()[0]
+        self.assertEqual(warm_script(topic, label_speakers=True), warm_script(topic))
 
     def test_warm_timeline_starts_and_ends_with_doctor(self):
         script = warm_script(topics()[0])

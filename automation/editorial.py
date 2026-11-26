@@ -224,7 +224,13 @@ def compile_storyboard(value, profile='legacy-hybrid'):
             if not isinstance(sections, dict) or any(not isinstance(sections.get(k), str)
                                                     or not sections[k].strip() for k in ('intro', 'body', 'outro')):
                 raise PipelineError('Warm-office drafting requires intro/body/outro speech sections.')
-            script['narration'] = ' '.join(sections[k].strip() for k in ('intro', 'body', 'outro'))
+            # Some Gemini responses prefix dialogue with the speaker's name.
+            # Remove these script labels before comparing or voicing the spoken text.
+            for key in ('intro', 'body', 'outro'):
+                sections[key] = re.sub(
+                    r'(?<!\S)(?:Dış ses|Kadın dış ses|Doktor|Dr\. Mustafa Burak Seven)\s*:\s*',
+                    '', sections[key], flags=re.IGNORECASE).strip()
+            script['narration'] = ' '.join(sections[k] for k in ('intro', 'body', 'outro'))
             script['production_profile'] = profile
             script['timeline_version'] = 'google-10-40-10'
         narration = script.get('narration', '')
