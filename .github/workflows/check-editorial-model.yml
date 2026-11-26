@@ -3,31 +3,26 @@ on:
   push:
     branches: [repair/daily-render-20261126]
     paths: ['.github/workflows/check-editorial-model.yml']
-permissions: {}
+permissions:
+  contents: read
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Verify configured model without generating content
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Check editorial request shape
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           python - <<'PY'
-          import json, os, urllib.request, urllib.error
-          url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite'
-          req = urllib.request.Request(url, headers={'x-goog-api-key': os.environ['GEMINI_API_KEY']})
-          try:
-              with urllib.request.urlopen(req, timeout=30) as response:
-                  model = json.load(response)
-                  print('Generation supported:', 'generateContent' in model.get('supportedGenerationMethods', []))
-                  print('Output token limit:', model.get('outputTokenLimit'))
-          except urllib.error.HTTPError as exc:
-              error = json.load(exc).get('error', {})
-              reasons = [d.get('reason') for d in error.get('details', []) if isinstance(d, dict)]
-              for reason in ['API_KEY_INVALID','API_KEY_EXPIRED','API_KEY_SERVICE_BLOCKED','BILLING_DISABLED','SERVICE_DISABLED']:
-                  if reason in reasons:
-                      print(reason)
-              if 'expired' in str(error.get('message', '')).lower():
-                  print('Key expiry reported')
-              raise SystemExit('Model lookup failed: HTTP '+str(exc.code))
+          import os, requests
+          from automation.editorial import response_schema, DEFAULT_MODELS
+          model = DEFAULT_MODELS['gemini']
+          cfg = {'responseJsonSchema':response_schema(3,'warm-office-60'),'responseMimeType':'application/json','temperature':0.35,'maxOutputTokens':26000}
+          response = requests.post('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent',headers={'x-goog-api-key':os.environ['GEMINI_API_KEY']},json={'generationConfig':cfg,'contents':[{'parts':[{'text':'Return an empty scripts list with blocked_reason test.'}]}]},timeout=90)
+          if not response.ok:
+              error = response.json().get('error', {})
+              msg = error.get('message','').replace(os.environ['GEMINI_API_KEY'],'[redacted]')
+              raise SystemExit('Schema check HTTP '+str(response.status_code)+' '+msg[:2000])
+          print('Schema accepted')
           PY
