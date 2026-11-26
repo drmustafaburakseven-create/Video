@@ -188,23 +188,25 @@ def response_schema(videos, profile='legacy-hybrid'):
     string = {'type': 'string'}
     broll = obj({'screen_text': string, 'visual': string, 'motion_prompt': string})
     hook = obj({'kind': {'type': 'string', 'enum': ['daily', 'myth', 'question']}, 'text': string})
-    tags = {'type': 'array', 'minItems': 1, 'maxItems': 5, 'items': string}
+    # Nested length bounds expand Gemini's serving grammar beyond its state limit.
+    # The prompt supplies counts and local validation checks the actual output.
+    tags = {'type': 'array', 'items': string}
     social = obj({'reels': obj({'title': string, 'caption': string, 'hashtags': tags}),
                   'youtube_shorts': obj({'title': string, 'description': string, 'hashtags': tags})})
     script = obj({'topic_id': string, 'title': string, 'age_group': string,
-                  'hooks': {'type': 'array', 'minItems': 3, 'maxItems': 3, 'items': hook},
+                  'hooks': {'type': 'array', 'items': hook},
                   'selected_hook': {'type': 'integer', 'enum': [0, 1, 2]},
                   'selection_reason': string,
                   'narration': string, 'cta': string, 'social_copy': social,
                   'sources': {'type': 'array', 'items': string},
-                  'broll': {'type': 'array', 'minItems': 13, 'maxItems': 13, 'items': broll}})
+                  'broll': {'type': 'array', 'items': broll}})
     if profile == 'warm-office-60':
         script['properties'].pop('narration')
         script['required'].remove('narration')
         script['properties']['speech_sections'] = obj({'intro': string, 'body': string, 'outro': string})
         script['required'].append('speech_sections')
     return {'type': 'object', 'required': ['scripts'], 'properties': {
-        'scripts': {'type': 'array', 'minItems': 0, 'maxItems': videos, 'items': script},
+        'scripts': {'type': 'array', 'items': script},
         'blocked_reason': string}}
 
 

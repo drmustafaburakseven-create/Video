@@ -170,8 +170,11 @@ class InsufficientEvidenceTests(unittest.TestCase):
     def test_structured_schema_allows_abort_and_parser_stops_without_drafting(self):
         schema = editorial.response_schema(1)
         self.assertEqual(schema['required'], ['scripts'])
-        self.assertEqual(schema['properties']['scripts']['minItems'], 0)
-        self.assertEqual(schema['properties']['scripts']['maxItems'], 1)
+        for count in (1, 3, 5):
+            for profile in ('legacy-hybrid', 'warm-office-60'):
+                wire = json.dumps(editorial.response_schema(count, profile))
+                self.assertNotIn('minItems', wire)
+                self.assertNotIn('maxItems', wire)
         self.assertEqual(schema['properties']['blocked_reason']['type'], 'string')
         stopped = gemini_result({'scripts': [], 'blocked_reason': 'insufficient source evidence'})
         with patch('automation.editorial._submit') as submit:
@@ -246,8 +249,7 @@ class DraftRecoveryTests(unittest.TestCase):
             self.assertEqual(payload['responseMimeType'], 'application/json')
             self.assertLessEqual(payload['maxOutputTokens'], 9000)
             script_schema = payload['responseJsonSchema']['properties']['scripts']['items']
-            self.assertEqual(script_schema['properties']['broll']['minItems'], 13)
-            self.assertEqual(script_schema['properties']['broll']['maxItems'], 13)
+            self.assertEqual(script_schema['properties']['broll']['items']['type'], 'object')
 
 
 if __name__ == '__main__':
