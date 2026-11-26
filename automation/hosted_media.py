@@ -16,6 +16,20 @@ def run_studio(tool, *args):
     subprocess.run([sys.executable, str(STUDIO / tool), *map(str, args)], check=True)
 
 
+def write_clip_prompts(script, directory):
+    # Use the final spoken text, preserving the doctor's response and closing.
+    intro = ' '.join(script['scenes'][0]['speech'].split())
+    hook = ' '.join(script['hooks'][script['selected_hook']]['text'].split())
+    common = ('Özgün doktor fotoğrafını referans al. Aynı klinik, yüz, eller ve kadraj. '
+              '10 saniye, dikey 9:16, doğal Türkçe konuşma. Müzik veya ekranda yazı olmasın.\n')
+    opening = intro
+    if intro.startswith(hook) and intro[len(hook):].strip():
+        opening = ('Kadın dış ses: ' + hook + '\nDoktor: ' + intro[len(hook):].strip())
+    (directory/'giris-gemini.txt').write_text(common + opening + '\n', encoding='utf-8')
+    ending = 'Doktor: ' + script['scenes'][-1]['speech'] + '\nSon 1,5 saniyede konuşmadan kameraya bak.'
+    (directory/'cikis-gemini.txt').write_text(common + ending + '\n', encoding='utf-8')
+
+
 def render_release(day, script, directory):
     topic = script['topic_id']
     tag = f'reels-{day}-{topic}'

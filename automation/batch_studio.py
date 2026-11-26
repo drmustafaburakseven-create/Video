@@ -56,8 +56,9 @@ def run(day, output, *, provider='gemini', model=None, videos=3, ready_root=None
             result['items'].append(item)
             manifest = ready_root/day/script['topic_id']/'ready.json'
             if hosted_releases and not editorial_only and not manifest.exists():
-                from automation.hosted_media import render_release
+                from automation.hosted_media import render_release, write_clip_prompts
                 try:
+                    write_clip_prompts(script, directory)
                     delivery = render_release(day, script, directory)
                     if delivery is None:
                         item.update(status='awaiting_media', release_tag=f"reels-{day}-{script['topic_id']}")

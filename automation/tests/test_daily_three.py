@@ -68,6 +68,26 @@ class ThreeDailyTests(unittest.TestCase):
         topic = topics()[0]
         self.assertEqual(warm_script(topic, label_speakers=True), warm_script(topic))
 
+    def test_hosted_media_waits_only_for_missing_releases(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            journal = LocalJournal(root/'journal')
+            selected = topics()
+            batch = completed_batch(DAY, selected, {}, journal, root, 'gemini', 'model', 3, 'warm-office-60')
+            journal.save('daily-'+DAY, {'date': DAY, 'topics': selected, 'provider': 'gemini',
+                                       'model': 'model', 'videos': 3, 'profile': 'warm-office-60',
+                                       'complete': True, 'batch': batch})
+            with patch('automation.hosted_media.render_release', return_value=None):
+                waiting = batch_studio.run(DAY, root/'out', journal=journal, hosted_releases=True)
+            self.assertEqual(waiting['status'], 'awaiting_media')
+            self.assertEqual(waiting['completed_videos'], 0)
+            for item in waiting['items']:
+                self.assertTrue((Path(item['directory'])/'giris-gemini.txt').is_file())
+            with patch('automation.hosted_media.render_release', side_effect=[None, PipelineError('bad input'), None]):
+                broken = batch_studio.run(DAY, root/'out', journal=journal, hosted_releases=True)
+            self.assertNotEqual(broken['status'], 'awaiting_media')
+            self.assertEqual(broken['items'][1]['status'], 'blocked')
+
     def test_warm_timeline_starts_and_ends_with_doctor(self):
         script = warm_script(topics()[0])
         scenes = script['scenes']

@@ -125,6 +125,7 @@ jobs:
             video-output/studio/*/*/shorts.txt
             video-output/studio/*/*/paylasim.md
             video-output/warm-studio/*/status.json
+            video-output/warm-studio/*/*/*-gemini.txt
             video-output/warm-studio/*/*/sonuc.gpg
             video-output/warm-studio/*/*/video.mp4
             video-output/warm-studio/*/*/delivery.json
