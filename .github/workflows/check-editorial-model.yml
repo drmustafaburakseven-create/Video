@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: d2aa9a722d042a9f7e45d35e10ff6fdcfa620642
+      - run: python -m unittest automation.tests.test_editorial
       - name: Check editorial request shape
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
